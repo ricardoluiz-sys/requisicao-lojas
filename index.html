@@ -100,7 +100,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .rl{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;}.rdot{width:7px;height:7px;border-radius:50%;}
 .ri{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;}
 .sb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
-.sPendente{background:rgba(245,183,49,.15);color:var(--gold);}.sAprovadoN1{background:rgba(79,126,255,.15);color:var(--accent);}.sAprovadoFinal{background:rgba(46,204,136,.15);color:var(--green);}.sReprovado{background:rgba(255,92,92,.15);color:var(--red);}
+.sPendente{background:rgba(245,183,49,.15);color:var(--gold);}.sAprovado{background:rgba(46,204,136,.15);color:var(--green);}.sReprovado{background:rgba(255,92,92,.15);color:var(--red);}
+/* week picker */
+.week-input-wrap{position:relative;}
+.week-input-wrap input{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+.week-input-wrap input:focus{border-color:var(--accent);}
+.week-picker{position:absolute;top:calc(100% + 6px);left:0;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4);display:none;}
+.week-picker.open{display:block;}
+.wp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.wp-nav button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.wp-nav button:hover{border-color:var(--accent);color:var(--text);}
+.wp-month{font-weight:600;font-size:14px;}
+.wp-weeks{display:flex;flex-direction:column;gap:4px;}
+.wp-week{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s;}
+.wp-week:hover{background:var(--card);}
+.wp-week.sel{background:var(--accent);color:#fff;}
+.wp-week-num{font-size:11px;color:var(--muted);width:24px;flex-shrink:0;}
+.wp-week.sel .wp-week-num{color:rgba(255,255,255,.7);}
+.wp-week-range{font-size:13px;}
 
 /* ── USER MANAGEMENT ── */
 .user-grid{display:grid;gap:12px;}
@@ -204,13 +221,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div id="form-area" style="display:none">
         <div class="fr">
-          <div class="fg"><label>Semana de Referência</label><input type="text" id="inp-semana" placeholder="Ex: 12–18 mai. 2025"/></div>
+          <div class="fg"><label>Semana de Referência</label>
+            <div class="week-input-wrap">
+              <input type="text" id="inp-semana" placeholder="Clique para selecionar a semana" readonly onclick="toggleWeekPicker()"/>
+              <div class="week-picker" id="week-picker">
+                <div class="wp-nav">
+                  <button onclick="wpMes(-1)">‹</button>
+                  <span class="wp-month" id="wp-month-label"></span>
+                  <button onclick="wpMes(1)">›</button>
+                </div>
+                <div class="wp-weeks" id="wp-weeks"></div>
+              </div>
+            </div>
+          </div>
           <div class="fg"><label>Responsável</label><input type="text" id="inp-resp" placeholder="Seu nome"/></div>
         </div>
         <div class="ebar">
           <div class="edot loading" id="edot"></div>
           <span id="emsg" style="color:var(--muted)">Carregando saldo Itapeva [Total]...</span>
           <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="etime"></span>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;">
+          <div style="flex:1;position:relative;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none;">🔍</span>
+            <input type="text" id="inp-busca" placeholder="Buscar produto ou categoria..."
+              style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px 9px 36px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;"
+              oninput="filtrarTabela(this.value)"
+              onfocus="this.style.borderColor='var(--accent)'"
+              onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+          <button class="btn bg2" style="padding:9px 14px;font-size:12px;white-space:nowrap" onclick="document.getElementById('inp-busca').value='';filtrarTabela('')">Limpar</button>
         </div>
         <div class="tw"><table>
           <thead><tr>
@@ -233,12 +273,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
     <!-- ═ GESTÃO ═ -->
     <section id="sec-gestao" class="sec">
-      <div class="ph"><h1>Gestão de Requisições</h1><p>Acompanhe e aprove as requisições.</p></div>
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div><h1>Gestão de Requisições</h1><p>Acompanhe e aprove as requisições.</p></div>
+    </div>
       <div class="chips">
         <button class="chip active" onclick="filtrar('todos',this)">Todos</button>
         <button class="chip" onclick="filtrar('Pendente',this)">Pendente</button>
-        <button class="chip" onclick="filtrar('AprovadoN1',this)">Aprovado N1</button>
-        <button class="chip" onclick="filtrar('AprovadoFinal',this)">Aprovado Final</button>
+          <button class="chip" onclick="filtrar('AprovadoFinal',this)">Aprovado Final</button>
         <button class="chip" onclick="filtrar('Reprovado',this)">Reprovado</button>
         <div style="flex:1"></div>
         <button class="btn bg2 bsm" onclick="renderGestao()">↻ Atualizar</button>
@@ -489,7 +530,7 @@ async function loadEstoque(){
     // Descobrir a linha de cabeçalho procurando por "Item" e "Itapeva"
     // Colunas (descobertas pelo cabeçalho da linha 3):
     // A=0 Linha | B=1 Item | C=2 Categoria | H=7 Estoque[Extrema] | I=8 Itapeva[Total] | J=9 Itapeva[Bruto]
-    let hRow=-1,colLinha=-1,colItem=-1,colCat=-1,colBruto=-1,colExtrema=-1;
+    let hRow=-1,colLinha=-1,colItem=-1,colCat=-1,colBruto=-1,colExtrema=-1,colStatus=-1;
     for(let i=0;i<Math.min(10,rows.length);i++){
       const row=rows[i];
       const iItem=row.findIndex(c=>c.trim()==='Item');
@@ -503,6 +544,8 @@ async function loadEstoque(){
         colExtrema=row.findIndex(c=>c.includes('Estoque')&&c.includes('Extrema'));
         if(colExtrema===-1)colExtrema=7;
         colBruto=iBruto>=0?iBruto:9;
+        colStatus=row.findIndex(c=>c.trim()==='Status');
+        if(colStatus===-1)colStatus=4;
         break;
       }
     }
@@ -518,6 +561,8 @@ async function loadEstoque(){
       const row=rows[i];
       const item=(row[colItem]||'').trim();
       if(!item)continue;
+      const statusProd=(row[colStatus]||'').trim();
+      if(statusProd.toLowerCase()==='descontinuado')continue;
       const cat=(colCat>=0?(row[colCat]||''):'').trim()||'Geral';
       const linha=(row[colLinha]||'').trim();
       const isUV=cat.trim().toUpperCase()==='UV';
@@ -606,7 +651,7 @@ function renderTabela(){
           <input type="number" class="qi" min="0" max="${p.saldo}" step="${lote}"
             data-prod="${p.item.replace(/"/g,'&quot;')}" data-cat="${p.categoria}"
             data-saldo="${p.saldo}" data-lote="${lote}"
-            value="" placeholder="${temLote?lote:'0'}"
+            value="" placeholder="0"
             ${p.saldo<=0?'disabled':''} oninput="onQty(this)" onchange="updateCnt()"/>
           ${loteTip}
         </td>
@@ -616,6 +661,45 @@ function renderTabela(){
   }
   document.getElementById('tbody').innerHTML=html;
   updateCnt();
+}
+
+function filtrarTabela(termo){
+  const t=termo.trim().toLowerCase();
+  const rows=document.querySelectorAll('#tbody tr');
+  let catAtual=null,catRow=null,catVisible=false;
+  rows.forEach(row=>{
+    if(row.classList.contains('crow')){
+      // linha de categoria: mostrar/ocultar depois de processar filhos
+      if(catRow&&catAtual!==null)catRow.style.display=catVisible?'':'none';
+      catRow=row;catAtual=row;catVisible=false;
+      return;
+    }
+    const produto=row.querySelector('.pname');
+    const cat=row.querySelector('td:nth-child(2)');
+    const texto=((produto?produto.textContent:'')+(cat?cat.textContent:'')).toLowerCase();
+    const visivel=!t||texto.includes(t);
+    row.style.display=visivel?'':'none';
+    if(visivel)catVisible=true;
+  });
+  // flush last category
+  if(catRow)catRow.style.display=catVisible?'':'none';
+
+  // show empty message if nothing visible
+  const anyVisible=[...rows].some(r=>!r.classList.contains('crow')&&r.style.display!=='none');
+  let emptyRow=document.getElementById('tr-empty-search');
+  if(!anyVisible){
+    if(!emptyRow){
+      emptyRow=document.createElement('tr');
+      emptyRow.id='tr-empty-search';
+      emptyRow.innerHTML=`<td colspan="5" style="text-align:center;padding:28px;color:var(--muted)">Nenhum produto encontrado para "<strong style="color:var(--text)">${termo}</strong>"</td>`;
+      document.getElementById('tbody').appendChild(emptyRow);
+    } else {
+      emptyRow.style.display='';
+      emptyRow.querySelector('td').innerHTML=`Nenhum produto encontrado para "<strong style="color:var(--text)">${termo}</strong>"`;
+    }
+  } else if(emptyRow){
+    emptyRow.style.display='none';
+  }
 }
 
 function onQty(inp){
@@ -656,7 +740,7 @@ function enviar(){
     }
   });
   const reqs=getReqs();
-  reqs.unshift({id:nextReqId(),semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,status:'Pendente',itens,criado:new Date().toISOString(),aprovN1:'',aprovN2:''});
+  reqs.unshift({id:nextReqId(),semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,status:'Pendente',itens,criado:new Date().toISOString(),aprovador:''});
   saveReqs(reqs);
   toast('Requisição enviada! 🎉','success');
   limpar();
@@ -665,6 +749,8 @@ function enviar(){
 function limpar(){
   document.querySelectorAll('.qi').forEach(i=>{i.value='';i.classList.remove('over');});
   document.querySelectorAll('.oi').forEach(i=>i.value='');
+  const busca=document.getElementById('inp-busca');
+  if(busca){busca.value='';filtrarTabela('');}
   updateCnt();
 }
 
@@ -685,8 +771,7 @@ function renderGestao(){
       <div class="ri">
         <span>📅 ${r.semana}</span><span>👤 ${r.responsavel}</span>
         <span>📦 ${r.itens.length} itens</span><span>🕐 ${fmtDate(r.criado)}</span>
-        ${r.aprovN1?`<span>✅ N1: ${r.aprovN1}</span>`:''}
-        ${r.aprovN2?`<span>✅ N2: ${r.aprovN2}</span>`:''}
+        ${r.aprovador?`<span>✅ Aprovado por: ${r.aprovador}</span>`:''}
       </div>
     </div>`).join('');
 }
@@ -722,25 +807,22 @@ function openReq(id){
 
   const isAdmin=currentUser.role==='admin';
   let foot=`<button class="btn bg2" onclick="closeModal('modal-req')">Fechar</button>`;
+  if(req.status==='Aprovado'){
+    foot+=`<button class="btn" style="background:rgba(46,204,136,.15);color:var(--green)" onclick="exportarExcel(${req.id})">⬇ Exportar Excel</button>`;
+  }
   if(isAdmin&&req.status==='Pendente'){
-    foot+=`<input type="text" class="qi" style="width:150px;font-size:13px;font-weight:400;text-align:left;padding:7px 10px" id="nm-n1" placeholder="Nome Aprovador N1"/>
-      <button class="btn bp" onclick="aprovar('AprovadoN1','nm-n1','aprovN1')">Aprovar N1</button>
-      <button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>`;
-  }else if(isAdmin&&req.status==='AprovadoN1'){
-    foot+=`<input type="text" class="qi" style="width:150px;font-size:13px;font-weight:400;text-align:left;padding:7px 10px" id="nm-n2" placeholder="Nome Aprovador N2"/>
-      <button class="btn bp" onclick="aprovar('AprovadoFinal','nm-n2','aprovN2')">Aprovação Final N2</button>
-      <button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>`;
+    foot+=`<button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>
+      <button class="btn bp" onclick="aprovar()">✓ Aprovar</button>`;
   }
   document.getElementById('mreq-foot').innerHTML=foot;
 }
 
-function aprovar(status,inputId,campo){
-  const nome=document.getElementById(inputId)?.value.trim();
-  if(!nome){toast('Informe o nome do aprovador.','error');return;}
+function aprovar(){
   const reqs=getReqs();const req=reqs.find(r=>r.id===reqAtual);if(!req)return;
-  req.status=status;req[campo]=nome;
-  for(const it of req.itens){const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);if(el)it.qtyAprov=parseInt(el.value)||0;}
-  saveReqs(reqs);toast('Status atualizado! ✅','success');closeModal('modal-req');renderGestao();
+  req.status='Aprovado';req.aprovador=currentUser.nome||currentUser.login;
+  req.aprovadoEm=new Date().toISOString();
+  for(const it of req.itens){const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);if(el)it.qtyAprov=parseInt(el.value)||it.qty;}
+  saveReqs(reqs);toast('Requisição aprovada! ✅','success');closeModal('modal-req');renderGestao();
 }
 
 function reprovar(){
@@ -748,13 +830,49 @@ function reprovar(){
   req.status='Reprovado';saveReqs(reqs);toast('Requisição reprovada.','error');closeModal('modal-req');renderGestao();
 }
 
+// ── EXPORTAR EXCEL ────────────────────────────────────────────────────────────
+function exportarExcel(id){
+  const req=getReqs().find(r=>r.id===id);if(!req)return;
+  const rows=[
+    ['Requisicao de Produtos - Exportacao'],
+    [],
+    ['Loja',req.loja,'Semana',req.semana],
+    ['Responsavel',req.responsavel,'Status',req.status],
+    ['Aprovado por',req.aprovador||'-','Aprovado em',req.aprovadoEm?fmtDate(req.aprovadoEm):'-'],
+    ['Criado em',fmtDate(req.criado)],
+    [],
+    ['Produto','Categoria','Saldo Disponivel','Qtd. Solicitada','Qtd. Aprovada','Observacao'],
+  ];
+  for(const it of req.itens){
+    rows.push([it.produto,it.categoria,it.saldo,it.qty,it.qtyAprov||it.qty,it.obs||'']);
+  }
+  rows.push([]);
+  rows.push(['Total de itens','',req.itens.length,'',req.itens.reduce((s,i)=>s+(i.qtyAprov||i.qty),0),'']);
+
+  function escCell(v){
+    var s=String(v==null?'':v);
+    if(s.indexOf(',')>=0||s.indexOf('"')>=0){return '"'+s.replace(/"/g,'""')+'"';}
+    return s;
+  }
+  var lines=rows.map(function(r){return r.map(escCell).join(',');});
+  var sep='\r\n';var csv='\uFEFF'+lines.join(sep);
+
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Requisicao_'+req.loja+'_'+req.semana.replace(/[^a-zA-Z0-9]/g,'_')+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  toast('Arquivo exportado! ✅','success');
+}
+
+
 // ── GESTÃO DE USUÁRIOS ────────────────────────────────────────────────────────
 function renderUsers(){
   const users=getUsers();
-  const avatarColors={admin:'#F5B731',loja:'var(--accent)'};
   document.getElementById('user-grid').innerHTML=users.map(u=>{
     const isSelf=u.id===currentUser.id;
-    const av=u.nome?u.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase():(u.login.slice(0,2).toUpperCase());
+    const av=u.nome?u.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase():u.login.slice(0,2).toUpperCase();
     return `<div class="user-card">
       <div class="user-avatar" style="background:${u.role==='admin'?'rgba(245,183,49,.15)':'rgba(79,126,255,.15)'};color:${u.role==='admin'?'var(--gold)':'var(--accent)'}">${av}</div>
       <div class="user-details">
@@ -814,15 +932,12 @@ function saveUser(){
   const loja=role==='loja'?document.getElementById('eu-loja').value:null;
   if(!nome||!login){toast('Preencha nome e login.','error');return;}
   const users=getUsers();
-  // check duplicate login
   const dup=users.find(u=>u.login===login&&u.id!==editUserId);
   if(dup){toast('Este login já está em uso.','error');return;}
   if(editUserId){
-    const u=users.find(x=>x.id===editUserId);
-    if(!u)return;
+    const u=users.find(x=>x.id===editUserId);if(!u)return;
     u.nome=nome;u.login=login;u.role=role;u.loja=loja;
     if(senha)u.senha=senha;
-    // update session if editing self
     if(editUserId===currentUser.id){currentUser={...u};sessionStorage.setItem('currentUser',JSON.stringify(currentUser));document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;}
   } else {
     if(!senha){toast('Informe uma senha.','error');return;}
@@ -834,8 +949,8 @@ function saveUser(){
 function confirmDelete(id){
   delUserId=id;
   const u=getUsers().find(x=>x.id===id);
-  document.getElementById('del-msg').textContent=`Tem certeza que deseja excluir o usuário "${u?.nome||u?.login}"? Esta ação não pode ser desfeita.`;
-  document.getElementById('del-confirm-btn').onclick=()=>{
+  document.getElementById('del-msg').textContent='Tem certeza que deseja excluir o usuário "'+( u?.nome||u?.login)+'"? Esta ação não pode ser desfeita.';
+  document.getElementById('del-confirm-btn').onclick=function(){
     const users=getUsers().filter(x=>x.id!==delUserId);
     saveUsers(users);closeModal('modal-del');renderUsers();toast('Usuário excluído.','error');
   };
@@ -844,7 +959,79 @@ function confirmDelete(id){
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-function toast(msg,type='success'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>el.classList.remove('show'),3500);}
+function toast(msg,type){
+  type=type||'success';
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+type;
+  setTimeout(function(){el.classList.remove('show');},3500);
+}
+
+// ── WEEK PICKER ──────────────────────────────────────────────────────────────
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_ABREV=['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
+let wpDate=new Date();
+
+function toggleWeekPicker(){
+  const el=document.getElementById('week-picker');
+  if(el.classList.contains('open')){el.classList.remove('open');return;}
+  wpDate=new Date();
+  renderWeekPicker();
+  el.classList.add('open');
+  setTimeout(()=>document.addEventListener('click',wpOutsideClick,{once:true}),10);
+}
+
+function wpOutsideClick(e){
+  const wp=document.getElementById('week-picker');
+  const inp=document.getElementById('inp-semana');
+  if(!wp.contains(e.target)&&e.target!==inp)wp.classList.remove('open');
+  else if(wp.classList.contains('open'))setTimeout(()=>document.addEventListener('click',wpOutsideClick,{once:true}),10);
+}
+
+function wpMes(delta){
+  wpDate=new Date(wpDate.getFullYear(),wpDate.getMonth()+delta,1);
+  renderWeekPicker();
+}
+
+function getWeeksOfMonth(year,month){
+  const weeks=[];
+  // Começa na segunda-feira da semana que contém o dia 1
+  const firstDay=new Date(year,month,1);
+  const dow=firstDay.getDay()||7; // 1=seg ... 7=dom
+  let start=new Date(firstDay);
+  start.setDate(1-(dow-1));
+  while(start.getMonth()<=month||start.getFullYear()<year){
+    const end=new Date(start);end.setDate(start.getDate()+6);
+    // inclui semana se tiver pelo menos 1 dia no mês
+    if(end.getMonth()>=month&&end.getFullYear()>=year){
+      weeks.push({start:new Date(start),end:new Date(end)});
+    }
+    start.setDate(start.getDate()+7);
+    if(start.getMonth()>month&&start.getFullYear()>=year)break;
+  }
+  return weeks;
+}
+
+function fmtWpDate(d){return `${String(d.getDate()).padStart(2,'0')} ${MESES_ABREV[d.getMonth()]}`;}
+
+function renderWeekPicker(){
+  const yr=wpDate.getFullYear(),mo=wpDate.getMonth();
+  document.getElementById('wp-month-label').textContent=`${MESES[mo]} ${yr}`;
+  const weeks=getWeeksOfMonth(yr,mo);
+  const sel=document.getElementById('inp-semana').value;
+  document.getElementById('wp-weeks').innerHTML=weeks.map((w,i)=>{
+    const label=`${fmtWpDate(w.start)} – ${fmtWpDate(w.end)} ${w.end.getFullYear()}`;
+    const isSel=sel===label;
+    return `<div class="wp-week${isSel?' sel':''}" onclick="selectWeek('${label}')">
+      <span class="wp-week-num">S${i+1}</span>
+      <span class="wp-week-range">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function selectWeek(label){
+  document.getElementById('inp-semana').value=label;
+  document.getElementById('week-picker').classList.remove('open');
+}
 
 init();
 </script>
