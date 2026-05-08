@@ -320,6 +320,52 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <script>
 const SHEET_ID='1FdmE1CvAusXk3DwjfhyKZ8acF1xLzczlzhaPH3-ack8';
 const GID='1102326416';
+const LOTES_SHEET_ID='1RlcVygtyPgnp08m25PNY1aGaOLvsMnSo8gKyg6bVGGI';
+const LOTES_GID='747704311';
+
+// Lotes mínimos por nome parcial do produto (carregado da planilha, fallback embutido)
+let LOTES_MAP={
+  'Garrafa Fresh 650ML':48,'Garrafa Fresh 950ML':40,'Garrafa Urban 500ML':40,
+  'Copo Vibe 470ML':40,'Copo Life 1170ML':15,'Copo Life 880ML':15,
+  'Garrafa Pro 700ML':24,'Garrafa Magsafe 700ML':24,'Garrafa Mini 350ML':24,
+  'Garrafa Kids 500ML':24,'Taça Térmica Drink':24,
+  'Bolsa Joy Pro':20,'Bolsa Moove':30,'Bolsa Tote Mini':30,'Bolsa Tote Pop':20,
+  'Bolsa Tote Shopper':30,'Bolsa Tote':25,'Lancheira Fun':10,'Mochila Fun':10,
+  'Lancheira Mix':20,'Lancheira Fruit':20,'Lancheira Play':32,'Mochila Pop':10,
+  'Bolsa Voyage':16,'Mochila Casual':20,'Bolsa de Garrafa Puffer':40,
+  'Bolsa Tote Moon Puffer':25,'Bolsa Tote Care':10,'Mochila Care':10,
+  'Mochila Executiva':20,'Necessaire MakeUp Double':40,'Necessaire Puffer Básica':100,
+  'Necessaire Puffer M':50,'Necessaire Voyage':40,'Powerbank':50,
+};
+
+function getLote(nomeProduto){
+  // Busca correspondência parcial: chave do mapa contida no nome do produto
+  for(const[chave,lote] of Object.entries(LOTES_MAP)){
+    if(nomeProduto.includes(chave))return lote;
+  }
+  return 1; // sem lote mínimo = qualquer quantidade
+}
+
+async function loadLotes(){
+  const url=`https://docs.google.com/spreadsheets/d/${LOTES_SHEET_ID}/export?format=csv&gid=${LOTES_GID}`;
+  try{
+    const r=await fetch(url);
+    if(!r.ok)return; // usa fallback embutido
+    const text=await r.text();
+    const rows=text.split('\n').map(l=>{
+      const cols=[];let inQ=false,cur='';
+      for(const ch of l){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur);cur='';}else{cur+=ch;}}
+      cols.push(cur);return cols;
+    });
+    const novoMap={};
+    for(let i=1;i<rows.length;i++){
+      const prod=(rows[i][1]||'').trim();
+      const qtd=parseInt((rows[i][2]||'').trim())||0;
+      if(prod&&qtd>0)novoMap[prod]=qtd;
+    }
+    if(Object.keys(novoMap).length>0)LOTES_MAP=novoMap;
+  }catch(e){}
+}
 
 // ── DEFAULT USERS ─────────────────────────────────────────────────────────────
 const DEFAULT_USERS=[
@@ -420,7 +466,7 @@ function selectLoja(nome,el){
   lojaAtual=nome;
   document.getElementById('lbl-loja').textContent=nome;
   document.getElementById('form-area').style.display='block';
-  if(!produtos.length)loadEstoque();else renderTabela();
+  if(!produtos.length){loadLotes();loadEstoque();}else renderTabela();
 }
 
 // ── ESTOQUE ───────────────────────────────────────────────────────────────────
@@ -491,6 +537,7 @@ async function loadEstoque(){
         saldo=parseSaldo(row[colBruto]);
         fonteLabel='Itapeva Bruto';
       }
+      if(saldo<=0)continue; // oculta produtos sem saldo
       list.push({item,categoria:cat,linha,saldo,fonteLabel});
     }
     if(!list.length)throw new Error('Sem dados');
@@ -548,14 +595,20 @@ function renderTabela(){
     for(const p of prods){
       const cls=p.saldo>50?'ok':p.saldo>0?'low':'zero';
       const pid=p.item.replace(/[^a-zA-Z0-9]/g,'_');
+      const lote=getLote(p.item);
+      const temLote=lote>1;
+      const loteTip=temLote?`<div style="font-size:10px;color:var(--gold);margin-top:3px">lote: ${lote} un</div>`:'';
       html+=`<tr>
         <td><div class="pname">${p.item}</div></td>
         <td style="color:var(--muted);font-size:12px">${p.categoria}</td>
         <td style="text-align:center"><span class="sc ${cls}">${p.saldo.toLocaleString('pt-BR')}</span><div style="font-size:10px;color:var(--muted);margin-top:2px">${p.fonteLabel||'Itapeva'}</div></td>
         <td style="text-align:center">
-          <input type="number" class="qi" min="0" max="${p.saldo}"
-            data-prod="${p.item.replace(/"/g,'&quot;')}" data-cat="${p.categoria}" data-saldo="${p.saldo}"
-            value="" placeholder="0" ${p.saldo<=0?'disabled':''} oninput="onQty(this)" onchange="updateCnt()"/>
+          <input type="number" class="qi" min="0" max="${p.saldo}" step="${lote}"
+            data-prod="${p.item.replace(/"/g,'&quot;')}" data-cat="${p.categoria}"
+            data-saldo="${p.saldo}" data-lote="${lote}"
+            value="" placeholder="${temLote?lote:'0'}"
+            ${p.saldo<=0?'disabled':''} oninput="onQty(this)" onchange="updateCnt()"/>
+          ${loteTip}
         </td>
         <td><input type="text" class="oi" placeholder="Obs..." data-obs="${pid}"/></td>
       </tr>`;
@@ -565,7 +618,22 @@ function renderTabela(){
   updateCnt();
 }
 
-function onQty(inp){inp.classList.toggle('over',(parseInt(inp.value)||0)>parseInt(inp.dataset.saldo));updateCnt();}
+function onQty(inp){
+  const v=parseInt(inp.value)||0;
+  const saldo=parseInt(inp.dataset.saldo)||0;
+  const lote=parseInt(inp.dataset.lote)||1;
+  const excedeSaldo=v>saldo;
+  const naoMultiplo=lote>1&&v>0&&v%lote!==0;
+  inp.classList.toggle('over',excedeSaldo||naoMultiplo);
+  if(naoMultiplo&&!excedeSaldo){
+    inp.title=`Quantidade deve ser múltiplo de ${lote} (lote mínimo por caixa)`;
+  } else if(excedeSaldo){
+    inp.title=`Quantidade não pode exceder o saldo disponível (${saldo})`;
+  } else {
+    inp.title='';
+  }
+  updateCnt();
+}
 function updateCnt(){
   let c=0;
   document.querySelectorAll('.qi').forEach(i=>{if((parseInt(i.value)||0)>0&&!i.classList.contains('over'))c++;});
