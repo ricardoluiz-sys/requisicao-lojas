@@ -298,27 +298,50 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
     <!-- ═ FLUXO ═ -->
     <section id="sec-fluxo" class="sec">
-      <div class="ph"><h1>Fluxo & Prazos</h1><p>Processo semanal de reabastecimento.</p></div>
+      <div class="ph"><h1>Fluxo &amp; Prazos</h1><p>Processo semanal de reabastecimento — da requisição à entrega.</p></div>
+
       <div class="fsteps">
-        <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>Loja</div><div class="sday">SEG · TER até 18h</div></div>
-        <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação N1<br>Gerente</div><div class="sday">QUA até 12h</div></div>
-        <div class="fstep"><div class="snum">3</div><div class="slbl">Aprovação N2<br>Gestor</div><div class="sday">QUA até 18h</div></div>
-        <div class="fstep"><div class="snum">4</div><div class="slbl">Separação<br>Depósito</div><div class="sday">QUI</div></div>
-        <div class="fstep"><div class="snum">5</div><div class="slbl">Entrega<br>nas Lojas</div><div class="sday">SEX até 17h</div></div>
+        <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>pela Loja</div><div class="sday">SEG · TER até 18h</div></div>
+        <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação<br>Administrador</div><div class="sday">QUA até 18h</div></div>
+        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday">QUI</div></div>
+        <div class="fstep"><div class="snum">4</div><div class="slbl">Transporte<br>&amp; Entrega</div><div class="sday">Conforme prazo</div></div>
+        <div class="fstep"><div class="snum">5</div><div class="slbl">Recebimento<br>na Loja</div><div class="sday">Ver prazos abaixo</div></div>
       </div>
+
+      <div class="igrid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:16px">
+        <div class="icard" style="border-top:3px solid var(--pks)">
+          <div class="icard-t" style="color:var(--pks)">🏪 Loja PKS</div>
+          <div style="font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px">15 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div>
+          <div class="ii">Prazo médio de recebimento após aprovação da requisição.</div>
+        </div>
+        <div class="icard" style="border-top:3px solid var(--igu)">
+          <div class="icard-t" style="color:var(--igu)">🏪 Loja Iguatemi</div>
+          <div style="font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px">20 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div>
+          <div class="ii">Prazo médio de recebimento após aprovação da requisição.</div>
+        </div>
+        <div class="icard" style="border-top:3px solid var(--ana)">
+          <div class="icard-t" style="color:var(--ana)">🏪 Loja Anália</div>
+          <div style="font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px">10 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div>
+          <div class="ii">Prazo médio de recebimento após aprovação da requisição.</div>
+        </div>
+      </div>
+
       <div class="igrid">
         <div class="icard">
           <div class="icard-t">Regras importantes</div>
-          <div class="ii">⏰ Requisições fora do prazo entram no ciclo seguinte.</div>
-          <div class="ii">🚫 Não é possível pedir mais do que o saldo Itapeva disponível.</div>
-          <div class="ii">✅ Aprovação N1 é do gerente da própria loja.</div>
-          <div class="ii">✅ Aprovação N2 é do gestor central.</div>
-          <div class="ii">📦 Separação só inicia após Aprovação N2.</div>
+          <div class="ii">⏰ Requisições enviadas fora do prazo entram no ciclo seguinte.</div>
+          <div class="ii">🚫 Não é possível solicitar mais do que o saldo disponível.</div>
+          <div class="ii">📦 A separação no depósito só inicia após a aprovação do administrador.</div>
+          <div class="ii">📋 Itens descontinuados ou sem saldo não aparecem na listagem.</div>
+          <div class="ii">📦 Produtos com lote mínimo devem ser solicitados em múltiplos do lote.</div>
         </div>
         <div class="icard">
-          <div class="icard-t">Níveis de aprovação</div>
-          <div class="ii"><strong style="color:var(--accent)">N1 — Gerente de Loja</strong><br>Valida necessidade, ajusta quantidades e confirma.</div>
-          <div class="ii" style="margin-top:12px"><strong style="color:var(--green)">N2 — Gestor Central</strong><br>Consolida 3 lojas, verifica estoque e autoriza depósito.</div>
+          <div class="icard-t">Aprovação</div>
+          <div class="ii"><strong style="color:var(--accent)">Administrador</strong><br>Responsável único pela revisão e aprovação de todas as requisições das 3 lojas. Após aprovação, o arquivo é exportado e enviado ao depósito para separação.</div>
+          <div class="ii" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <strong style="color:var(--muted)">Ciclo semanal</strong><br>
+            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · entrega conforme prazo por loja</span>
+          </div>
         </div>
       </div>
     </section>
@@ -833,21 +856,10 @@ function reprovar(){
 // ── EXPORTAR EXCEL ────────────────────────────────────────────────────────────
 function exportarExcel(id){
   const req=getReqs().find(r=>r.id===id);if(!req)return;
-  const rows=[
-    ['Requisicao de Produtos - Exportacao'],
-    [],
-    ['Loja',req.loja,'Semana',req.semana],
-    ['Responsavel',req.responsavel,'Status',req.status],
-    ['Aprovado por',req.aprovador||'-','Aprovado em',req.aprovadoEm?fmtDate(req.aprovadoEm):'-'],
-    ['Criado em',fmtDate(req.criado)],
-    [],
-    ['Produto','Categoria','Saldo Disponivel','Qtd. Solicitada','Qtd. Aprovada','Observacao'],
-  ];
+  const rows=[['Item','Quantidade','Loja']];
   for(const it of req.itens){
-    rows.push([it.produto,it.categoria,it.saldo,it.qty,it.qtyAprov||it.qty,it.obs||'']);
+    rows.push([it.produto, it.qtyAprov||it.qty, req.loja]);
   }
-  rows.push([]);
-  rows.push(['Total de itens','',req.itens.length,'',req.itens.reduce((s,i)=>s+(i.qtyAprov||i.qty),0),'']);
 
   function escCell(v){
     var s=String(v==null?'':v);
