@@ -165,6 +165,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .nav{order:3;width:100%;}.nb{flex:1;text-align:center;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -331,7 +332,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="icard-t">Regras importantes</div>
           <div class="ii">⏰ Requisições enviadas fora do prazo entram no ciclo seguinte.</div>
           <div class="ii">🚫 Não é possível solicitar mais do que o saldo disponível.</div>
-          <div class="ii">📦 A separação no depósito só inicia após a aprovação do administrador.</div>
           <div class="ii">📋 Itens descontinuados ou sem saldo não aparecem na listagem.</div>
           <div class="ii">📦 Produtos com lote mínimo devem ser solicitados em múltiplos do lote.</div>
         </div>
@@ -856,25 +856,29 @@ function reprovar(){
 // ── EXPORTAR EXCEL ────────────────────────────────────────────────────────────
 function exportarExcel(id){
   const req=getReqs().find(r=>r.id===id);if(!req)return;
+
+  // Dados
   const rows=[['Item','Quantidade','Loja']];
   for(const it of req.itens){
     rows.push([it.produto, it.qtyAprov||it.qty, req.loja]);
   }
 
-  function escCell(v){
-    var s=String(v==null?'':v);
-    if(s.indexOf(',')>=0||s.indexOf('"')>=0){return '"'+s.replace(/"/g,'""')+'"';}
-    return s;
-  }
-  var lines=rows.map(function(r){return r.map(escCell).join(',');});
-  var sep='\r\n';var csv='\uFEFF'+lines.join(sep);
+  // Cria workbook com SheetJS
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(rows);
 
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='Requisicao_'+req.loja+'_'+req.semana.replace(/[^a-zA-Z0-9]/g,'_')+'.csv';
-  a.click();URL.revokeObjectURL(url);
+  // Largura das colunas
+  ws['!cols']=[{wch:45},{wch:14},{wch:16}];
+
+  // Estilo do cabeçalho (negrito) — SheetJS CE suporta via cell style parcial
+  ['A1','B1','C1'].forEach(function(ref){
+    if(ws[ref])ws[ref].s={font:{bold:true}};
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Requisição');
+
+  var nome='Requisicao_'+req.loja+'_'+req.semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx';
+  XLSX.writeFile(wb, nome);
   toast('Arquivo exportado! ✅','success');
 }
 
