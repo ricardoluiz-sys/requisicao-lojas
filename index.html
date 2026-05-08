@@ -215,7 +215,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="tw"><table>
           <thead><tr>
             <th style="width:38%">Produto</th><th>Categoria</th>
-            <th style="text-align:center">Saldo Itapeva</th>
+            <th style="text-align:center">Saldo Disponível</th>
             <th style="text-align:center">Qtd. Solicitada</th>
             <th>Observação</th>
           </tr></thead>
@@ -441,31 +441,57 @@ async function loadEstoque(){
     // Linha 4+ (row 5+): dados
 
     // Descobrir a linha de cabeçalho procurando por "Item" e "Itapeva"
-    let hRow=-1, colItem=-1, colCat=-1, colSaldo=-1;
+    // Colunas (descobertas pelo cabeçalho da linha 3):
+    // A=0 Linha | B=1 Item | C=2 Categoria | H=7 Estoque[Extrema] | I=8 Itapeva[Total] | J=9 Itapeva[Bruto]
+    let hRow=-1,colLinha=-1,colItem=-1,colCat=-1,colBruto=-1,colExtrema=-1;
     for(let i=0;i<Math.min(10,rows.length);i++){
       const row=rows[i];
       const iItem=row.findIndex(c=>c.trim()==='Item');
-      const iSaldo=row.findIndex(c=>c.includes('Itapeva')&&c.includes('Total'));
-      if(iItem>=0&&iSaldo>=0){
-        hRow=i; colItem=iItem;
+      const iBruto=row.findIndex(c=>c.includes('Itapeva')&&c.includes('Bruto'));
+      if(iItem>=0){
+        hRow=i;
+        colLinha=row.findIndex(c=>c.trim()==='Linha');
+        if(colLinha===-1)colLinha=0;
+        colItem=iItem;
         colCat=row.findIndex(c=>c.trim()==='Categoria');
-        colSaldo=iSaldo;
+        colExtrema=row.findIndex(c=>c.includes('Estoque')&&c.includes('Extrema'));
+        if(colExtrema===-1)colExtrema=7;
+        colBruto=iBruto>=0?iBruto:9;
         break;
       }
     }
     if(hRow===-1)throw new Error('Cabeçalho não encontrado');
 
+    function parseSaldo(val){
+      const raw=(val||'').trim().replace(/\./g,'').replace(',','.');
+      return raw?Math.max(0,parseInt(raw)||0):0;
+    }
+
     const list=[];
-    // pular linha de cabeçalho e qualquer linha vazia logo após
     for(let i=hRow+1;i<rows.length;i++){
       const row=rows[i];
       const item=(row[colItem]||'').trim();
-      if(!item)continue; // pula linhas vazias
+      if(!item)continue;
       const cat=(colCat>=0?(row[colCat]||''):'').trim()||'Geral';
-      // saldo vem formatado com pontos como milhar: "1.515" → 1515
-      const raw=(row[colSaldo]||'').trim().replace(/\./g,'').replace(',','.');
-      const saldo=raw?Math.max(0,parseInt(raw)||0):0;
-      list.push({item,categoria:cat,saldo});
+      const linha=(row[colLinha]||'').trim();
+      const isUV=cat.trim().toUpperCase()==='UV';
+      const isBase=linha.toUpperCase().startsWith('BASE');
+
+      let saldo,fonteLabel;
+      if(isUV){
+        // UV: Estoque [Extrema]
+        saldo=parseSaldo(row[colExtrema]);
+        fonteLabel='Extrema';
+      } else if(isBase){
+        // Base: Itapeva [Bruto] + Estoque [Extrema]
+        saldo=parseSaldo(row[colBruto])+parseSaldo(row[colExtrema]);
+        fonteLabel='Bruto+Extrema';
+      } else {
+        // Demais: Itapeva [Bruto]
+        saldo=parseSaldo(row[colBruto]);
+        fonteLabel='Itapeva Bruto';
+      }
+      list.push({item,categoria:cat,linha,saldo,fonteLabel});
     }
     if(!list.length)throw new Error('Sem dados');
     produtos=list;
@@ -525,7 +551,7 @@ function renderTabela(){
       html+=`<tr>
         <td><div class="pname">${p.item}</div></td>
         <td style="color:var(--muted);font-size:12px">${p.categoria}</td>
-        <td style="text-align:center"><span class="sc ${cls}">${p.saldo.toLocaleString('pt-BR')}</span></td>
+        <td style="text-align:center"><span class="sc ${cls}">${p.saldo.toLocaleString('pt-BR')}</span><div style="font-size:10px;color:var(--muted);margin-top:2px">${p.fonteLabel||'Itapeva'}</div></td>
         <td style="text-align:center">
           <input type="number" class="qi" min="0" max="${p.saldo}"
             data-prod="${p.item.replace(/"/g,'&quot;')}" data-cat="${p.categoria}" data-saldo="${p.saldo}"
