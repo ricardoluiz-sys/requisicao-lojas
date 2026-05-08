@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Requisição de Produtos — Lojas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0D0F14;--surface:#151820;--card:#1C2030;--border:#252A3A;--accent:#4F7EFF;--gold:#F5B731;--green:#2ECC88;--red:#FF5C5C;--text:#E8EAF0;--muted:#6B7280;--pks:#4F7EFF;--igu:#2ECC88;--ana:#C084FC;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:380px;}
+.login-logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#8B5CF6);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:22px;color:#fff;margin:0 auto 20px;}
+.login-title{font-family:'DM Serif Display',serif;font-size:22px;text-align:center;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px;}
+.login-err{background:rgba(255,92,92,.12);border:1px solid rgba(255,92,92,.3);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+.login-err.show{display:block;}
+.fl{margin-bottom:16px;}
+.fl label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.fl input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.fl input:focus{border-color:var(--accent);}
+.login-btn{width:100%;padding:11px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px;}
+.login-btn:hover{background:#3D6CE0;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#8B5CF6);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#fff;}
+.brand-name{font-size:14px;font-weight:600;}.brand-sub{font-size:11px;color:var(--muted);}
+.nav{display:flex;gap:3px;}
+.nb{padding:6px 13px;border-radius:7px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;}
+.nb:hover{background:var(--card);color:var(--text);}.nb.active{background:var(--accent);color:#fff;}
+.user-info{display:flex;align-items:center;gap:10px;}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;}
+.user-dot{width:7px;height:7px;border-radius:50%;}
+.logout-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* ── LAYOUT ── */
+.main{max-width:1100px;margin:0 auto;padding:28px 20px;}
+.sec{display:none;}.sec.on{display:block;}
+.ph{margin-bottom:24px;}.ph h1{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;}.ph p{color:var(--muted);margin-top:4px;font-size:13px;}
+
+/* ── LOJAS ── */
+.lojas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px;cursor:pointer;transition:all .2s;}
+.lc:hover{transform:translateY(-2px);}.lc.sel{border-color:var(--lc);}
+.ldot{width:9px;height:9px;border-radius:50%;margin-bottom:10px;}
+.lname{font-weight:600;font-size:14px;}.lmeta{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ── FORMS ── */
+.fr{display:flex;gap:14px;margin-bottom:18px;}.fg{flex:1;}
+.fg label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.fg input,.fg select{width:100%;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--accent);}
+.fg select option{background:var(--card);}
+
+/* ── ESTOQUE BAR ── */
+.ebar{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--card);border:1px solid var(--border);border-radius:9px;margin-bottom:18px;font-size:13px;}
+.edot{width:7px;height:7px;border-radius:50%;}.edot.ok{background:var(--green);box-shadow:0 0 5px var(--green);}.edot.loading{background:var(--gold);animation:pulse 1s infinite;}.edot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TABLE ── */
+.tw{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:20px;}
+.tw table{width:100%;border-collapse:collapse;}
+.tw thead th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border);}
+.tw tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}.tw tbody tr:last-child{border-bottom:none;}.tw tbody tr:hover{background:rgba(255,255,255,.02);}
+.tw td{padding:10px 14px;}
+.crow td{background:rgba(255,255,255,.03);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:7px 14px;}
+.pname{font-weight:500;font-size:13px;}
+.sc{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;}
+.sc.ok{background:rgba(46,204,136,.12);color:var(--green);}.sc.low{background:rgba(245,183,49,.12);color:var(--gold);}.sc.zero{background:rgba(255,92,92,.12);color:var(--red);}
+.qi{width:80px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border-color .2s;text-align:center;}
+.qi:focus{border-color:var(--accent);}.qi.over{border-color:var(--red);color:var(--red);}
+.oi{width:100%;background:transparent;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.oi::placeholder{color:#3A4055;}
+
+/* ── ACTION BAR ── */
+.abar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:28px;}
+.abar .sum{font-size:13px;color:var(--muted);}.abar .sum strong{color:var(--text);}
+
+/* ── BTNS ── */
+.btn{padding:9px 18px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.bp{background:var(--accent);color:#fff;}.bp:hover{background:#3D6CE0;transform:translateY(-1px);}.bp:disabled{background:#2A3050;color:var(--muted);cursor:not-allowed;transform:none;}
+.bg2{background:transparent;color:var(--muted);border:1px solid var(--border);}.bg2:hover{background:var(--card);color:var(--text);}
+.bsm{padding:5px 12px;font-size:12px;}
+
+/* ── CHIPS ── */
+.chips{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.chip:hover{border-color:var(--accent);color:var(--text);}.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── REQ CARDS ── */
+.rlist{display:flex;flex-direction:column;gap:10px;}
+.rc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;cursor:pointer;transition:all .2s;}.rc:hover{border-color:var(--accent);}
+.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.rl{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;}.rdot{width:7px;height:7px;border-radius:50%;}
+.ri{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;}
+.sb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.sPendente{background:rgba(245,183,49,.15);color:var(--gold);}.sAprovadoN1{background:rgba(79,126,255,.15);color:var(--accent);}.sAprovadoFinal{background:rgba(46,204,136,.15);color:var(--green);}.sReprovado{background:rgba(255,92,92,.15);color:var(--red);}
+
+/* ── USER MANAGEMENT ── */
+.user-grid{display:grid;gap:12px;}
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 20px;display:flex;align-items:center;gap:14px;}
+.user-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0;}
+.user-details{flex:1;}
+.user-login{font-weight:600;font-size:14px;}.user-role{font-size:12px;color:var(--muted);margin-top:2px;}
+.user-actions{display:flex;gap:8px;}
+.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.role-admin{background:rgba(245,183,49,.15);color:var(--gold);}
+.role-loja{background:rgba(79,126,255,.15);color:var(--accent);}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);}.mo.open{display:flex;}
+.md{background:var(--surface);border:1px solid var(--border);border-radius:15px;width:90%;max-width:680px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:su .25s ease;}
+.md-sm{max-width:440px;}
+@keyframes su{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mh h2{font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;}
+.mx{width:30px;height:30px;border-radius:7px;border:none;background:var(--card);color:var(--muted);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;}.mx:hover{background:var(--border);color:var(--text);}
+.mb{padding:18px 22px;overflow-y:auto;flex:1;}.mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+
+/* ── FLUXO ── */
+.fsteps{display:flex;gap:0;margin-bottom:28px;position:relative;}
+.fsteps::before{content:'';position:absolute;top:20px;left:40px;right:40px;height:2px;background:var(--border);z-index:0;}
+.fstep{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;}
+.snum{width:40px;height:40px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--muted);}
+.fstep.act .snum{background:var(--accent);border-color:var(--accent);color:#fff;}
+.slbl{font-size:11px;color:var(--muted);text-align:center;font-weight:500;line-height:1.3;}.sday{font-size:10px;color:var(--border);}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.icard{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;}
+.icard-t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:12px;}
+.ii{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);transform:translateY(60px);opacity:0;transition:all .3s;z-index:300;}
+.toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--green);color:var(--green);}.toast.error{border-color:var(--red);color:var(--red);}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+@media(max-width:640px){
+  .lojas{grid-template-columns:1fr;}.fr{flex-direction:column;}
+  .fsteps{flex-wrap:wrap;gap:10px;}.fsteps::before{display:none;}
+  .igrid{grid-template-columns:1fr;}.topbar{padding:12px 16px;flex-wrap:wrap;gap:8px;}
+  .nav{order:3;width:100%;}.nb{flex:1;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">R</div>
+    <div class="login-title">Requisição de Produtos</div>
+    <div class="login-sub">PKS · Iguatemi · Anália</div>
+    <div class="login-err" id="login-err">Usuário ou senha incorretos.</div>
+    <div class="fl"><label>Usuário</label><input type="text" id="inp-user" placeholder="Digite seu usuário" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="fl"><label>Senha</label><input type="password" id="inp-pass" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app-wrap" style="display:none">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">R</div>
+      <div><div class="brand-name">Requisição de Produtos</div><div class="brand-sub" id="tb-sub">—</div></div>
+    </div>
+    <nav class="nav" id="main-nav">
+      <button class="nb active" id="nb-nova" onclick="showSec('nova',this)">Nova Requisição</button>
+      <button class="nb" id="nb-gestao" onclick="showSec('gestao',this)">Gestão</button>
+      <button class="nb" id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
+      <button class="nb" id="nb-fluxo" onclick="showSec('fluxo',this)">Fluxo & Prazos</button>
+    </nav>
+    <div class="user-info">
+      <div class="user-chip">
+        <div class="user-dot" id="user-dot"></div>
+        <span id="user-label">—</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ═ NOVA REQUISIÇÃO ═ -->
+    <section id="sec-nova" class="sec on">
+      <div class="ph"><h1>Nova Requisição</h1><p id="nova-sub">Informe as quantidades e envie para aprovação.</p></div>
+      <div class="lojas" id="lojas-grid" style="display:none">
+        <div class="lc" style="--lc:var(--pks)" onclick="selectLoja('PKS',this)">
+          <div class="ldot" style="background:var(--pks)"></div><div class="lname">PKS</div><div class="lmeta">Clique para selecionar</div>
+        </div>
+        <div class="lc" style="--lc:var(--igu)" onclick="selectLoja('Iguatemi',this)">
+          <div class="ldot" style="background:var(--igu)"></div><div class="lname">Iguatemi</div><div class="lmeta">Clique para selecionar</div>
+        </div>
+        <div class="lc" style="--lc:var(--ana)" onclick="selectLoja('Anália',this)">
+          <div class="ldot" style="background:var(--ana)"></div><div class="lname">Anália</div><div class="lmeta">Clique para selecionar</div>
+        </div>
+      </div>
+      <div id="form-area" style="display:none">
+        <div class="fr">
+          <div class="fg"><label>Semana de Referência</label><input type="text" id="inp-semana" placeholder="Ex: 12–18 mai. 2025"/></div>
+          <div class="fg"><label>Responsável</label><input type="text" id="inp-resp" placeholder="Seu nome"/></div>
+        </div>
+        <div class="ebar">
+          <div class="edot loading" id="edot"></div>
+          <span id="emsg" style="color:var(--muted)">Carregando saldo Itapeva [Total]...</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="etime"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th style="width:38%">Produto</th><th>Categoria</th>
+            <th style="text-align:center">Saldo Itapeva</th>
+            <th style="text-align:center">Qtd. Solicitada</th>
+            <th>Observação</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table></div>
+        <div class="abar">
+          <div class="sum"><strong id="cnt">0</strong> itens · Loja: <strong id="lbl-loja">—</strong></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn bg2" onclick="limpar()">Limpar</button>
+            <button class="btn bp" id="btn-env" onclick="enviar()" disabled>Enviar Requisição</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═ GESTÃO ═ -->
+    <section id="sec-gestao" class="sec">
+      <div class="ph"><h1>Gestão de Requisições</h1><p>Acompanhe e aprove as requisições.</p></div>
+      <div class="chips">
+        <button class="chip active" onclick="filtrar('todos',this)">Todos</button>
+        <button class="chip" onclick="filtrar('Pendente',this)">Pendente</button>
+        <button class="chip" onclick="filtrar('AprovadoN1',this)">Aprovado N1</button>
+        <button class="chip" onclick="filtrar('AprovadoFinal',this)">Aprovado Final</button>
+        <button class="chip" onclick="filtrar('Reprovado',this)">Reprovado</button>
+        <div style="flex:1"></div>
+        <button class="btn bg2 bsm" onclick="renderGestao()">↻ Atualizar</button>
+      </div>
+      <div id="rlist" class="rlist"></div>
+    </section>
+
+    <!-- ═ USUÁRIOS (admin only) ═ -->
+    <section id="sec-usuarios" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><h1>Gestão de Usuários</h1><p>Crie, edite e remova acessos ao sistema.</p></div>
+        <button class="btn bp" onclick="openUserModal(null)">+ Novo Usuário</button>
+      </div>
+      <div class="user-grid" id="user-grid"></div>
+    </section>
+
+    <!-- ═ FLUXO ═ -->
+    <section id="sec-fluxo" class="sec">
+      <div class="ph"><h1>Fluxo & Prazos</h1><p>Processo semanal de reabastecimento.</p></div>
+      <div class="fsteps">
+        <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>Loja</div><div class="sday">SEG · TER até 18h</div></div>
+        <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação N1<br>Gerente</div><div class="sday">QUA até 12h</div></div>
+        <div class="fstep"><div class="snum">3</div><div class="slbl">Aprovação N2<br>Gestor</div><div class="sday">QUA até 18h</div></div>
+        <div class="fstep"><div class="snum">4</div><div class="slbl">Separação<br>Depósito</div><div class="sday">QUI</div></div>
+        <div class="fstep"><div class="snum">5</div><div class="slbl">Entrega<br>nas Lojas</div><div class="sday">SEX até 17h</div></div>
+      </div>
+      <div class="igrid">
+        <div class="icard">
+          <div class="icard-t">Regras importantes</div>
+          <div class="ii">⏰ Requisições fora do prazo entram no ciclo seguinte.</div>
+          <div class="ii">🚫 Não é possível pedir mais do que o saldo Itapeva disponível.</div>
+          <div class="ii">✅ Aprovação N1 é do gerente da própria loja.</div>
+          <div class="ii">✅ Aprovação N2 é do gestor central.</div>
+          <div class="ii">📦 Separação só inicia após Aprovação N2.</div>
+        </div>
+        <div class="icard">
+          <div class="icard-t">Níveis de aprovação</div>
+          <div class="ii"><strong style="color:var(--accent)">N1 — Gerente de Loja</strong><br>Valida necessidade, ajusta quantidades e confirma.</div>
+          <div class="ii" style="margin-top:12px"><strong style="color:var(--green)">N2 — Gestor Central</strong><br>Consolida 3 lojas, verifica estoque e autoriza depósito.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- MODAL DETALHE REQUISIÇÃO -->
+<div class="mo" id="modal-req" onclick="if(event.target===this)closeModal('modal-req')">
+  <div class="md">
+    <div class="mh"><h2 id="mreq-title">Detalhe</h2><button class="mx" onclick="closeModal('modal-req')">✕</button></div>
+    <div class="mb" id="mreq-body"></div>
+    <div class="mf" id="mreq-foot"></div>
+  </div>
+</div>
+
+<!-- MODAL USUÁRIO -->
+<div class="mo" id="modal-user" onclick="if(event.target===this)closeModal('modal-user')">
+  <div class="md md-sm">
+    <div class="mh"><h2 id="muser-title">Usuário</h2><button class="mx" onclick="closeModal('modal-user')">✕</button></div>
+    <div class="mb" id="muser-body"></div>
+    <div class="mf" id="muser-foot"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR DELETE -->
+<div class="mo" id="modal-del" onclick="if(event.target===this)closeModal('modal-del')">
+  <div class="md md-sm">
+    <div class="mh"><h2>Confirmar exclusão</h2><button class="mx" onclick="closeModal('modal-del')">✕</button></div>
+    <div class="mb"><p style="font-size:14px;color:var(--muted);line-height:1.6" id="del-msg"></p></div>
+    <div class="mf">
+      <button class="btn bg2" onclick="closeModal('modal-del')">Cancelar</button>
+      <button class="btn" style="background:rgba(255,92,92,.2);color:var(--red)" id="del-confirm-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHEET_ID='1FdmE1CvAusXk3DwjfhyKZ8acF1xLzczlzhaPH3-ack8';
+const GID='1102326416';
+
+// ── DEFAULT USERS ─────────────────────────────────────────────────────────────
+const DEFAULT_USERS=[
+  {id:1,login:'admin',senha:'admin123',role:'admin',loja:null,nome:'Administrador'},
+  {id:2,login:'pks',senha:'pks123',role:'loja',loja:'PKS',nome:'Responsável PKS'},
+  {id:3,login:'iguatemi',senha:'iguatemi123',role:'loja',loja:'Iguatemi',nome:'Responsável Iguatemi'},
+  {id:4,login:'analia',senha:'analia123',role:'loja',loja:'Anália',nome:'Responsável Anália'},
+];
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function getUsers(){
+  try{const u=JSON.parse(localStorage.getItem('usuarios')||'null');return u||DEFAULT_USERS;}
+  catch(e){return DEFAULT_USERS;}
+}
+function saveUsers(u){localStorage.setItem('usuarios',JSON.stringify(u));}
+function getReqs(){try{return JSON.parse(localStorage.getItem('requisicoes')||'[]');}catch(e){return[];}}
+function saveReqs(r){localStorage.setItem('requisicoes',JSON.stringify(r));}
+function nextReqId(){const r=getReqs();return r.length?Math.max(...r.map(x=>x.id))+1:1;}
+function nextUserId(){const u=getUsers();return u.length?Math.max(...u.map(x=>x.id))+1:1;}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser=null,lojaAtual=null,produtos=[],filtroAtual='todos',reqAtual=null,editUserId=null,delUserId=null;
+
+const LOJA_COLORS={PKS:'var(--pks)',Iguatemi:'var(--igu)','Anália':'var(--ana)'};
+const ROLE_COLORS={admin:'#F5B731',loja:'var(--accent)'};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init(){
+  // init users if first time
+  if(!localStorage.getItem('usuarios'))saveUsers(DEFAULT_USERS);
+  const saved=sessionStorage.getItem('currentUser');
+  if(saved){currentUser=JSON.parse(saved);showApp();}
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const login=document.getElementById('inp-user').value.trim();
+  const senha=document.getElementById('inp-pass').value;
+  const users=getUsers();
+  const user=users.find(u=>u.login===login&&u.senha===senha);
+  if(!user){document.getElementById('login-err').classList.add('show');return;}
+  document.getElementById('login-err').classList.remove('show');
+  currentUser=user;
+  sessionStorage.setItem('currentUser',JSON.stringify(user));
+  showApp();
+}
+
+function doLogout(){
+  currentUser=null;sessionStorage.removeItem('currentUser');
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('login-wrap').style.display='flex';
+  document.getElementById('inp-user').value='';
+  document.getElementById('inp-pass').value='';
+  lojaAtual=null;produtos=[];
+}
+
+// ── SHOW APP ──────────────────────────────────────────────────────────────────
+function showApp(){
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('app-wrap').style.display='block';
+
+  // topbar
+  const isAdmin=currentUser.role==='admin';
+  document.getElementById('tb-sub').textContent=isAdmin?'Administrador':'Loja '+currentUser.loja;
+  document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;
+  document.getElementById('user-dot').style.background=isAdmin?'var(--gold)':LOJA_COLORS[currentUser.loja]||'var(--accent)';
+  document.getElementById('nb-usuarios').style.display=isAdmin?'':'none';
+
+  // nova req setup
+  if(isAdmin){
+    document.getElementById('lojas-grid').style.display='grid';
+    document.getElementById('nova-sub').textContent='Selecione a loja, informe as quantidades e envie para aprovação.';
+    document.getElementById('form-area').style.display='none';
+  } else {
+    document.getElementById('lojas-grid').style.display='none';
+    document.getElementById('nova-sub').textContent=`Loja ${currentUser.loja} — informe as quantidades e envie para aprovação.`;
+    lojaAtual=currentUser.loja;
+    document.getElementById('lbl-loja').textContent=currentUser.loja;
+    document.getElementById('form-area').style.display='block';
+    if(!produtos.length)loadEstoque();
+  }
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showSec(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('on');
+  el.classList.add('active');
+  if(id==='gestao')renderGestao();
+  if(id==='usuarios')renderUsers();
+}
+
+// ── LOJA SELECT (admin) ───────────────────────────────────────────────────────
+function selectLoja(nome,el){
+  document.querySelectorAll('.lc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  lojaAtual=nome;
+  document.getElementById('lbl-loja').textContent=nome;
+  document.getElementById('form-area').style.display='block';
+  if(!produtos.length)loadEstoque();else renderTabela();
+}
+
+// ── ESTOQUE ───────────────────────────────────────────────────────────────────
+async function loadEstoque(){
+  setEst('loading','Carregando saldo Itapeva [Total]...');
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+  try{
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const text=await r.text();
+    const rows=parseCSV(text);
+
+    // Estrutura real da planilha:
+    // Linha 0 (row 1): grupos de cabeçalho
+    // Linha 1 (row 2): números das colunas (1, 2, 3...)
+    // Linha 2 (row 3): nomes reais — Linha | Item | Categoria | Curva ABC | (vazia) | Status | ... | Itapeva [Total] ...
+    // Linha 3 (row 4): vazia
+    // Linha 4+ (row 5+): dados
+
+    // Descobrir a linha de cabeçalho procurando por "Item" e "Itapeva"
+    let hRow=-1, colItem=-1, colCat=-1, colSaldo=-1;
+    for(let i=0;i<Math.min(10,rows.length);i++){
+      const row=rows[i];
+      const iItem=row.findIndex(c=>c.trim()==='Item');
+      const iSaldo=row.findIndex(c=>c.includes('Itapeva')&&c.includes('Total'));
+      if(iItem>=0&&iSaldo>=0){
+        hRow=i; colItem=iItem;
+        colCat=row.findIndex(c=>c.trim()==='Categoria');
+        colSaldo=iSaldo;
+        break;
+      }
+    }
+    if(hRow===-1)throw new Error('Cabeçalho não encontrado');
+
+    const list=[];
+    // pular linha de cabeçalho e qualquer linha vazia logo após
+    for(let i=hRow+1;i<rows.length;i++){
+      const row=rows[i];
+      const item=(row[colItem]||'').trim();
+      if(!item)continue; // pula linhas vazias
+      const cat=(colCat>=0?(row[colCat]||''):'').trim()||'Geral';
+      // saldo vem formatado com pontos como milhar: "1.515" → 1515
+      const raw=(row[colSaldo]||'').trim().replace(/\./g,'').replace(',','.');
+      const saldo=raw?Math.max(0,parseInt(raw)||0):0;
+      list.push({item,categoria:cat,saldo});
+    }
+    if(!list.length)throw new Error('Sem dados');
+    produtos=list;
+    const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    setEst('ok',`${list.length} produtos carregados`);
+    document.getElementById('etime').textContent=`Atualizado às ${t}`;
+    renderTabela();
+  }catch(e){
+    setEst('err','Planilha indisponível — usando saldo de demonstração.');
+    produtos=[
+      {item:'Bolsa Garrafa Térmica Preta',categoria:'Têxtil',saldo:1100},
+      {item:'Bolsa Garrafa Térmica Vinho',categoria:'Têxtil',saldo:967},
+      {item:'Bolsa Garrafa Térmica Off White',categoria:'Têxtil',saldo:696},
+      {item:'Bolsa Garrafa Térmica Marrom',categoria:'Têxtil',saldo:330},
+      {item:'Bolsa Fitness Puffer Preta',categoria:'Têxtil',saldo:1411},
+      {item:'Bolsa Fitness Puffer Marrom',categoria:'Têxtil',saldo:957},
+      {item:'Bolsa Fitness Puffer Off White',categoria:'Têxtil',saldo:587},
+      {item:'Bolsa Fitness Puffer Vinho',categoria:'Têxtil',saldo:782},
+      {item:'Necessaire Puffer M Preta',categoria:'Têxtil',saldo:1515},
+      {item:'Necessaire Puffer M Off White',categoria:'Têxtil',saldo:820},
+      {item:'Necessaire Puffer M Rosa',categoria:'Têxtil',saldo:0},
+      {item:'Necessaire Puffer M Vinho',categoria:'Têxtil',saldo:0},
+      {item:'Necessaire Puffer Básica Preta',categoria:'Gift',saldo:973},
+      {item:'Necessaire Puffer Básica Rosa',categoria:'Gift',saldo:449},
+      {item:'Necessaire Puffer Básica Off White',categoria:'Gift',saldo:0},
+      {item:'Necessaire Puffer Básica Lilás',categoria:'Gift',saldo:91},
+    ];
+    renderTabela();
+  }
+}
+
+function setEst(t,m){document.getElementById('edot').className='edot '+t;document.getElementById('emsg').textContent=m;}
+
+function parseCSV(text){
+  const rows=[];
+  for(const line of text.split('\n')){
+    const cols=[];let inQ=false,cur='';
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur);cur='';}else{cur+=ch;}
+    }
+    cols.push(cur);rows.push(cols);
+  }
+  return rows;
+}
+
+// ── TABELA PRODUTOS ───────────────────────────────────────────────────────────
+function renderTabela(){
+  const cats={};
+  for(const p of produtos){if(!cats[p.categoria])cats[p.categoria]=[];cats[p.categoria].push(p);}
+  let html='';
+  for(const[cat,prods]of Object.entries(cats)){
+    html+=`<tr class="crow"><td colspan="5">${cat}</td></tr>`;
+    for(const p of prods){
+      const cls=p.saldo>50?'ok':p.saldo>0?'low':'zero';
+      const pid=p.item.replace(/[^a-zA-Z0-9]/g,'_');
+      html+=`<tr>
+        <td><div class="pname">${p.item}</div></td>
+        <td style="color:var(--muted);font-size:12px">${p.categoria}</td>
+        <td style="text-align:center"><span class="sc ${cls}">${p.saldo.toLocaleString('pt-BR')}</span></td>
+        <td style="text-align:center">
+          <input type="number" class="qi" min="0" max="${p.saldo}"
+            data-prod="${p.item.replace(/"/g,'&quot;')}" data-cat="${p.categoria}" data-saldo="${p.saldo}"
+            value="" placeholder="0" ${p.saldo<=0?'disabled':''} oninput="onQty(this)" onchange="updateCnt()"/>
+        </td>
+        <td><input type="text" class="oi" placeholder="Obs..." data-obs="${pid}"/></td>
+      </tr>`;
+    }
+  }
+  document.getElementById('tbody').innerHTML=html;
+  updateCnt();
+}
+
+function onQty(inp){inp.classList.toggle('over',(parseInt(inp.value)||0)>parseInt(inp.dataset.saldo));updateCnt();}
+function updateCnt(){
+  let c=0;
+  document.querySelectorAll('.qi').forEach(i=>{if((parseInt(i.value)||0)>0&&!i.classList.contains('over'))c++;});
+  document.getElementById('cnt').textContent=c;
+  document.getElementById('btn-env').disabled=c===0||!lojaAtual;
+}
+
+// ── ENVIAR ────────────────────────────────────────────────────────────────────
+function enviar(){
+  const semana=document.getElementById('inp-semana').value.trim();
+  const resp=document.getElementById('inp-resp').value.trim();
+  if(!semana||!resp){toast('Preencha semana e responsável.','error');return;}
+  const itens=[];
+  document.querySelectorAll('.qi').forEach(inp=>{
+    const v=parseInt(inp.value)||0;
+    if(v>0&&!inp.classList.contains('over')){
+      const pid=inp.dataset.prod.replace(/[^a-zA-Z0-9]/g,'_');
+      const obs=document.querySelector(`.oi[data-obs="${pid}"]`);
+      itens.push({produto:inp.dataset.prod,categoria:inp.dataset.cat,saldo:parseInt(inp.dataset.saldo),qty:v,obs:obs?obs.value.trim():''});
+    }
+  });
+  const reqs=getReqs();
+  reqs.unshift({id:nextReqId(),semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,status:'Pendente',itens,criado:new Date().toISOString(),aprovN1:'',aprovN2:''});
+  saveReqs(reqs);
+  toast('Requisição enviada! 🎉','success');
+  limpar();
+}
+
+function limpar(){
+  document.querySelectorAll('.qi').forEach(i=>{i.value='';i.classList.remove('over');});
+  document.querySelectorAll('.oi').forEach(i=>i.value='');
+  updateCnt();
+}
+
+// ── GESTÃO ────────────────────────────────────────────────────────────────────
+function renderGestao(){
+  let reqs=getReqs();
+  // loja user só vê suas próprias
+  if(currentUser.role==='loja')reqs=reqs.filter(r=>r.loja===currentUser.loja);
+  const fil=filtroAtual==='todos'?reqs:reqs.filter(r=>r.status===filtroAtual);
+  const el=document.getElementById('rlist');
+  if(!fil.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><p>Nenhuma requisição encontrada.</p></div>`;return;}
+  el.innerHTML=fil.map(r=>`
+    <div class="rc" onclick="openReq(${r.id})">
+      <div class="rh">
+        <div class="rl"><div class="rdot" style="background:${LOJA_COLORS[r.loja]||'var(--accent)'}"></div>Loja ${r.loja}</div>
+        <span class="sb s${r.status.replace(/ /g,'')}">${r.status}</span>
+      </div>
+      <div class="ri">
+        <span>📅 ${r.semana}</span><span>👤 ${r.responsavel}</span>
+        <span>📦 ${r.itens.length} itens</span><span>🕐 ${fmtDate(r.criado)}</span>
+        ${r.aprovN1?`<span>✅ N1: ${r.aprovN1}</span>`:''}
+        ${r.aprovN2?`<span>✅ N2: ${r.aprovN2}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function filtrar(f,el){filtroAtual=f;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderGestao();}
+function fmtDate(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+// ── MODAL REQUISIÇÃO ──────────────────────────────────────────────────────────
+function openReq(id){
+  const req=getReqs().find(r=>r.id===id);if(!req)return;
+  reqAtual=id;
+  document.getElementById('modal-req').classList.add('open');
+  document.getElementById('mreq-title').textContent=`Loja ${req.loja} — ${req.semana}`;
+  let body=`<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)">
+    <span>👤 <strong style="color:var(--text)">${req.responsavel}</strong></span>
+    <span>📅 ${req.semana}</span>
+    <span class="sb s${req.status.replace(/ /g,'')}">${req.status}</span>
+  </div>
+  <div class="tw"><table style="width:100%">
+    <thead><tr><th>Produto</th><th style="text-align:center">Saldo</th><th style="text-align:center">Solicitado</th><th style="text-align:center">Aprovado</th><th>Obs.</th></tr></thead><tbody>`;
+  for(const it of req.itens){
+    const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
+    body+=`<tr>
+      <td><div class="pname">${it.produto}</div><div style="font-size:11px;color:var(--muted)">${it.categoria}</div></td>
+      <td style="text-align:center">${it.saldo.toLocaleString('pt-BR')}</td>
+      <td style="text-align:center"><strong>${it.qty}</strong></td>
+      <td style="text-align:center"><input type="number" class="qi" style="width:70px" id="${pid}" value="${it.qtyAprov||''}" placeholder="—" min="0" max="${it.qty}"/></td>
+      <td style="font-size:12px;color:var(--muted)">${it.obs||'—'}</td>
+    </tr>`;
+  }
+  body+=`</tbody></table></div>`;
+  document.getElementById('mreq-body').innerHTML=body;
+
+  const isAdmin=currentUser.role==='admin';
+  let foot=`<button class="btn bg2" onclick="closeModal('modal-req')">Fechar</button>`;
+  if(isAdmin&&req.status==='Pendente'){
+    foot+=`<input type="text" class="qi" style="width:150px;font-size:13px;font-weight:400;text-align:left;padding:7px 10px" id="nm-n1" placeholder="Nome Aprovador N1"/>
+      <button class="btn bp" onclick="aprovar('AprovadoN1','nm-n1','aprovN1')">Aprovar N1</button>
+      <button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>`;
+  }else if(isAdmin&&req.status==='AprovadoN1'){
+    foot+=`<input type="text" class="qi" style="width:150px;font-size:13px;font-weight:400;text-align:left;padding:7px 10px" id="nm-n2" placeholder="Nome Aprovador N2"/>
+      <button class="btn bp" onclick="aprovar('AprovadoFinal','nm-n2','aprovN2')">Aprovação Final N2</button>
+      <button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>`;
+  }
+  document.getElementById('mreq-foot').innerHTML=foot;
+}
+
+function aprovar(status,inputId,campo){
+  const nome=document.getElementById(inputId)?.value.trim();
+  if(!nome){toast('Informe o nome do aprovador.','error');return;}
+  const reqs=getReqs();const req=reqs.find(r=>r.id===reqAtual);if(!req)return;
+  req.status=status;req[campo]=nome;
+  for(const it of req.itens){const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);if(el)it.qtyAprov=parseInt(el.value)||0;}
+  saveReqs(reqs);toast('Status atualizado! ✅','success');closeModal('modal-req');renderGestao();
+}
+
+function reprovar(){
+  const reqs=getReqs();const req=reqs.find(r=>r.id===reqAtual);if(!req)return;
+  req.status='Reprovado';saveReqs(reqs);toast('Requisição reprovada.','error');closeModal('modal-req');renderGestao();
+}
+
+// ── GESTÃO DE USUÁRIOS ────────────────────────────────────────────────────────
+function renderUsers(){
+  const users=getUsers();
+  const avatarColors={admin:'#F5B731',loja:'var(--accent)'};
+  document.getElementById('user-grid').innerHTML=users.map(u=>{
+    const isSelf=u.id===currentUser.id;
+    const av=u.nome?u.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase():(u.login.slice(0,2).toUpperCase());
+    return `<div class="user-card">
+      <div class="user-avatar" style="background:${u.role==='admin'?'rgba(245,183,49,.15)':'rgba(79,126,255,.15)'};color:${u.role==='admin'?'var(--gold)':'var(--accent)'}">${av}</div>
+      <div class="user-details">
+        <div class="user-login">${u.nome||u.login} <span style="font-weight:400;color:var(--muted);font-size:12px">@${u.login}</span></div>
+        <div class="user-role" style="margin-top:4px">
+          <span class="role-badge ${u.role==='admin'?'role-admin':'role-loja'}">${u.role==='admin'?'Administrador':'Loja '+u.loja}</span>
+          ${isSelf?'<span style="font-size:11px;color:var(--muted);margin-left:8px">você</span>':''}
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="btn bg2 bsm" onclick="openUserModal(${u.id})">Editar</button>
+        ${!isSelf?`<button class="btn bsm" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="confirmDelete(${u.id})">Excluir</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openUserModal(id){
+  editUserId=id;
+  const users=getUsers();
+  const u=id?users.find(x=>x.id===id):null;
+  document.getElementById('muser-title').textContent=id?'Editar Usuário':'Novo Usuário';
+  document.getElementById('muser-body').innerHTML=`
+    <div class="fl"><label>Nome completo</label><input type="text" id="eu-nome" value="${u?u.nome:''}" placeholder="Ex: João Silva"/></div>
+    <div class="fl"><label>Login (usuário)</label><input type="text" id="eu-login" value="${u?u.login:''}" placeholder="Ex: joao.silva"/></div>
+    <div class="fl"><label>Senha ${id?'(deixe em branco para manter)':''}</label><input type="password" id="eu-senha" value="" placeholder="Nova senha"/></div>
+    <div class="fl"><label>Perfil</label>
+      <select id="eu-role" onchange="toggleLojaField()">
+        <option value="loja" ${u&&u.role==='loja'?'selected':''}>Loja</option>
+        <option value="admin" ${u&&u.role==='admin'?'selected':''}>Administrador</option>
+      </select>
+    </div>
+    <div class="fl" id="fl-loja" style="${u&&u.role==='admin'?'display:none':''}">
+      <label>Loja</label>
+      <select id="eu-loja">
+        <option value="PKS" ${u&&u.loja==='PKS'?'selected':''}>PKS</option>
+        <option value="Iguatemi" ${u&&u.loja==='Iguatemi'?'selected':''}>Iguatemi</option>
+        <option value="Anália" ${u&&u.loja==='Anália'?'selected':''}>Anália</option>
+      </select>
+    </div>`;
+  document.getElementById('muser-foot').innerHTML=`
+    <button class="btn bg2" onclick="closeModal('modal-user')">Cancelar</button>
+    <button class="btn bp" onclick="saveUser()">Salvar</button>`;
+  document.getElementById('modal-user').classList.add('open');
+}
+
+function toggleLojaField(){
+  const role=document.getElementById('eu-role').value;
+  document.getElementById('fl-loja').style.display=role==='admin'?'none':'';
+}
+
+function saveUser(){
+  const nome=document.getElementById('eu-nome').value.trim();
+  const login=document.getElementById('eu-login').value.trim();
+  const senha=document.getElementById('eu-senha').value;
+  const role=document.getElementById('eu-role').value;
+  const loja=role==='loja'?document.getElementById('eu-loja').value:null;
+  if(!nome||!login){toast('Preencha nome e login.','error');return;}
+  const users=getUsers();
+  // check duplicate login
+  const dup=users.find(u=>u.login===login&&u.id!==editUserId);
+  if(dup){toast('Este login já está em uso.','error');return;}
+  if(editUserId){
+    const u=users.find(x=>x.id===editUserId);
+    if(!u)return;
+    u.nome=nome;u.login=login;u.role=role;u.loja=loja;
+    if(senha)u.senha=senha;
+    // update session if editing self
+    if(editUserId===currentUser.id){currentUser={...u};sessionStorage.setItem('currentUser',JSON.stringify(currentUser));document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;}
+  } else {
+    if(!senha){toast('Informe uma senha.','error');return;}
+    users.push({id:nextUserId(),nome,login,senha,role,loja});
+  }
+  saveUsers(users);closeModal('modal-user');renderUsers();toast('Usuário salvo! ✅','success');
+}
+
+function confirmDelete(id){
+  delUserId=id;
+  const u=getUsers().find(x=>x.id===id);
+  document.getElementById('del-msg').textContent=`Tem certeza que deseja excluir o usuário "${u?.nome||u?.login}"? Esta ação não pode ser desfeita.`;
+  document.getElementById('del-confirm-btn').onclick=()=>{
+    const users=getUsers().filter(x=>x.id!==delUserId);
+    saveUsers(users);closeModal('modal-del');renderUsers();toast('Usuário excluído.','error');
+  };
+  document.getElementById('modal-del').classList.add('open');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toast(msg,type='success'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>el.classList.remove('show'),3500);}
+
+init();
+</script>
+</body>
+</html>
