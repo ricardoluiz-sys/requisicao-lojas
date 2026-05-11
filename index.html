@@ -163,6 +163,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);transform:translateY(60px);opacity:0;transition:all .3s;z-index:300;}
 .toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--green);color:var(--green);}.toast.error{border-color:var(--red);color:var(--red);}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
+.rup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:4px;}
+.rup-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;transition:border-color .2s;}
+.rup-card:hover{border-color:var(--accent);}
+.rup-item{font-weight:500;font-size:13px;margin-bottom:8px;line-height:1.4;}
+.rup-linha{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.rup-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+.rup-label{color:var(--muted);}
+.rup-date{font-weight:600;color:var(--gold);font-size:13px;}
+.rup-vol{font-weight:600;color:var(--green);font-size:13px;}
+.rup-mix{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(79,126,255,.12);color:var(--accent);margin-bottom:8px;}
+@media(max-width:640px){.rup-grid{grid-template-columns:1fr;}}
 .divider{height:1px;background:var(--border);margin:20px 0;}
 
 /* ── TABLET ── */
@@ -318,6 +329,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="nb active" id="nb-nova" onclick="showSec('nova',this)">Nova Requisição</button>
       <button class="nb" id="nb-gestao" onclick="showSec('gestao',this)">Gestão</button>
       <button class="nb" id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
+      <button class="nb" id="nb-ruptura" onclick="showSec('ruptura',this)">Rupturas</button>
       <button class="nb" id="nb-fluxo" onclick="showSec('fluxo',this)">Fluxo & Prazos</button>
     </nav>
     <div class="user-info">
@@ -474,6 +486,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
   </div>
 </div>
+
+  <!-- ═ RUPTURAS ═ -->
+  <section id="sec-ruptura" class="sec">
+    <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div><h1>Consulta de Rupturas</h1><p>Itens em ruptura com previsão de chegada confirmada.</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="inp-busca-rup" placeholder="Buscar produto..."
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;"
+          oninput="filtrarRuptura(this.value)"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"/>
+        <button class="btn bg2 bsm" onclick="_rupturaCache=null;loadRuptura()">↻ Atualizar</button>
+      </div>
+    </div>
+    <div id="rup-resumo" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"></div>
+    <div id="rup-grid" class="rup-grid"></div>
+  </section>
+
+
 
 <!-- MODAL DETALHE REQUISIÇÃO -->
 <div class="mo" id="modal-req" onclick="if(event.target===this)closeModal('modal-req')">
@@ -1217,6 +1248,83 @@ function renderWeekPicker(){
 function selectWeek(label){
   document.getElementById('inp-semana').value=label;
   document.getElementById('week-picker').classList.remove('open');
+}
+
+// ── RUPTURAS ─────────────────────────────────────────────────────────────────
+let _rupturaCache=null;
+let _rupturaAll=[];
+
+async function loadRuptura(){
+  const grid=document.getElementById('rup-grid');
+  grid.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  document.getElementById('rup-resumo').innerHTML='';
+  try{
+    const r=await fetch(PROXY+'?tipo=ruptura');
+    const data=await r.json();
+    if(!Array.isArray(data)||data.length===0){
+      grid.innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum item em ruptura com previsão de entrega.</p></div>`;
+      return;
+    }
+    _rupturaAll=data;
+    renderRupturaCards(data);
+  }catch(e){
+    grid.innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar rupturas.</p></div>`;
+  }
+}
+
+function renderRupturaCards(items){
+  const grid=document.getElementById('rup-grid');
+  if(!items.length){
+    grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum item encontrado.</p></div>`;
+    renderRupturaResumo([]);
+    return;
+  }
+  // Agrupa por data de entrega
+  const porData={};
+  items.forEach(it=>{
+    if(!porData[it.proximaEntrega])porData[it.proximaEntrega]=0;
+    porData[it.proximaEntrega]++;
+  });
+  // Resumo
+  renderRupturaResumo(porData);
+  // Cards
+  grid.innerHTML=items.map(it=>`
+    <div class="rup-card">
+      <div class="rup-mix">${it.mix||'—'}</div>
+      <div class="rup-item">${it.item}</div>
+      <div class="rup-linha">${it.linha}</div>
+      <div class="rup-row" style="margin-bottom:6px">
+        <span class="rup-label">Próxima Entrega</span>
+        <span class="rup-date">📅 ${it.proximaEntrega}</span>
+      </div>
+      <div class="rup-row">
+        <span class="rup-label">Volume esperado</span>
+        <span class="rup-vol">📦 ${it.volume||'—'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderRupturaResumo(porData){
+  const el=document.getElementById('rup-resumo');
+  const total=_rupturaAll.length;
+  const datas=Object.keys(porData).sort();
+  el.innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;">
+      <span style="color:var(--muted)">Total em ruptura c/ previsão: </span>
+      <strong style="color:var(--red)">${total} itens</strong>
+    </div>
+    ${datas.map(d=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;">
+      <span style="color:var(--muted)">📅 ${d}: </span>
+      <strong style="color:var(--gold)">${porData[d]} iten${porData[d]>1?'s':''}</strong>
+    </div>`).join('')}`;
+}
+
+function filtrarRuptura(termo){
+  if(!_rupturaAll.length)return;
+  const t=termo.trim().toLowerCase();
+  const fil=t?_rupturaAll.filter(it=>(it.item+it.linha+it.mix).toLowerCase().includes(t)):_rupturaAll;
+  renderRupturaCards(fil);
 }
 
 init();
