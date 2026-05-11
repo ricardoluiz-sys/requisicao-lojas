@@ -158,11 +158,129 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
 .divider{height:1px;background:var(--border);margin:20px 0;}
 
+/* ── TABLET ── */
+@media(max-width:900px){
+  .lojas{grid-template-columns:1fr 1fr;}
+  .igrid{grid-template-columns:1fr;}
+  .igrid[style*="1fr 1fr 1fr"]{grid-template-columns:1fr!important;}
+  .main{padding:20px 16px;}
+}
+
+/* ── MOBILE ── */
 @media(max-width:640px){
-  .lojas{grid-template-columns:1fr;}.fr{flex-direction:column;}
-  .fsteps{flex-wrap:wrap;gap:10px;}.fsteps::before{display:none;}
-  .igrid{grid-template-columns:1fr;}.topbar{padding:12px 16px;flex-wrap:wrap;gap:8px;}
-  .nav{order:3;width:100%;}.nb{flex:1;text-align:center;}
+  /* Topbar */
+  .topbar{padding:10px 14px;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:100;}
+  .brand-name{font-size:13px;}.brand-sub{display:none;}
+  .logo{width:28px;height:28px;font-size:14px;}
+  .nav{order:3;width:100%;display:flex;overflow-x:auto;gap:2px;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+  .nav::-webkit-scrollbar{display:none;}
+  .nb{flex:1;text-align:center;padding:6px 8px;font-size:12px;white-space:nowrap;}
+  .user-info{gap:6px;}
+  .user-chip{padding:4px 8px;font-size:11px;}
+  .logout-btn{padding:4px 8px;font-size:11px;}
+
+  /* Login */
+  .login-box{padding:28px 20px;border-radius:12px;}
+  .login-title{font-size:18px;}
+
+  /* Layout */
+  .main{padding:14px 12px;}
+  .ph h1{font-size:20px;}.ph p{font-size:12px;}
+  .ph{margin-bottom:16px;}
+
+  /* Lojas */
+  .lojas{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+  .lc{padding:14px;}
+  .lname{font-size:13px;}.lmeta{font-size:11px;}
+
+  /* Formulário */
+  .fr{flex-direction:column;gap:10px;margin-bottom:14px;}
+  .fg input,.fg select{padding:10px 12px;font-size:14px;} /* maior para toque */
+
+  /* Barra de estoque */
+  .ebar{padding:9px 12px;font-size:12px;}
+  #etime{display:none;}
+
+  /* Busca */
+  #inp-busca{font-size:14px;padding:10px 12px 10px 34px;}
+
+  /* Tabela — vira cards no mobile */
+  .tw{border-radius:10px;overflow:hidden;}
+  .tw table{display:block;}
+  .tw thead{display:none;}
+  .tw tbody{display:block;}
+  .tw tbody tr{display:flex;flex-direction:column;padding:12px 14px;gap:6px;border-bottom:1px solid var(--border);}
+  .tw tbody tr.crow{flex-direction:row;padding:6px 14px;background:rgba(255,255,255,.03);}
+  .tw tbody tr.crow td{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+  .tw td{padding:0;border:none;font-size:13px;}
+  .tw td:nth-child(2){font-size:11px;color:var(--muted);}
+  .tw td:nth-child(3){display:flex;align-items:center;gap:8px;}
+  .tw td:nth-child(3)::before{content:'Saldo:';font-size:11px;color:var(--muted);}
+  .tw td:nth-child(4){display:flex;align-items:center;gap:8px;}
+  .tw td:nth-child(4)::before{content:'Qtd.:';font-size:11px;color:var(--muted);}
+  .tw td:nth-child(5)::before{content:'Obs.:';font-size:11px;color:var(--muted);display:block;margin-bottom:2px;}
+  .qi{width:100px;padding:8px 10px;font-size:15px;}
+  .oi{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);background:var(--surface);}
+
+  /* Action bar */
+  .abar{flex-direction:column;gap:10px;align-items:stretch;padding:12px 14px;}
+  .abar .sum{text-align:center;}
+  .abar div:last-child{display:flex;gap:8px;}
+  .abar .btn{flex:1;}
+
+  /* Chips filtro */
+  .chips{gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{white-space:nowrap;padding:6px 12px;font-size:11px;}
+
+  /* Req cards */
+  .rc{padding:14px;}
+  .rl{font-size:13px;}.ri{gap:8px;font-size:11px;}
+  .sb{font-size:10px;padding:3px 8px;}
+
+  /* User cards */
+  .user-card{flex-wrap:wrap;gap:10px;padding:12px 14px;}
+  .user-actions{width:100%;display:flex;gap:8px;}
+  .user-actions .btn{flex:1;}
+
+  /* Modal */
+  .md{width:100%;max-width:100%;max-height:92vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;}
+  .md-sm{max-width:100%;}
+  .mo{align-items:flex-end;}
+  .mh{padding:14px 16px;}
+  .mb{padding:14px 16px;}
+  .mf{padding:12px 16px;flex-wrap:wrap;}
+  .mf .btn{flex:1;}
+
+  /* Modal tabela */
+  .mb .tw table{display:block;}
+  .mb .tw thead{display:none;}
+  .mb .tw tbody{display:block;}
+  .mb .tw tbody tr{display:flex;flex-direction:column;padding:10px 12px;gap:4px;}
+  .mb .tw td{padding:0;border:none;font-size:12px;}
+
+  /* Fluxo */
+  .fsteps{flex-wrap:wrap;gap:8px;justify-content:center;}
+  .fsteps::before{display:none;}
+  .fstep{width:calc(33% - 8px);min-width:80px;}
+  .snum{width:34px;height:34px;font-size:12px;}
+  .slbl{font-size:10px;}.sday{font-size:9px;}
+  .igrid{grid-template-columns:1fr;}
+  .igrid[style*="1fr 1fr 1fr"]{grid-template-columns:1fr!important;}
+
+  /* Week picker */
+  .week-picker{width:calc(100vw - 32px);left:0;}
+
+  /* Botões gerais maiores para toque */
+  .btn{min-height:40px;}
+  .bsm{min-height:34px;}
+}
+
+/* ── MOBILE PEQUENO (< 380px) ── */
+@media(max-width:380px){
+  .nb{font-size:11px;padding:5px 6px;}
+  .ph h1{font-size:18px;}
+  .fstep{width:calc(50% - 8px);}
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -304,7 +422,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="fsteps">
         <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>pela Loja</div><div class="sday">SEG · TER até 18h</div></div>
         <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação<br>Administrador</div><div class="sday">QUA até 18h</div></div>
-        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday">QUI</div></div>
+        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday"></div></div>
         <div class="fstep"><div class="snum">4</div><div class="slbl">Transporte<br>&amp; Entrega</div><div class="sday">Conforme prazo</div></div>
         <div class="fstep"><div class="snum">5</div><div class="slbl">Recebimento<br>na Loja</div><div class="sday">Ver prazos abaixo</div></div>
       </div>
@@ -341,7 +459,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="ii"><strong style="color:var(--accent)">Administrador</strong><br>Responsável único pela revisão e aprovação de todas as requisições das 3 lojas. Após aprovação, o arquivo é exportado e enviado ao depósito para separação.</div>
           <div class="ii" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
             <strong style="color:var(--muted)">Ciclo semanal</strong><br>
-            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · QUI → separação · entrega conforme prazo por loja</span>
+            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · Entrega conforme prazo por loja</span>
           </div>
         </div>
       </div>
