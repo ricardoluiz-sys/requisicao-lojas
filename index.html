@@ -118,6 +118,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .wp-week-num{font-size:11px;color:var(--muted);width:24px;flex-shrink:0;}
 .wp-week.sel .wp-week-num{color:rgba(255,255,255,.7);}
 .wp-week-range{font-size:13px;}
+.wp-week.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.wp-week.disabled .wp-week-range::after{content:' — prazo insuficiente';font-size:10px;color:var(--red);margin-left:6px;}
 
 /* ── USER MANAGEMENT ── */
 .user-grid{display:grid;gap:12px;}
@@ -403,7 +405,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="chips">
         <button class="chip active" onclick="filtrar('todos',this)">Todos</button>
         <button class="chip" onclick="filtrar('Pendente',this)">Pendente</button>
-          <button class="chip" onclick="filtrar('AprovadoFinal',this)">Aprovado Final</button>
+          <button class="chip" onclick="filtrar('Aprovado',this)">Aprovado</button>
         <button class="chip" onclick="filtrar('Reprovado',this)">Reprovado</button>
         <div style="flex:1"></div>
         <button class="btn bg2 bsm" onclick="renderGestao()">↻ Atualizar</button>
@@ -738,7 +740,7 @@ async function loadEstoque(){
         saldo=parseSaldo(row[colBruto]);
         fonteLabel='Itapeva Bruto';
       }
-      if(saldo<=0)continue;
+      if(saldo<50)continue; // oculta saldo < 50
       list.push({item,categoria:cat,linha,saldo,fonteLabel});
     }
     if(!list.length)throw new Error('Nenhum produto encontrado');
@@ -1172,15 +1174,40 @@ function getWeeksOfMonth(year,month){
 
 function fmtWpDate(d){return `${String(d.getDate()).padStart(2,'0')} ${MESES_ABREV[d.getMonth()]}`;}
 
+// Prazo mínimo em dias úteis por loja
+const PRAZOS_LOJA={PKS:15,Iguatemi:20,'Anália':10};
+
+function diasUteisAte(dataAlvo){
+  // Conta dias úteis entre hoje e dataAlvo
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const alvo=new Date(dataAlvo);alvo.setHours(0,0,0,0);
+  if(alvo<=hoje)return 0;
+  let count=0,d=new Date(hoje);
+  while(d<alvo){
+    d.setDate(d.getDate()+1);
+    const dow=d.getDay();
+    if(dow!==0&&dow!==6)count++;
+  }
+  return count;
+}
+
 function renderWeekPicker(){
   const yr=wpDate.getFullYear(),mo=wpDate.getMonth();
   document.getElementById('wp-month-label').textContent=`${MESES[mo]} ${yr}`;
   const weeks=getWeeksOfMonth(yr,mo);
   const sel=document.getElementById('inp-semana').value;
+  const prazoMin=lojaAtual?PRAZOS_LOJA[lojaAtual]||0:0;
   document.getElementById('wp-weeks').innerHTML=weeks.map((w,i)=>{
     const label=`${fmtWpDate(w.start)} – ${fmtWpDate(w.end)} ${w.end.getFullYear()}`;
     const isSel=sel===label;
-    return `<div class="wp-week${isSel?' sel':''}" onclick="selectWeek('${label}')">
+    // Bloqueia se o início da semana não tem dias úteis suficientes
+    const diasUteis=diasUteisAte(w.start);
+    const bloqueada=prazoMin>0&&diasUteis<prazoMin;
+    const cls='wp-week'+(isSel?' sel':'')+(bloqueada?' disabled':'');
+    const onclick=bloqueada?'':` onclick="selectWeek('${label}')"`;
+    const dica=bloqueada?` title="Mínimo ${prazoMin} dias úteis para loja ${lojaAtual} (faltam ${diasUteis})"`:
+                         ` title="${diasUteis} dias úteis até o início da semana"`;
+    return `<div class="${cls}"${onclick}${dica}>
       <span class="wp-week-num">S${i+1}</span>
       <span class="wp-week-range">${label}</span>
     </div>`;
