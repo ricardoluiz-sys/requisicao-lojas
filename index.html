@@ -304,7 +304,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="fsteps">
         <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>pela Loja</div><div class="sday">SEG · TER até 18h</div></div>
         <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação<br>Administrador</div><div class="sday">QUA até 18h</div></div>
-        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>na Fábrica</div><div class="sday"></div></div>
+        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday">QUI</div></div>
         <div class="fstep"><div class="snum">4</div><div class="slbl">Transporte<br>&amp; Entrega</div><div class="sday">Conforme prazo</div></div>
         <div class="fstep"><div class="snum">5</div><div class="slbl">Recebimento<br>na Loja</div><div class="sday">Ver prazos abaixo</div></div>
       </div>
@@ -332,6 +332,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="icard-t">Regras importantes</div>
           <div class="ii">⏰ Requisições enviadas fora do prazo entram no ciclo seguinte.</div>
           <div class="ii">🚫 Não é possível solicitar mais do que o saldo disponível.</div>
+          <div class="ii">📦 A separação no depósito só inicia após a aprovação do administrador.</div>
           <div class="ii">📋 Itens descontinuados ou sem saldo não aparecem na listagem.</div>
           <div class="ii">📦 Produtos com lote mínimo devem ser solicitados em múltiplos do lote.</div>
         </div>
@@ -340,7 +341,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="ii"><strong style="color:var(--accent)">Administrador</strong><br>Responsável único pela revisão e aprovação de todas as requisições das 3 lojas. Após aprovação, o arquivo é exportado e enviado ao depósito para separação.</div>
           <div class="ii" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
             <strong style="color:var(--muted)">Ciclo semanal</strong><br>
-            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · entrega conforme prazo por loja</span>
+            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · QUI → separação · entrega conforme prazo por loja</span>
           </div>
         </div>
       </div>
@@ -411,7 +412,7 @@ function getLote(nomeProduto){
 }
 
 async function loadLotes(){
-  const url=`https://docs.google.com/spreadsheets/d/${LOTES_SHEET_ID}/export?format=csv&gid=${LOTES_GID}`;
+  const url=`https://docs.google.com/spreadsheets/d/${LOTES_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${LOTES_GID}`;
   try{
     const r=await fetch(url);
     if(!r.ok)return; // usa fallback embutido
@@ -536,7 +537,7 @@ function selectLoja(nome,el){
 // ── ESTOQUE ───────────────────────────────────────────────────────────────────
 async function loadEstoque(){
   setEst('loading','Carregando saldo Itapeva [Total]...');
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
   try{
     const r=await fetch(url);
     if(!r.ok)throw new Error('HTTP '+r.status);
