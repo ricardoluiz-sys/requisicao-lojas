@@ -602,13 +602,30 @@ const DEFAULT_USERS=[
 // ── STORAGE ───────────────────────────────────────────────────────────────────
 const PROXY='https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec';
 
-// Usuários — mantém em localStorage (só admin gerencia, não precisa sincronizar)
-function getUsers(){
-  try{const u=JSON.parse(localStorage.getItem('usuarios')||'null');return u||DEFAULT_USERS;}
-  catch(e){return DEFAULT_USERS;}
+// Usuários — sincronizados via Apps Script
+let _usersCache=null;
+
+async function getUsers(){
+  if(_usersCache)return _usersCache;
+  try{
+    const r=await fetch(PROXY+'?tipo=usuarios');
+    const data=await r.json();
+    _usersCache=Array.isArray(data)&&data.length?data:DEFAULT_USERS;
+    return _usersCache;
+  }catch(e){return DEFAULT_USERS;}
 }
-function saveUsers(u){localStorage.setItem('usuarios',JSON.stringify(u));}
-function nextUserId(){const u=getUsers();return u.length?Math.max(...u.map(x=>x.id))+1:1;}
+
+async function saveUserRemote(u){
+  _usersCache=null;
+  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'salvarUser',...u})});
+  return await r.json();
+}
+
+async function deleteUserRemote(id){
+  _usersCache=null;
+  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'deletarUser',id})});
+  return await r.json();
+}
 
 // Cache local de requisições (evita re-fetch desnecessário)
 let _reqsCache=null;
@@ -658,11 +675,14 @@ function init(){
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
-function doLogin(){
+async function doLogin(){
+  const btn=document.querySelector('.login-btn');
+  btn.textContent='Entrando...';btn.disabled=true;
   const login=document.getElementById('inp-user').value.trim();
   const senha=document.getElementById('inp-pass').value;
-  const users=getUsers();
+  const users=await getUsers();
   const user=users.find(u=>u.login===login&&u.senha===senha);
+  btn.textContent='Entrar';btn.disabled=false;
   if(!user){document.getElementById('login-err').classList.add('show');return;}
   document.getElementById('login-err').classList.remove('show');
   currentUser=user;
@@ -1068,8 +1088,8 @@ async function exportarExcel(id){
 
 
 // ── GESTÃO DE USUÁRIOS ────────────────────────────────────────────────────────
-function renderUsers(){
-  const users=getUsers();
+async function renderUsers(){
+  const users=await getUsers();
   document.getElementById('user-grid').innerHTML=users.map(u=>{
     const isSelf=u.id===currentUser.id;
     const av=u.nome?u.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase():u.login.slice(0,2).toUpperCase();
@@ -1090,9 +1110,9 @@ function renderUsers(){
   }).join('');
 }
 
-function openUserModal(id){
+async function openUserModal(id){
   editUserId=id;
-  const users=getUsers();
+  const users=await getUsers();
   const u=id?users.find(x=>x.id===id):null;
   document.getElementById('muser-title').textContent=id?'Editar Usuário':'Novo Usuário';
   document.getElementById('muser-body').innerHTML=`
@@ -1124,35 +1144,48 @@ function toggleLojaField(){
   document.getElementById('fl-loja').style.display=role==='admin'?'none':'';
 }
 
-function saveUser(){
+async function saveUser(){
   const nome=document.getElementById('eu-nome').value.trim();
   const login=document.getElementById('eu-login').value.trim();
   const senha=document.getElementById('eu-senha').value;
   const role=document.getElementById('eu-role').value;
-  const loja=role==='loja'?document.getElementById('eu-loja').value:null;
+  const loja=role==='loja'?document.getElementById('eu-loja').value:'';
   if(!nome||!login){toast('Preencha nome e login.','error');return;}
-  const users=getUsers();
+  const users=await getUsers();
   const dup=users.find(u=>u.login===login&&u.id!==editUserId);
   if(dup){toast('Este login já está em uso.','error');return;}
-  if(editUserId){
-    const u=users.find(x=>x.id===editUserId);if(!u)return;
-    u.nome=nome;u.login=login;u.role=role;u.loja=loja;
-    if(senha)u.senha=senha;
-    if(editUserId===currentUser.id){currentUser={...u};sessionStorage.setItem('currentUser',JSON.stringify(currentUser));document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;}
-  } else {
-    if(!senha){toast('Informe uma senha.','error');return;}
-    users.push({id:nextUserId(),nome,login,senha,role,loja});
+  if(!editUserId&&!senha){toast('Informe uma senha.','error');return;}
+  const payload={nome,login,role,loja};
+  if(editUserId)payload.id=editUserId;
+  // Senha: se não informada na edição, mantém a atual
+  if(senha){payload.senha=senha;}
+  else if(editUserId){
+    const u=users.find(x=>x.id===editUserId);
+    payload.senha=u?u.senha:'';
   }
-  saveUsers(users);closeModal('modal-user');renderUsers();toast('Usuário salvo! ✅','success');
+  const d=await saveUserRemote(payload);
+  if(d.ok){
+    // Atualiza sessão se editou o próprio usuário
+    if(editUserId&&editUserId===currentUser.id){
+      currentUser={...currentUser,...payload};
+      sessionStorage.setItem('currentUser',JSON.stringify(currentUser));
+      document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;
+    }
+    closeModal('modal-user');renderUsers();toast('Usuário salvo! ✅','success');
+  } else {
+    toast('Erro ao salvar: '+(d.erro||''),'error');
+  }
 }
 
-function confirmDelete(id){
+async function confirmDelete(id){
   delUserId=id;
-  const u=getUsers().find(x=>x.id===id);
-  document.getElementById('del-msg').textContent='Tem certeza que deseja excluir o usuário "'+( u?.nome||u?.login)+'"? Esta ação não pode ser desfeita.';
-  document.getElementById('del-confirm-btn').onclick=function(){
-    const users=getUsers().filter(x=>x.id!==delUserId);
-    saveUsers(users);closeModal('modal-del');renderUsers();toast('Usuário excluído.','error');
+  const users=await getUsers();
+  const u=users.find(x=>x.id===id);
+  document.getElementById('del-msg').textContent='Tem certeza que deseja excluir o usuário "'+(u?u.nome||u.login:'?')+'"? Esta ação não pode ser desfeita.';
+  document.getElementById('del-confirm-btn').onclick=async function(){
+    const d=await deleteUserRemote(delUserId);
+    if(d.ok){closeModal('modal-del');renderUsers();toast('Usuário excluído.','error');}
+    else toast('Erro ao excluir.','error');
   };
   document.getElementById('modal-del').classList.add('open');
 }
