@@ -153,6 +153,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .ii{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
 
 /* ── TOAST ── */
+.fab{position:fixed;bottom:24px;right:24px;z-index:150;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:13px 22px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(79,126,255,.4);transition:all .2s;display:none;align-items:center;gap:8px;}
+.fab:hover{background:#3D6CE0;transform:translateY(-2px);box-shadow:0 6px 24px rgba(79,126,255,.5);}
+.fab:disabled{background:#2A3050;color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none;}
+.fab.visible{display:flex;}
+@media(max-width:640px){.fab{bottom:16px;right:16px;padding:12px 18px;font-size:13px;}}
 .toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);transform:translateY(60px);opacity:0;transition:all .3s;z-index:300;}
 .toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--green);color:var(--green);}.toast.error{border-color:var(--red);color:var(--red);}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
@@ -422,7 +427,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="fsteps">
         <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>pela Loja</div><div class="sday">SEG · TER até 18h</div></div>
         <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação<br>Administrador</div><div class="sday">QUA até 18h</div></div>
-        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday"></div></div>
+        <div class="fstep"><div class="snum">3</div><div class="slbl">Separação<br>no Depósito</div><div class="sday">QUI</div></div>
         <div class="fstep"><div class="snum">4</div><div class="slbl">Transporte<br>&amp; Entrega</div><div class="sday">Conforme prazo</div></div>
         <div class="fstep"><div class="snum">5</div><div class="slbl">Recebimento<br>na Loja</div><div class="sday">Ver prazos abaixo</div></div>
       </div>
@@ -459,7 +464,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="ii"><strong style="color:var(--accent)">Administrador</strong><br>Responsável único pela revisão e aprovação de todas as requisições das 3 lojas. Após aprovação, o arquivo é exportado e enviado ao depósito para separação.</div>
           <div class="ii" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
             <strong style="color:var(--muted)">Ciclo semanal</strong><br>
-            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · Entrega conforme prazo por loja</span>
+            <span style="font-size:12px">SEG/TER → preenchimento · QUA → aprovação · QUI → separação · entrega conforme prazo por loja</span>
           </div>
         </div>
       </div>
@@ -499,6 +504,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 
 <div class="toast" id="toast"></div>
+<button class="fab" id="btn-env-float" onclick="enviar()">✓ Enviar Requisição</button>
 
 <script>
 const SHEET_ID='1FdmE1CvAusXk3DwjfhyKZ8acF1xLzczlzhaPH3-ack8';
@@ -553,15 +559,48 @@ const DEFAULT_USERS=[
 ];
 
 // ── STORAGE ───────────────────────────────────────────────────────────────────
+const PROXY='https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec';
+
+// Usuários — mantém em localStorage (só admin gerencia, não precisa sincronizar)
 function getUsers(){
   try{const u=JSON.parse(localStorage.getItem('usuarios')||'null');return u||DEFAULT_USERS;}
   catch(e){return DEFAULT_USERS;}
 }
 function saveUsers(u){localStorage.setItem('usuarios',JSON.stringify(u));}
-function getReqs(){try{return JSON.parse(localStorage.getItem('requisicoes')||'[]');}catch(e){return[];}}
-function saveReqs(r){localStorage.setItem('requisicoes',JSON.stringify(r));}
-function nextReqId(){const r=getReqs();return r.length?Math.max(...r.map(x=>x.id))+1:1;}
 function nextUserId(){const u=getUsers();return u.length?Math.max(...u.map(x=>x.id))+1:1;}
+
+// Cache local de requisições (evita re-fetch desnecessário)
+let _reqsCache=null;
+
+async function getReqs(){
+  if(_reqsCache!==null)return _reqsCache;
+  try{
+    const r=await fetch(PROXY+'?tipo=requisicoes');
+    const data=await r.json();
+    _reqsCache=Array.isArray(data)?data:[];
+    return _reqsCache;
+  }catch(e){return[];}
+}
+
+async function saveReq(req){
+  // Nova requisição
+  const r=await fetch(PROXY,{
+    method:'POST',
+    body:JSON.stringify({acao:'salvar',...req})
+  });
+  const d=await r.json();
+  _reqsCache=null; // invalida cache
+  return d;
+}
+
+async function updateReq(payload){
+  const r=await fetch(PROXY,{
+    method:'POST',
+    body:JSON.stringify({acao:'atualizar',...payload})
+  });
+  _reqsCache=null;
+  return await r.json();
+}
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let currentUser=null,lojaAtual=null,produtos=[],filtroAtual='todos',reqAtual=null,editUserId=null,delUserId=null;
@@ -829,11 +868,14 @@ function updateCnt(){
   let c=0;
   document.querySelectorAll('.qi').forEach(i=>{if((parseInt(i.value)||0)>0&&!i.classList.contains('over'))c++;});
   document.getElementById('cnt').textContent=c;
-  document.getElementById('btn-env').disabled=c===0||!lojaAtual;
+  const disabled=c===0||!lojaAtual;
+  document.getElementById('btn-env').disabled=disabled;
+  const fab=document.getElementById('btn-env-float');
+  if(fab){fab.disabled=disabled;fab.classList.toggle('visible',!disabled);}
 }
 
 // ── ENVIAR ────────────────────────────────────────────────────────────────────
-function enviar(){
+async function enviar(){
   const semana=document.getElementById('inp-semana').value.trim();
   const resp=document.getElementById('inp-resp').value.trim();
   if(!semana||!resp){toast('Preencha semana e responsável.','error');return;}
@@ -846,11 +888,18 @@ function enviar(){
       itens.push({produto:inp.dataset.prod,categoria:inp.dataset.cat,saldo:parseInt(inp.dataset.saldo),qty:v,obs:obs?obs.value.trim():''});
     }
   });
-  const reqs=getReqs();
-  reqs.unshift({id:nextReqId(),semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,status:'Pendente',itens,criado:new Date().toISOString(),aprovador:''});
-  saveReqs(reqs);
-  toast('Requisição enviada! 🎉','success');
-  limpar();
+  if(!itens.length){toast('Adicione ao menos um item.','error');return;}
+  const btn=document.getElementById('btn-env');
+  const btnF=document.getElementById('btn-env-float');
+  btn.disabled=true;btn.textContent='Enviando...';
+  if(btnF){btnF.disabled=true;btnF.textContent='⏳';}
+  try{
+    const d=await saveReq({semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,itens});
+    if(d.ok){toast('Requisição enviada! 🎉','success');limpar();}
+    else toast('Erro ao enviar: '+(d.erro||''),'error');
+  }catch(e){toast('Erro de conexão.','error');}
+  btn.disabled=false;btn.textContent='Enviar Requisição';
+  if(btnF){btnF.disabled=false;btnF.textContent='✓ Enviar';}
 }
 
 function limpar(){
@@ -858,16 +907,18 @@ function limpar(){
   document.querySelectorAll('.oi').forEach(i=>i.value='');
   const busca=document.getElementById('inp-busca');
   if(busca){busca.value='';filtrarTabela('');}
+  const fab=document.getElementById('btn-env-float');if(fab)fab.classList.remove('visible');
   updateCnt();
 }
 
 // ── GESTÃO ────────────────────────────────────────────────────────────────────
-function renderGestao(){
-  let reqs=getReqs();
-  // loja user só vê suas próprias
+async function renderGestao(){
+  const el2=document.getElementById('rlist');
+  el2.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  let reqs=await getReqs();
   if(currentUser.role==='loja')reqs=reqs.filter(r=>r.loja===currentUser.loja);
   const fil=filtroAtual==='todos'?reqs:reqs.filter(r=>r.status===filtroAtual);
-  const el=document.getElementById('rlist');
+  const el=el2;
   if(!fil.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><p>Nenhuma requisição encontrada.</p></div>`;return;}
   el.innerHTML=fil.map(r=>`
     <div class="rc" onclick="openReq(${r.id})">
@@ -883,12 +934,13 @@ function renderGestao(){
     </div>`).join('');
 }
 
-function filtrar(f,el){filtroAtual=f;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderGestao();}
+function filtrar(f,el){filtroAtual=f;_reqsCache=null;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderGestao();}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
 // ── MODAL REQUISIÇÃO ──────────────────────────────────────────────────────────
-function openReq(id){
-  const req=getReqs().find(r=>r.id===id);if(!req)return;
+async function openReq(id){
+  const reqs=await getReqs();
+  const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
   reqAtual=id;
   document.getElementById('modal-req').classList.add('open');
   document.getElementById('mreq-title').textContent=`Loja ${req.loja} — ${req.semana}`;
@@ -924,22 +976,29 @@ function openReq(id){
   document.getElementById('mreq-foot').innerHTML=foot;
 }
 
-function aprovar(){
-  const reqs=getReqs();const req=reqs.find(r=>r.id===reqAtual);if(!req)return;
-  req.status='Aprovado';req.aprovador=currentUser.nome||currentUser.login;
-  req.aprovadoEm=new Date().toISOString();
-  for(const it of req.itens){const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);if(el)it.qtyAprov=parseInt(el.value)||it.qty;}
-  saveReqs(reqs);toast('Requisição aprovada! ✅','success');closeModal('modal-req');renderGestao();
+async function aprovar(){
+  const reqs=await getReqs();
+  const req=reqs.find(r=>String(r.id)===String(reqAtual));if(!req)return;
+  const itens=req.itens.map(it=>{
+    const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
+    const el=document.getElementById(pid);
+    return {...it,qtyAprov:el?parseInt(el.value)||it.qty:it.qty};
+  });
+  const d=await updateReq({id:reqAtual,status:'Aprovado',aprovador:currentUser.nome||currentUser.login,aprovadoEm:new Date().toISOString(),itens});
+  if(d.ok){toast('Requisição aprovada! ✅','success');closeModal('modal-req');renderGestao();}
+  else toast('Erro ao aprovar.','error');
 }
 
-function reprovar(){
-  const reqs=getReqs();const req=reqs.find(r=>r.id===reqAtual);if(!req)return;
-  req.status='Reprovado';saveReqs(reqs);toast('Requisição reprovada.','error');closeModal('modal-req');renderGestao();
+async function reprovar(){
+  const d=await updateReq({id:reqAtual,status:'Reprovado'});
+  if(d.ok){toast('Requisição reprovada.','error');closeModal('modal-req');renderGestao();}
+  else toast('Erro ao reprovar.','error');
 }
 
 // ── EXPORTAR EXCEL ────────────────────────────────────────────────────────────
-function exportarExcel(id){
-  const req=getReqs().find(r=>r.id===id);if(!req)return;
+async function exportarExcel(id){
+  const reqs=await getReqs();
+  const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
 
   // Dados
   const rows=[['Item','Quantidade','Loja']];
