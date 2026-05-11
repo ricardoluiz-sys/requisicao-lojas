@@ -177,6 +177,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .ped-pendente{background:rgba(245,183,49,.12);color:var(--gold);}
 .ped-semestoque{background:rgba(255,92,92,.12);color:var(--red);}
 .ped-outro{background:rgba(107,114,128,.12);color:var(--muted);}
+.ped-aguard{background:rgba(79,126,255,.12);color:var(--accent);}
 .ped-loja-pks{color:var(--pks);font-weight:600;}
 .ped-loja-igu{color:var(--igu);font-weight:600;}
 .ped-loja-ana{color:var(--ana);font-weight:600;}
@@ -541,9 +542,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <select id="sel-status-ped" onchange="filtrarPedidos()"
         style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
         <option value="">Todos os status</option>
-        <option value="CONCLUÍDO">Concluído</option>
-        <option value="SEM ESTOQUE">Sem Estoque</option>
+        <option value="CONCLU">Concluído</option>
         <option value="PEND">Pendente</option>
+        <option value="AGUARDANDO NF">Aguardando NF</option>
+        <option value="AGUARDANDO">Aguardando</option>
+        <option value="AG. COLETA">Ag. Coleta</option>
+        <option value="SEM ESTOQUE">Sem Estoque</option>
+        <option value="SEM SALDO">Sem Saldo no Webgex</option>
+        <option value="DUPLICADO">Duplicado</option>
+        <option value="CANCELADO">Cancelado</option>
       </select>
     </div>
     <div id="ped-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
@@ -1378,9 +1385,14 @@ function fmtPedData(val){
 
 function statusClass(s){
   const u=(s||'').toUpperCase();
-  if(u.includes('CONCLU'))return 'ped-concluido';
-  if(u.includes('SEM EST'))return 'ped-semestoque';
-  if(u.includes('PEND'))return 'ped-pendente'; // cobre PENDENTE e PENDENTES
+  if(u.includes('CONCLU'))   return 'ped-concluido';
+  if(u.includes('SEM EST'))  return 'ped-semestoque';
+  if(u.includes('SEM SALDO'))return 'ped-semestoque';
+  if(u.includes('CANCEL'))   return 'ped-semestoque';
+  if(u.includes('DUPLIC'))   return 'ped-semestoque';
+  if(u.includes('AGUARD'))   return 'ped-aguard';
+  if(u.includes('AG. COL'))  return 'ped-aguard';
+  if(u.includes('PEND'))     return 'ped-pendente';
   return 'ped-outro';
 }
 
