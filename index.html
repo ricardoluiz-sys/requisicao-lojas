@@ -1272,52 +1272,72 @@ async function loadRuptura(){
   }
 }
 
+// Formata data: "08/05/2026", timestamp JS, "Itapeva - 09/02" → sempre DD/MM/AAAA ou texto curto
+function fmtRupData(val){
+  if(!val)return'—';
+  // Já é uma date object ou timestamp numérico do Sheets
+  const ts=Date.parse(val);
+  if(!isNaN(ts)&&String(val).length>6){
+    const d=new Date(ts);
+    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  }
+  // Texto como "Itapeva - 09/02" — retorna como está
+  return String(val).trim();
+}
+
 function renderRupturaCards(items){
   const grid=document.getElementById('rup-grid');
   if(!items.length){
     grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum item encontrado.</p></div>`;
-    renderRupturaResumo([]);
+    renderRupturaResumo({});
     return;
   }
-  // Agrupa por data de entrega
+  // Agrupa por data formatada
   const porData={};
   items.forEach(it=>{
-    if(!porData[it.proximaEntrega])porData[it.proximaEntrega]=0;
-    porData[it.proximaEntrega]++;
+    const df=fmtRupData(it.proximaEntrega);
+    if(!porData[df])porData[df]=0;
+    porData[df]++;
   });
-  // Resumo
-  renderRupturaResumo(porData);
-  // Cards
+  renderRupturaResumo(porData,items.length);
   grid.innerHTML=items.map(it=>`
     <div class="rup-card">
-      <div class="rup-mix">${it.mix||'—'}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span class="rup-mix">${it.mix||'—'}</span>
+        <span style="font-size:11px;color:var(--muted)">${it.linha}</span>
+      </div>
       <div class="rup-item">${it.item}</div>
-      <div class="rup-linha">${it.linha}</div>
+      <div style="height:1px;background:var(--border);margin:10px 0"></div>
       <div class="rup-row" style="margin-bottom:6px">
         <span class="rup-label">Próxima Entrega</span>
-        <span class="rup-date">📅 ${it.proximaEntrega}</span>
+        <span class="rup-date">📅 ${fmtRupData(it.proximaEntrega)}</span>
       </div>
       <div class="rup-row">
         <span class="rup-label">Volume esperado</span>
-        <span class="rup-vol">📦 ${it.volume||'—'}</span>
+        <span class="rup-vol">📦 ${it.volume&&it.volume!=='0'?Number(it.volume).toLocaleString('pt-BR'):'—'}</span>
       </div>
     </div>`).join('');
 }
 
-function renderRupturaResumo(porData){
+function renderRupturaResumo(porData,total){
   const el=document.getElementById('rup-resumo');
-  const total=_rupturaAll.length;
-  const datas=Object.keys(porData).sort();
+  if(!total){el.innerHTML='';return;}
+  const datas=Object.keys(porData).sort((a,b)=>{
+    // Ordena por data — tenta parsear dd/mm/aaaa
+    const pa=a.split('/').reverse().join('-');
+    const pb=b.split('/').reverse().join('-');
+    return pa.localeCompare(pb);
+  });
   el.innerHTML=`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;">
-      <span style="color:var(--muted)">Total em ruptura c/ previsão: </span>
-      <strong style="color:var(--red)">${total} itens</strong>
+    <div style="background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">⚠️</span>
+      <span style="color:var(--muted)">Total: </span>
+      <strong style="color:var(--red)">${total} iten${total>1?'s':''} em ruptura</strong>
     </div>
-    ${datas.map(d=>`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;">
-      <span style="color:var(--muted)">📅 ${d}: </span>
-      <strong style="color:var(--gold)">${porData[d]} iten${porData[d]>1?'s':''}</strong>
-    </div>`).join('')}`;
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Por data:</span>
+      ${datas.map(d=>`<span style="background:rgba(245,183,49,.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">📅 ${d} · ${porData[d]}</span>`).join('')}
+    </div>`;
 }
 
 function filtrarRuptura(termo){
