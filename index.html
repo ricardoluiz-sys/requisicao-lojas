@@ -163,17 +163,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);transform:translateY(60px);opacity:0;transition:all .3s;z-index:300;}
 .toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--green);color:var(--green);}.toast.error{border-color:var(--red);color:var(--red);}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
-.rup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:4px;}
-.rup-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;transition:border-color .2s;}
-.rup-card:hover{border-color:var(--accent);}
-.rup-item{font-weight:500;font-size:13px;margin-bottom:8px;line-height:1.4;}
-.rup-linha{font-size:11px;color:var(--muted);margin-bottom:10px;}
-.rup-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
-.rup-label{color:var(--muted);}
+.rup-grid{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.rup-card{display:grid;grid-template-columns:1fr 140px 140px 110px;align-items:center;gap:12px;padding:11px 16px;background:var(--card);border-bottom:1px solid var(--border);transition:background .15s;}
+.rup-card:first-child{border-radius:11px 11px 0 0;}
+.rup-card:last-child{border-radius:0 0 11px 11px;border-bottom:none;}
+.rup-card:only-child{border-radius:11px;}
+.rup-card:hover{background:rgba(255,255,255,.03);}
+.rup-header{display:grid;grid-template-columns:1fr 140px 140px 110px;gap:12px;padding:8px 16px;background:var(--surface);border-radius:11px 11px 0 0;border:1px solid var(--border);border-bottom:none;}
+.rup-header span{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);}
+.rup-wrap{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
+.rup-item{font-weight:500;font-size:13px;line-height:1.4;}
+.rup-linha{font-size:11px;color:var(--muted);margin-top:2px;}
 .rup-date{font-weight:600;color:var(--gold);font-size:13px;}
 .rup-vol{font-weight:600;color:var(--green);font-size:13px;}
-.rup-mix{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(79,126,255,.12);color:var(--accent);margin-bottom:8px;}
-@media(max-width:640px){.rup-grid{grid-template-columns:1fr;}}
+.rup-mix{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(79,126,255,.12);color:var(--accent);}
+@media(max-width:640px){
+  .rup-card{grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;}
+  .rup-header{grid-template-columns:1fr 1fr;}
+  .rup-card>*:nth-child(3),.rup-header span:nth-child(3){display:none;}
+}
 .divider{height:1px;background:var(--border);margin:20px 0;}
 
 /* ── TABLET ── */
@@ -501,7 +509,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
     <div id="rup-resumo" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"></div>
-    <div id="rup-grid" class="rup-grid"></div>
+    <div id="rup-grid"></div>
   </section>
 
 
@@ -1300,23 +1308,24 @@ function renderRupturaCards(items){
     porData[df]++;
   });
   renderRupturaResumo(porData,items.length);
-  grid.innerHTML=items.map(it=>`
+  grid.innerHTML=`<div class="rup-wrap">
+    <div class="rup-header">
+      <span>Produto</span>
+      <span>Próxima Entrega</span>
+      <span>Volume Esperado</span>
+      <span>Categoria</span>
+    </div>
+    ${items.map(it=>`
     <div class="rup-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span class="rup-mix">${it.mix||'—'}</span>
-        <span style="font-size:11px;color:var(--muted)">${it.linha}</span>
+      <div>
+        <div class="rup-item">${it.item}</div>
+        <div class="rup-linha">${it.linha}</div>
       </div>
-      <div class="rup-item">${it.item}</div>
-      <div style="height:1px;background:var(--border);margin:10px 0"></div>
-      <div class="rup-row" style="margin-bottom:6px">
-        <span class="rup-label">Próxima Entrega</span>
-        <span class="rup-date">📅 ${fmtRupData(it.proximaEntrega)}</span>
-      </div>
-      <div class="rup-row">
-        <span class="rup-label">Volume esperado</span>
-        <span class="rup-vol">📦 ${it.volume&&it.volume!=='0'?Number(it.volume).toLocaleString('pt-BR'):'—'}</span>
-      </div>
-    </div>`).join('');
+      <div class="rup-date">📅 ${fmtRupData(it.proximaEntrega)}</div>
+      <div class="rup-vol">${it.volume&&it.volume!=='0'?'📦 '+Number(it.volume).toLocaleString('pt-BR'):'—'}</div>
+      <div><span class="rup-mix">${it.mix||'—'}</span></div>
+    </div>`).join('')}
+  </div>`;
 }
 
 function renderRupturaResumo(porData,total){
