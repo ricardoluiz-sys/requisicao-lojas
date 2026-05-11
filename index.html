@@ -412,20 +412,14 @@ function getLote(nomeProduto){
 }
 
 async function loadLotes(){
-  const url=`https://docs.google.com/spreadsheets/d/${LOTES_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${LOTES_GID}`;
   try{
-    const r=await fetch(url);
-    if(!r.ok)return; // usa fallback embutido
-    const text=await r.text();
-    const rows=text.split('\n').map(l=>{
-      const cols=[];let inQ=false,cur='';
-      for(const ch of l){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur);cur='';}else{cur+=ch;}}
-      cols.push(cur);return cols;
-    });
+    const r=await fetch('https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec?tipo=lotes');
+    if(!r.ok)return;
+    const rows=await r.json();
     const novoMap={};
     for(let i=1;i<rows.length;i++){
-      const prod=(rows[i][1]||'').trim();
-      const qtd=parseInt((rows[i][2]||'').trim())||0;
+      const prod=String(rows[i][1]||'').trim();
+      const qtd=parseInt(String(rows[i][2]||''))||0;
       if(prod&&qtd>0)novoMap[prod]=qtd;
     }
     if(Object.keys(novoMap).length>0)LOTES_MAP=novoMap;
@@ -537,52 +531,37 @@ function selectLoja(nome,el){
 // ── ESTOQUE ───────────────────────────────────────────────────────────────────
 async function loadEstoque(){
   setEst('loading','Carregando saldo Itapeva [Total]...');
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
   try{
-    const r=await fetch(url);
+    const r=await fetch('https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec?tipo=estoque');
     if(!r.ok)throw new Error('HTTP '+r.status);
-    const text=await r.text();
-    const rows=parseCSV(text);
+    const rows=await r.json();
 
-    // Estrutura real da planilha:
-    // Linha 0 (row 1): grupos de cabeçalho
-    // Linha 1 (row 2): números das colunas (1, 2, 3...)
-    // Linha 2 (row 3): nomes reais — Linha | Item | Categoria | Curva ABC | (vazia) | Status | ... | Itapeva [Total] ...
-    // Linha 3 (row 4): vazia
-    // Linha 4+ (row 5+): dados
-
-    // Descobrir a linha de cabeçalho procurando por "Item" e "Itapeva"
-    // Colunas (descobertas pelo cabeçalho da linha 3):
-    // A=0 Linha | B=1 Item | C=2 Categoria | H=7 Estoque[Extrema] | I=8 Itapeva[Total] | J=9 Itapeva[Bruto]
     let hRow=-1,colLinha=-1,colItem=-1,colCat=-1,colBruto=-1,colExtrema=-1,colStatus=-1;
     for(let i=0;i<Math.min(10,rows.length);i++){
-      const row=rows[i];
-      const iItem=row.findIndex(c=>c.trim()==='Item');
-      const iBruto=row.findIndex(c=>c.includes('Itapeva')&&c.includes('Bruto'));
+      const row=rows[i].map(v=>String(v==null?'':v));
+      const iItem=row.findIndex(h=>h.trim()==='Item');
+      const iBruto=row.findIndex(h=>h.includes('Itapeva')&&h.includes('Bruto'));
       if(iItem>=0){
         hRow=i;
-        colLinha=row.findIndex(c=>c.trim()==='Linha');
-        if(colLinha===-1)colLinha=0;
+        colLinha=row.findIndex(h=>h.trim()==='Linha'); if(colLinha===-1)colLinha=0;
         colItem=iItem;
-        colCat=row.findIndex(c=>c.trim()==='Categoria');
-        colExtrema=row.findIndex(c=>c.includes('Estoque')&&c.includes('Extrema'));
-        if(colExtrema===-1)colExtrema=7;
+        colCat=row.findIndex(h=>h.trim()==='Categoria');
+        colExtrema=row.findIndex(h=>h.includes('Estoque')&&h.includes('Extrema')); if(colExtrema===-1)colExtrema=7;
         colBruto=iBruto>=0?iBruto:9;
-        colStatus=row.findIndex(c=>c.trim()==='Status');
-        if(colStatus===-1)colStatus=4;
+        colStatus=row.findIndex(h=>h.trim()==='Status'); if(colStatus===-1)colStatus=4;
         break;
       }
     }
     if(hRow===-1)throw new Error('Cabeçalho não encontrado');
 
     function parseSaldo(val){
-      const raw=(val||'').trim().replace(/\./g,'').replace(',','.');
+      const raw=String(val==null?'':val).trim().replace(/\./g,'').replace(',','.');
       return raw?Math.max(0,parseInt(raw)||0):0;
     }
 
     const list=[];
     for(let i=hRow+1;i<rows.length;i++){
-      const row=rows[i];
+      const row=rows[i].map(v=>String(v==null?'':v));
       const item=(row[colItem]||'').trim();
       if(!item)continue;
       const statusProd=(row[colStatus]||'').trim();
@@ -591,25 +570,21 @@ async function loadEstoque(){
       const linha=(row[colLinha]||'').trim();
       const isUV=cat.trim().toUpperCase()==='UV';
       const isBase=linha.toUpperCase().startsWith('BASE');
-
       let saldo,fonteLabel;
       if(isUV){
-        // UV: Estoque [Extrema]
         saldo=parseSaldo(row[colExtrema]);
         fonteLabel='Extrema';
-      } else if(isBase){
-        // Base: Itapeva [Bruto] + Estoque [Extrema]
+      }else if(isBase){
         saldo=parseSaldo(row[colBruto])+parseSaldo(row[colExtrema]);
         fonteLabel='Bruto+Extrema';
-      } else {
-        // Demais: Itapeva [Bruto]
+      }else{
         saldo=parseSaldo(row[colBruto]);
         fonteLabel='Itapeva Bruto';
       }
-      if(saldo<=0)continue; // oculta produtos sem saldo
+      if(saldo<=0)continue;
       list.push({item,categoria:cat,linha,saldo,fonteLabel});
     }
-    if(!list.length)throw new Error('Sem dados');
+    if(!list.length)throw new Error('Nenhum produto encontrado');
     produtos=list;
     const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     setEst('ok',`${list.length} produtos carregados`);
@@ -618,26 +593,16 @@ async function loadEstoque(){
   }catch(e){
     setEst('err','Planilha indisponível — usando saldo de demonstração.');
     produtos=[
-      {item:'Bolsa Garrafa Térmica Preta',categoria:'Têxtil',saldo:1100},
-      {item:'Bolsa Garrafa Térmica Vinho',categoria:'Têxtil',saldo:967},
-      {item:'Bolsa Garrafa Térmica Off White',categoria:'Têxtil',saldo:696},
-      {item:'Bolsa Garrafa Térmica Marrom',categoria:'Têxtil',saldo:330},
-      {item:'Bolsa Fitness Puffer Preta',categoria:'Têxtil',saldo:1411},
-      {item:'Bolsa Fitness Puffer Marrom',categoria:'Têxtil',saldo:957},
-      {item:'Bolsa Fitness Puffer Off White',categoria:'Têxtil',saldo:587},
-      {item:'Bolsa Fitness Puffer Vinho',categoria:'Têxtil',saldo:782},
-      {item:'Necessaire Puffer M Preta',categoria:'Têxtil',saldo:1515},
-      {item:'Necessaire Puffer M Off White',categoria:'Têxtil',saldo:820},
-      {item:'Necessaire Puffer M Rosa',categoria:'Têxtil',saldo:0},
-      {item:'Necessaire Puffer M Vinho',categoria:'Têxtil',saldo:0},
-      {item:'Necessaire Puffer Básica Preta',categoria:'Gift',saldo:973},
-      {item:'Necessaire Puffer Básica Rosa',categoria:'Gift',saldo:449},
-      {item:'Necessaire Puffer Básica Off White',categoria:'Gift',saldo:0},
-      {item:'Necessaire Puffer Básica Lilás',categoria:'Gift',saldo:91},
+      {item:'Bolsa Garrafa Térmica Preta',categoria:'Têxtil',saldo:1100,fonteLabel:'Itapeva Bruto'},
+      {item:'Bolsa Garrafa Térmica Vinho',categoria:'Têxtil',saldo:967,fonteLabel:'Itapeva Bruto'},
+      {item:'Bolsa Fitness Puffer Preta',categoria:'Têxtil',saldo:1411,fonteLabel:'Itapeva Bruto'},
+      {item:'Necessaire Puffer M Preta',categoria:'Têxtil',saldo:1515,fonteLabel:'Itapeva Bruto'},
+      {item:'Necessaire Puffer Básica Preta',categoria:'Gift',saldo:973,fonteLabel:'Itapeva Bruto'},
     ];
     renderTabela();
   }
 }
+
 
 function setEst(t,m){document.getElementById('edot').className='edot '+t;document.getElementById('emsg').textContent=m;}
 
