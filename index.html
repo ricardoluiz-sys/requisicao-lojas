@@ -543,7 +543,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <option value="">Todos os status</option>
         <option value="CONCLUÍDO">Concluído</option>
         <option value="SEM ESTOQUE">Sem Estoque</option>
-        <option value="PENDENTE">Pendente</option>
+        <option value="PEND">Pendente</option>
       </select>
     </div>
     <div id="ped-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
@@ -1380,7 +1380,7 @@ function statusClass(s){
   const u=(s||'').toUpperCase();
   if(u.includes('CONCLU'))return 'ped-concluido';
   if(u.includes('SEM EST'))return 'ped-semestoque';
-  if(u.includes('PEND'))return 'ped-pendente';
+  if(u.includes('PEND'))return 'ped-pendente'; // cobre PENDENTE e PENDENTES
   return 'ped-outro';
 }
 
