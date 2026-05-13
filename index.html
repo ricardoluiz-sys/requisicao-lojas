@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Requisição de Produtos — Lojas</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#0D0F14;--surface:#151820;--card:#1C2030;--border:#252A3A;--accent:#4F7EFF;--gold:#F5B731;--green:#2ECC88;--red:#FF5C5C;--text:#E8EAF0;--muted:#6B7280;--pks:#4F7EFF;--igu:#2ECC88;--ana:#C084FC;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -101,7 +102,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .ri{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;}
 .sb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
 .sPendente{background:rgba(245,183,49,.15);color:var(--gold);}.sAprovado{background:rgba(46,204,136,.15);color:var(--green);}.sReprovado{background:rgba(255,92,92,.15);color:var(--red);}
-/* week picker */
+
+/* ── WEEK PICKER ── */
 .week-input-wrap{position:relative;}
 .week-input-wrap input{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
 .week-input-wrap input:focus{border-color:var(--accent);}
@@ -156,14 +158,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ── TOAST ── */
 .fab{position:fixed;bottom:24px;right:24px;z-index:150;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:13px 22px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(79,126,255,.4);transition:all .2s;display:none;align-items:center;gap:8px;}
-.fab:hover{background:#3D6CE0;transform:translateY(-2px);box-shadow:0 6px 24px rgba(79,126,255,.5);}
-.fab:disabled{background:#2A3050;color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none;}
+.fab:hover{background:#3D6CE0;transform:translateY(-2px);}.fab:disabled{background:#2A3050;color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none;}
 .fab.visible{display:flex;}
-@media(max-width:640px){.fab{bottom:16px;right:16px;padding:12px 18px;font-size:13px;}}
 .toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);transform:translateY(60px);opacity:0;transition:all .3s;z-index:300;}
 .toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--green);color:var(--green);}.toast.error{border-color:var(--red);color:var(--red);}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty-icon{font-size:36px;margin-bottom:10px;}
-/* Pedidos */
+
+/* ── PEDIDOS ── */
 .ped-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
 .ped-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
 .ped-table-wrap table{width:100%;border-collapse:collapse;}
@@ -183,157 +184,98 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .ped-loja-ana{color:var(--ana);font-weight:600;}
 .ped-prog{height:4px;background:var(--border);border-radius:2px;margin-top:4px;min-width:60px;}
 .ped-prog-bar{height:4px;border-radius:2px;background:var(--green);}
-@media(max-width:640px){
-  .ped-table-wrap{overflow-x:auto;}
-  .ped-table-wrap table{min-width:700px;}
-}
+
+/* ── RUPTURAS ── */
 .rup-grid{display:flex;flex-direction:column;gap:0;margin-top:4px;}
 .rup-card{display:grid;grid-template-columns:1fr 140px 140px 110px;align-items:center;gap:12px;padding:11px 16px;background:var(--card);border-bottom:1px solid var(--border);transition:background .15s;}
-.rup-card:first-child{border-radius:11px 11px 0 0;}
-.rup-card:last-child{border-radius:0 0 11px 11px;border-bottom:none;}
-.rup-card:only-child{border-radius:11px;}
-.rup-card:hover{background:rgba(255,255,255,.03);}
+.rup-card:first-child{border-radius:11px 11px 0 0;}.rup-card:last-child{border-radius:0 0 11px 11px;border-bottom:none;}.rup-card:only-child{border-radius:11px;}.rup-card:hover{background:rgba(255,255,255,.03);}
 .rup-header{display:grid;grid-template-columns:1fr 140px 140px 110px;gap:12px;padding:8px 16px;background:var(--surface);border-radius:11px 11px 0 0;border:1px solid var(--border);border-bottom:none;}
 .rup-header span{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);}
 .rup-wrap{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
-.rup-item{font-weight:500;font-size:13px;line-height:1.4;}
-.rup-linha{font-size:11px;color:var(--muted);margin-top:2px;}
+.rup-item{font-weight:500;font-size:13px;line-height:1.4;}.rup-linha{font-size:11px;color:var(--muted);margin-top:2px;}
 .rup-date{font-weight:600;color:var(--gold);font-size:13px;}
 .rup-vol{font-weight:600;color:var(--green);font-size:13px;}
 .rup-mix{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(79,126,255,.12);color:var(--accent);}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* ── PLANO DE REPOSIÇÃO ── */
+.plan-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.plan-mc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.plan-mc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:8px;}
+.plan-mc-val{font-size:24px;font-weight:700;line-height:1;}
+.plan-mc-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+.plan-prazo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+.plan-pb{border-radius:10px;padding:14px 18px;border:1px solid;}
+.plan-pb-pks{background:rgba(79,126,255,.07);border-color:rgba(79,126,255,.2);}
+.plan-pb-igu{background:rgba(46,204,136,.07);border-color:rgba(46,204,136,.2);}
+.plan-pb-ana{background:rgba(192,132,252,.07);border-color:rgba(192,132,252,.2);}
+.plan-pb-loja{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.plan-pb-dias{font-size:26px;font-weight:700;line-height:1;}
+.plan-pb-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.plan-tabs-wrap{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0;overflow-x:auto;}
+.plan-tab{padding:11px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px;white-space:nowrap;}
+.plan-tab:hover{color:var(--text);}
+.plan-tab.active{color:var(--text);border-bottom-color:var(--accent);}
+.plan-tab-dot{width:7px;height:7px;border-radius:50%;}
+.plan-tab-cnt{font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600;}
+.plan-section{display:none;}.plan-section.on{display:block;}
+.plan-loja-header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px;flex-wrap:wrap;gap:12px;}
+.plan-loja-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.plan-lstat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-size:12px;text-align:center;}
+.plan-lstat-val{font-size:17px;font-weight:700;display:block;}
+.plan-lstat-lbl{color:var(--muted);font-size:11px;}
+.plan-lotes-info{background:rgba(245,183,49,.07);border:1px solid rgba(245,183,49,.2);border-radius:9px;padding:12px 16px;font-size:12px;color:var(--gold);margin-bottom:14px;line-height:1.6;}
+.plan-abar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;}
+.plan-abar-sum{font-size:13px;color:var(--muted);}
+.plan-abar-sum strong{color:var(--text);}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;}
+.b-urg{background:rgba(255,92,92,.15);color:var(--red);}
+.b-alt{background:rgba(245,183,49,.15);color:var(--gold);}
+.b-cob{background:rgba(79,126,255,.15);color:var(--accent);}
+.b-np{background:rgba(107,114,128,.12);color:var(--muted);}
+.b-clA{background:rgba(255,92,92,.1);color:var(--red);}
+.b-clB{background:rgba(245,183,49,.1);color:var(--gold);}
+.b-clC{background:rgba(79,126,255,.1);color:var(--accent);}
+.qty-cell{font-weight:700;font-size:15px;}
+.lote-tag{font-size:10px;color:var(--gold);margin-top:2px;}
+.plan-resumo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.plan-resumo-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.plan-resumo-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:14px;}
+.plan-ciclo{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:22px;}
+.plan-ciclo-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:14px;}
+.plan-steps{display:flex;gap:0;position:relative;}
+.plan-steps::before{content:'';position:absolute;top:18px;left:18px;right:18px;height:2px;background:var(--border);}
+.plan-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1;}
+.plan-snum{width:36px;height:36px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--muted);}
+.plan-step.act .plan-snum{background:var(--accent);border-color:var(--accent);color:#fff;}
+.plan-slbl{font-size:11px;color:var(--muted);text-align:center;line-height:1.3;font-weight:500;}
+.plan-sday{font-size:10px;color:var(--border);}
+
+/* ── MOBILE ── */
+@media(max-width:900px){.lojas{grid-template-columns:1fr 1fr;}.igrid{grid-template-columns:1fr;}.main{padding:20px 16px;}.plan-metrics{grid-template-columns:1fr 1fr;}.plan-prazo-grid{grid-template-columns:1fr;}}
 @media(max-width:640px){
+  .topbar{padding:10px 14px;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:100;}
+  .brand-name{font-size:13px;}.brand-sub{display:none;}.logo{width:28px;height:28px;font-size:14px;}
+  .nav{order:3;width:100%;display:flex;overflow-x:auto;gap:2px;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+  .nav::-webkit-scrollbar{display:none;}
+  .nb{flex-shrink:0;text-align:center;padding:6px 8px;font-size:12px;white-space:nowrap;}
+  .user-info{gap:6px;}.user-chip{padding:4px 8px;font-size:11px;}.logout-btn{padding:4px 8px;font-size:11px;}
+  .main{padding:14px 12px;}.ph h1{font-size:20px;}.lojas{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+  .fr{flex-direction:column;gap:10px;margin-bottom:14px;}
+  .tw table{display:block;}.tw thead{display:none;}.tw tbody{display:block;}
+  .tw tbody tr{display:flex;flex-direction:column;padding:12px 14px;gap:6px;border-bottom:1px solid var(--border);}
+  .tw tbody tr.crow{flex-direction:row;padding:6px 14px;}
+  .tw td{padding:0;border:none;font-size:13px;}
+  .qi{width:100px;padding:8px 10px;font-size:15px;}
+  .abar{flex-direction:column;gap:10px;align-items:stretch;padding:12px 14px;}
+  .abar div:last-child{display:flex;gap:8px;}.abar .btn{flex:1;}
+  .plan-metrics{grid-template-columns:1fr 1fr;}.plan-prazo-grid{grid-template-columns:1fr;}
+  .plan-loja-header{flex-direction:column;align-items:flex-start;}
   .rup-card{grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;}
   .rup-header{grid-template-columns:1fr 1fr;}
   .rup-card>*:nth-child(3),.rup-header span:nth-child(3){display:none;}
 }
-.divider{height:1px;background:var(--border);margin:20px 0;}
-
-/* ── TABLET ── */
-@media(max-width:900px){
-  .lojas{grid-template-columns:1fr 1fr;}
-  .igrid{grid-template-columns:1fr;}
-  .igrid[style*="1fr 1fr 1fr"]{grid-template-columns:1fr!important;}
-  .main{padding:20px 16px;}
-}
-
-/* ── MOBILE ── */
-@media(max-width:640px){
-  /* Topbar */
-  .topbar{padding:10px 14px;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:100;}
-  .brand-name{font-size:13px;}.brand-sub{display:none;}
-  .logo{width:28px;height:28px;font-size:14px;}
-  .nav{order:3;width:100%;display:flex;overflow-x:auto;gap:2px;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
-  .nav::-webkit-scrollbar{display:none;}
-  .nb{flex:1;text-align:center;padding:6px 8px;font-size:12px;white-space:nowrap;}
-  .user-info{gap:6px;}
-  .user-chip{padding:4px 8px;font-size:11px;}
-  .logout-btn{padding:4px 8px;font-size:11px;}
-
-  /* Login */
-  .login-box{padding:28px 20px;border-radius:12px;}
-  .login-title{font-size:18px;}
-
-  /* Layout */
-  .main{padding:14px 12px;}
-  .ph h1{font-size:20px;}.ph p{font-size:12px;}
-  .ph{margin-bottom:16px;}
-
-  /* Lojas */
-  .lojas{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
-  .lc{padding:14px;}
-  .lname{font-size:13px;}.lmeta{font-size:11px;}
-
-  /* Formulário */
-  .fr{flex-direction:column;gap:10px;margin-bottom:14px;}
-  .fg input,.fg select{padding:10px 12px;font-size:14px;} /* maior para toque */
-
-  /* Barra de estoque */
-  .ebar{padding:9px 12px;font-size:12px;}
-  #etime{display:none;}
-
-  /* Busca */
-  #inp-busca{font-size:14px;padding:10px 12px 10px 34px;}
-
-  /* Tabela — vira cards no mobile */
-  .tw{border-radius:10px;overflow:hidden;}
-  .tw table{display:block;}
-  .tw thead{display:none;}
-  .tw tbody{display:block;}
-  .tw tbody tr{display:flex;flex-direction:column;padding:12px 14px;gap:6px;border-bottom:1px solid var(--border);}
-  .tw tbody tr.crow{flex-direction:row;padding:6px 14px;background:rgba(255,255,255,.03);}
-  .tw tbody tr.crow td{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
-  .tw td{padding:0;border:none;font-size:13px;}
-  .tw td:nth-child(2){font-size:11px;color:var(--muted);}
-  .tw td:nth-child(3){display:flex;align-items:center;gap:8px;}
-  .tw td:nth-child(3)::before{content:'Saldo:';font-size:11px;color:var(--muted);}
-  .tw td:nth-child(4){display:flex;align-items:center;gap:8px;}
-  .tw td:nth-child(4)::before{content:'Qtd.:';font-size:11px;color:var(--muted);}
-  .tw td:nth-child(5)::before{content:'Obs.:';font-size:11px;color:var(--muted);display:block;margin-bottom:2px;}
-  .qi{width:100px;padding:8px 10px;font-size:15px;}
-  .oi{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);background:var(--surface);}
-
-  /* Action bar */
-  .abar{flex-direction:column;gap:10px;align-items:stretch;padding:12px 14px;}
-  .abar .sum{text-align:center;}
-  .abar div:last-child{display:flex;gap:8px;}
-  .abar .btn{flex:1;}
-
-  /* Chips filtro */
-  .chips{gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
-  .chips::-webkit-scrollbar{display:none;}
-  .chip{white-space:nowrap;padding:6px 12px;font-size:11px;}
-
-  /* Req cards */
-  .rc{padding:14px;}
-  .rl{font-size:13px;}.ri{gap:8px;font-size:11px;}
-  .sb{font-size:10px;padding:3px 8px;}
-
-  /* User cards */
-  .user-card{flex-wrap:wrap;gap:10px;padding:12px 14px;}
-  .user-actions{width:100%;display:flex;gap:8px;}
-  .user-actions .btn{flex:1;}
-
-  /* Modal */
-  .md{width:100%;max-width:100%;max-height:92vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;}
-  .md-sm{max-width:100%;}
-  .mo{align-items:flex-end;}
-  .mh{padding:14px 16px;}
-  .mb{padding:14px 16px;}
-  .mf{padding:12px 16px;flex-wrap:wrap;}
-  .mf .btn{flex:1;}
-
-  /* Modal tabela */
-  .mb .tw table{display:block;}
-  .mb .tw thead{display:none;}
-  .mb .tw tbody{display:block;}
-  .mb .tw tbody tr{display:flex;flex-direction:column;padding:10px 12px;gap:4px;}
-  .mb .tw td{padding:0;border:none;font-size:12px;}
-
-  /* Fluxo */
-  .fsteps{flex-wrap:wrap;gap:8px;justify-content:center;}
-  .fsteps::before{display:none;}
-  .fstep{width:calc(33% - 8px);min-width:80px;}
-  .snum{width:34px;height:34px;font-size:12px;}
-  .slbl{font-size:10px;}.sday{font-size:9px;}
-  .igrid{grid-template-columns:1fr;}
-  .igrid[style*="1fr 1fr 1fr"]{grid-template-columns:1fr!important;}
-
-  /* Week picker */
-  .week-picker{width:calc(100vw - 32px);left:0;}
-
-  /* Botões gerais maiores para toque */
-  .btn{min-height:40px;}
-  .bsm{min-height:34px;}
-}
-
-/* ── MOBILE PEQUENO (< 380px) ── */
-@media(max-width:380px){
-  .nb{font-size:11px;padding:5px 6px;}
-  .ph h1{font-size:18px;}
-  .fstep{width:calc(50% - 8px);}
-}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -358,18 +300,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div><div class="brand-name">Requisição de Produtos</div><div class="brand-sub" id="tb-sub">—</div></div>
     </div>
     <nav class="nav" id="main-nav">
-      <button class="nb active" id="nb-nova" onclick="showSec('nova',this)">Nova Requisição</button>
-      <button class="nb" id="nb-gestao" onclick="showSec('gestao',this)">Gestão</button>
-      <button class="nb" id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
-      <button class="nb" id="nb-pedidos" onclick="showSec('pedidos',this)">Pedidos</button>
-      <button class="nb" id="nb-ruptura" onclick="showSec('ruptura',this)">Rupturas</button>
-      <button class="nb" id="nb-fluxo" onclick="showSec('fluxo',this)">Fluxo & Prazos</button>
+      <button class="nb active" id="nb-nova"    onclick="showSec('nova',this)">Nova Requisição</button>
+      <button class="nb"        id="nb-gestao"  onclick="showSec('gestao',this)">Gestão</button>
+      <button class="nb"        id="nb-plano"   onclick="showSec('plano',this)">📊 Plano de Reposição</button>
+      <button class="nb"        id="nb-pedidos" onclick="showSec('pedidos',this)">Pedidos</button>
+      <button class="nb"        id="nb-ruptura" onclick="showSec('ruptura',this)">Rupturas</button>
+      <button class="nb"        id="nb-fluxo"   onclick="showSec('fluxo',this)">Fluxo &amp; Prazos</button>
+      <button class="nb"        id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
     </nav>
     <div class="user-info">
-      <div class="user-chip">
-        <div class="user-dot" id="user-dot"></div>
-        <span id="user-label">—</span>
-      </div>
+      <div class="user-chip"><div class="user-dot" id="user-dot"></div><span id="user-label">—</span></div>
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
@@ -387,7 +327,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="ldot" style="background:var(--igu)"></div><div class="lname">Iguatemi</div><div class="lmeta">Clique para selecionar</div>
         </div>
         <div class="lc" style="--lc:var(--ana)" onclick="selectLoja('Anália',this)">
-          <div class="ldot" style="background:var(--ana)"></div><div class="lname">Anália</div><div class="lmeta">Clique para selecionar</div>
+          <div class="ldot" style="background:var(--ana)"></div><div class="lname">Anália Franco</div><div class="lmeta">Clique para selecionar</div>
         </div>
       </div>
       <div id="form-area" style="display:none">
@@ -445,12 +385,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- ═ GESTÃO ═ -->
     <section id="sec-gestao" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div><h1>Gestão de Requisições</h1><p>Acompanhe e aprove as requisições.</p></div>
-    </div>
+        <div><h1>Gestão de Requisições</h1><p>Acompanhe e aprove as requisições.</p></div>
+      </div>
       <div class="chips">
         <button class="chip active" onclick="filtrar('todos',this)">Todos</button>
         <button class="chip" onclick="filtrar('Pendente',this)">Pendente</button>
-          <button class="chip" onclick="filtrar('Aprovado',this)">Aprovado</button>
+        <button class="chip" onclick="filtrar('Aprovado',this)">Aprovado</button>
         <button class="chip" onclick="filtrar('Reprovado',this)">Reprovado</button>
         <div style="flex:1"></div>
         <button class="btn bg2 bsm" onclick="renderGestao()">↻ Atualizar</button>
@@ -458,19 +398,199 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div id="rlist" class="rlist"></div>
     </section>
 
-    <!-- ═ USUÁRIOS (admin only) ═ -->
-    <section id="sec-usuarios" class="sec">
+    <!-- ═ PLANO DE REPOSIÇÃO ═ -->
+    <section id="sec-plano" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div><h1>Gestão de Usuários</h1><p>Crie, edite e remova acessos ao sistema.</p></div>
-        <button class="btn bp" onclick="openUserModal(null)">+ Novo Usuário</button>
+        <div>
+          <h1>Plano de Reposição</h1>
+          <p>Gerado a partir dos dados do Metabase · Curva ABC · Urgência por cobertura de estoque</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="background:rgba(79,126,255,.12);border:1px solid rgba(79,126,255,.25);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--accent)" id="plan-semana-label">📅 Semana 20 · 19–23 Mai 2026</span>
+          <button class="btn bg2 bsm" onclick="planExportarTudo()">⬇ Exportar Tudo</button>
+        </div>
       </div>
-      <div class="user-grid" id="user-grid"></div>
+
+      <!-- Ciclo -->
+      <div class="plan-ciclo">
+        <div class="plan-ciclo-title">Ciclo desta semana</div>
+        <div class="plan-steps">
+          <div class="plan-step act"><div class="plan-snum">1</div><div class="plan-slbl">Preenchimento<br>pela Loja</div><div class="plan-sday">SEG · TER até 18h</div></div>
+          <div class="plan-step"><div class="plan-snum">2</div><div class="plan-slbl">Aprovação<br>Admin</div><div class="plan-sday">QUA até 18h</div></div>
+          <div class="plan-step"><div class="plan-snum">3</div><div class="plan-slbl">Separação<br>Depósito</div><div class="plan-sday">QUI</div></div>
+          <div class="plan-step"><div class="plan-snum">4</div><div class="plan-slbl">Transporte<br>&amp; Entrega</div><div class="plan-sday">Conf. prazo</div></div>
+          <div class="plan-step"><div class="plan-snum">5</div><div class="plan-slbl">Recebimento<br>na Loja</div><div class="plan-sday">Ver prazos</div></div>
+        </div>
+      </div>
+
+      <!-- Métricas -->
+      <div class="plan-metrics">
+        <div class="plan-mc"><div class="plan-mc-label">Total de itens sugeridos</div><div class="plan-mc-val" id="plan-total-itens">—</div><div class="plan-mc-sub">nas 3 lojas</div></div>
+        <div class="plan-mc"><div class="plan-mc-label">Itens urgentes (Classe A)</div><div class="plan-mc-val" style="color:var(--red)" id="plan-total-urg">—</div><div class="plan-mc-sub">ruptura ou cobertura 0</div></div>
+        <div class="plan-mc"><div class="plan-mc-label">Loja mais crítica</div><div class="plan-mc-val" style="color:var(--igu);font-size:18px" id="plan-loja-crit">—</div><div class="plan-mc-sub" id="plan-loja-crit-sub">—</div></div>
+        <div class="plan-mc"><div class="plan-mc-label">Maior prazo de entrega</div><div class="plan-mc-val" style="color:var(--gold)">20 dias</div><div class="plan-mc-sub">Iguatemi · após aprovação</div></div>
+      </div>
+
+      <!-- Prazos -->
+      <div class="plan-prazo-grid">
+        <div class="plan-pb plan-pb-pks"><div class="plan-pb-loja" style="color:var(--pks)">🏪 PKS Brasília</div><div class="plan-pb-dias" style="color:var(--pks)">15 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div><div class="plan-pb-sub">Após aprovação da requisição</div></div>
+        <div class="plan-pb plan-pb-igu"><div class="plan-pb-loja" style="color:var(--igu)">🏪 Iguatemi</div><div class="plan-pb-dias" style="color:var(--igu)">20 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div><div class="plan-pb-sub">Após aprovação da requisição</div></div>
+        <div class="plan-pb plan-pb-ana"><div class="plan-pb-loja" style="color:var(--ana)">🏪 Anália Franco</div><div class="plan-pb-dias" style="color:var(--ana)">10 <span style="font-size:14px;font-weight:400;color:var(--muted)">dias úteis</span></div><div class="plan-pb-sub">Após aprovação da requisição</div></div>
+      </div>
+
+      <!-- Tabs internas do plano -->
+      <div class="plan-tabs-wrap">
+        <button class="plan-tab active" onclick="planShowTab('pks',this)"><span class="plan-tab-dot" style="background:var(--pks)"></span>PKS Brasília<span class="plan-tab-cnt" style="background:rgba(79,126,255,.15);color:var(--pks)" id="plan-cnt-pks">—</span></button>
+        <button class="plan-tab" onclick="planShowTab('igu',this)"><span class="plan-tab-dot" style="background:var(--igu)"></span>Iguatemi<span class="plan-tab-cnt" style="background:rgba(46,204,136,.15);color:var(--igu)" id="plan-cnt-igu">—</span></button>
+        <button class="plan-tab" onclick="planShowTab('ana',this)"><span class="plan-tab-dot" style="background:var(--ana)"></span>Anália Franco<span class="plan-tab-cnt" style="background:rgba(192,132,252,.15);color:var(--ana)" id="plan-cnt-ana">—</span></button>
+        <button class="plan-tab" onclick="planShowTab('resumo',this)">📊 Resumo Consolidado</button>
+      </div>
+
+      <!-- TAB PKS -->
+      <div class="plan-section on" id="plan-tab-pks">
+        <div class="plan-loja-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--pks);display:inline-block"></span>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pks)">Loja PKS — Brasília</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Company ID 106 · Prazo 15 dias úteis · 686 SKUs ativos</div></div>
+          </div>
+          <div class="plan-loja-stats">
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--red)" id="plan-pks-urg">—</span><span class="plan-lstat-lbl">Urgentes</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--gold)" id="plan-pks-alt">—</span><span class="plan-lstat-lbl">Alertas</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" id="plan-pks-tot">—</span><span class="plan-lstat-lbl">Total itens</span></div>
+          </div>
+        </div>
+        <div class="plan-lotes-info">⚠️ <strong>Lotes mínimos:</strong> Lancheiras Play = 32 un · Bolsas de Garrafa = 40 un · Mochilas = 10–20 un · Garrafas Térmicas = 24–48 un</div>
+        <div class="plan-abar">
+          <div class="plan-abar-sum">Loja: <strong style="color:var(--pks)">PKS</strong> · <strong id="plan-pks-sel">0</strong> itens para repor</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn bg2 bsm" onclick="planExportarLoja('PKS')">⬇ Exportar PKS</button>
+            <button class="btn bp bsm" onclick="planGerarReq('PKS')">✓ Gerar Requisição PKS</button>
+          </div>
+        </div>
+        <div class="tw" id="plan-tw-pks"></div>
+      </div>
+
+      <!-- TAB IGUATEMI -->
+      <div class="plan-section" id="plan-tab-igu">
+        <div class="plan-loja-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--igu);display:inline-block"></span>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--igu)">Loja Iguatemi</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Company IDs 26, 27 · Prazo 20 dias úteis · 883 SKUs ativos</div></div>
+          </div>
+          <div class="plan-loja-stats">
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--red)" id="plan-igu-urg">—</span><span class="plan-lstat-lbl">Urgentes</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--gold)" id="plan-igu-alt">—</span><span class="plan-lstat-lbl">Alertas</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" id="plan-igu-tot">—</span><span class="plan-lstat-lbl">Total itens</span></div>
+          </div>
+        </div>
+        <div class="plan-lotes-info">⚠️ <strong>Iguatemi — maior prazo (20 dias):</strong> Priorize URGENTES Classe A agora. Bolsa Moove = 30 · Lancheira Fruit PRO = 20 · Necessaire Makeup Double = 40 · Garrafas Fresh 650ml = 48</div>
+        <div class="plan-abar">
+          <div class="plan-abar-sum">Loja: <strong style="color:var(--igu)">Iguatemi</strong> · <strong id="plan-igu-sel">0</strong> itens para repor</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn bg2 bsm" onclick="planExportarLoja('Iguatemi')">⬇ Exportar Iguatemi</button>
+            <button class="btn bp bsm" onclick="planGerarReq('Iguatemi')">✓ Gerar Requisição Iguatemi</button>
+          </div>
+        </div>
+        <div class="tw" id="plan-tw-igu"></div>
+      </div>
+
+      <!-- TAB ANÁLIA -->
+      <div class="plan-section" id="plan-tab-ana">
+        <div class="plan-loja-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--ana);display:inline-block"></span>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--ana)">Loja Anália Franco</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Company ID 107 · Prazo 10 dias úteis · 639 SKUs ativos</div></div>
+          </div>
+          <div class="plan-loja-stats">
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--red)" id="plan-ana-urg">—</span><span class="plan-lstat-lbl">Urgentes</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" style="color:var(--gold)" id="plan-ana-alt">—</span><span class="plan-lstat-lbl">Alertas</span></div>
+            <div class="plan-lstat"><span class="plan-lstat-val" id="plan-ana-tot">—</span><span class="plan-lstat-lbl">Total itens</span></div>
+          </div>
+        </div>
+        <div class="plan-lotes-info">⚠️ <strong>Anália Franco — menor prazo (10 dias):</strong> Aproveite para repor também itens em ALERTA. Tote Shopper = 30 · Bolsa Moove = 30 · Mala Joy = 16 · Necessaire = 40</div>
+        <div class="plan-abar">
+          <div class="plan-abar-sum">Loja: <strong style="color:var(--ana)">Anália Franco</strong> · <strong id="plan-ana-sel">0</strong> itens para repor</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn bg2 bsm" onclick="planExportarLoja('Anália Franco')">⬇ Exportar Anália</button>
+            <button class="btn bp bsm" onclick="planGerarReq('Anália Franco')">✓ Gerar Requisição Anália</button>
+          </div>
+        </div>
+        <div class="tw" id="plan-tw-ana"></div>
+      </div>
+
+      <!-- TAB RESUMO -->
+      <div class="plan-section" id="plan-tab-resumo">
+        <div style="padding:18px 0 14px"><h2 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:4px">Resumo Consolidado</h2><p style="color:var(--muted);font-size:13px">Visão unificada das 3 lojas — prioridades e próximos passos</p></div>
+        <div class="plan-resumo-grid">
+          <div class="plan-resumo-card"><div class="plan-resumo-title" style="color:var(--red)">🚨 Urgentes — Ação Hoje</div><div id="plan-resumo-urgentes"></div></div>
+          <div class="plan-resumo-card"><div class="plan-resumo-title" style="color:var(--gold)">⚠️ Alertas — Repor neste Ciclo</div><div id="plan-resumo-alertas"></div></div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Produto</th><th style="text-align:center">PKS</th><th style="text-align:center">Iguatemi</th><th style="text-align:center">Anália</th><th style="text-align:center">Classe</th><th style="text-align:center">Prioridade</th></tr></thead>
+            <tbody id="plan-resumo-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═ PEDIDOS ═ -->
+    <section id="sec-pedidos" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><h1>Pedidos das Lojas</h1><p>Acompanhe os pedidos em andamento por loja.</p></div>
+        <button class="btn bg2 bsm" onclick="_pedidosCache=null;loadPedidos()">↻ Atualizar</button>
+      </div>
+      <div class="ped-filtros">
+        <input type="text" id="inp-busca-ped" placeholder="Buscar pedido ou item..."
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;flex:1;min-width:180px;"
+          oninput="filtrarPedidos()"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"/>
+        <select id="sel-loja-ped" onchange="filtrarPedidos()"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <option value="">Todas as lojas</option>
+          <option value="PKS">PKS</option>
+          <option value="IGUATEMI">Iguatemi</option>
+          <option value="ANÁLIA FRANCO">Anália Franco</option>
+        </select>
+        <select id="sel-status-ped" onchange="filtrarPedidos()"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <option value="">Todos os status</option>
+          <option value="CONCLU">Concluído</option>
+          <option value="PEND">Pendente</option>
+          <option value="AGUARDANDO NF">Aguardando NF</option>
+          <option value="AGUARDANDO">Aguardando</option>
+          <option value="AG. COLETA">Ag. Coleta</option>
+          <option value="SEM ESTOQUE">Sem Estoque</option>
+          <option value="SEM SALDO">Sem Saldo no Webgex</option>
+          <option value="DUPLICADO">Duplicado</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+      </div>
+      <div id="ped-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
+      <div id="ped-table"></div>
+    </section>
+
+    <!-- ═ RUPTURAS ═ -->
+    <section id="sec-ruptura" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><h1>Consulta de Rupturas</h1><p>Itens em ruptura com previsão de chegada confirmada.</p></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="inp-busca-rup" placeholder="Buscar produto..."
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;"
+            oninput="filtrarRuptura(this.value)"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--border)'"/>
+          <button class="btn bg2 bsm" onclick="_rupturaCache=null;loadRuptura()">↻ Atualizar</button>
+        </div>
+      </div>
+      <div id="rup-resumo" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"></div>
+      <div id="rup-grid"></div>
     </section>
 
     <!-- ═ FLUXO ═ -->
     <section id="sec-fluxo" class="sec">
       <div class="ph"><h1>Fluxo &amp; Prazos</h1><p>Processo semanal de reabastecimento — da requisição à entrega.</p></div>
-
       <div class="fsteps">
         <div class="fstep act"><div class="snum">1</div><div class="slbl">Preenchimento<br>pela Loja</div><div class="sday">SEG · TER até 18h</div></div>
         <div class="fstep"><div class="snum">2</div><div class="slbl">Aprovação<br>Administrador</div><div class="sday">QUA até 18h</div></div>
@@ -478,7 +598,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="fstep"><div class="snum">4</div><div class="slbl">Transporte<br>&amp; Entrega</div><div class="sday">Conforme prazo</div></div>
         <div class="fstep"><div class="snum">5</div><div class="slbl">Recebimento<br>na Loja</div><div class="sday">Ver prazos abaixo</div></div>
       </div>
-
       <div class="igrid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:16px">
         <div class="icard" style="border-top:3px solid var(--pks)">
           <div class="icard-t" style="color:var(--pks)">🏪 Loja PKS</div>
@@ -496,7 +615,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="ii">Prazo médio de recebimento após aprovação da requisição.</div>
         </div>
       </div>
-
       <div class="igrid">
         <div class="icard">
           <div class="icard-t">Regras importantes</div>
@@ -517,92 +635,47 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </section>
 
-  </div>
+    <!-- ═ USUÁRIOS ═ -->
+    <section id="sec-usuarios" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><h1>Gestão de Usuários</h1><p>Crie, edite e remova acessos ao sistema.</p></div>
+        <button class="btn bp" onclick="openUserModal(null)">+ Novo Usuário</button>
+      </div>
+      <div class="user-grid" id="user-grid"></div>
+    </section>
+
+  </div><!-- /main -->
+</div><!-- /app-wrap -->
+
+<!-- MODAL REQUISIÇÃO -->
+<div class="mo" id="modal-req" onclick="if(event.target===this)closeModal('modal-req')">
+  <div class="md"><div class="mh"><h2 id="mreq-title">Detalhe</h2><button class="mx" onclick="closeModal('modal-req')">✕</button></div>
+    <div class="mb" id="mreq-body"></div><div class="mf" id="mreq-foot"></div></div>
 </div>
 
-  <!-- ═ PEDIDOS ═ -->
-  <section id="sec-pedidos" class="sec">
-    <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div><h1>Pedidos das Lojas</h1><p>Acompanhe os pedidos em andamento por loja.</p></div>
-      <button class="btn bg2 bsm" onclick="_pedidosCache=null;loadPedidos()">↻ Atualizar</button>
+<!-- MODAL PLANO REQUISIÇÃO -->
+<div class="mo" id="modal-plan-req" onclick="if(event.target===this)closeModal('modal-plan-req')">
+  <div class="md"><div class="mh"><h2 id="mplan-title">Requisição gerada</h2><button class="mx" onclick="closeModal('modal-plan-req')">✕</button></div>
+    <div class="mb" id="mplan-body"></div>
+    <div class="mf">
+      <button class="btn bg2" onclick="closeModal('modal-plan-req')">Fechar</button>
+      <button class="btn bp" id="mplan-export-btn">⬇ Exportar Excel</button>
     </div>
-    <div class="ped-filtros">
-      <input type="text" id="inp-busca-ped" placeholder="Buscar pedido ou item..."
-        style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;flex:1;min-width:180px;"
-        oninput="filtrarPedidos()"
-        onfocus="this.style.borderColor='var(--accent)'"
-        onblur="this.style.borderColor='var(--border)'"/>
-      <select id="sel-loja-ped" onchange="filtrarPedidos()"
-        style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-        <option value="">Todas as lojas</option>
-        <option value="PKS">PKS</option>
-        <option value="IGUATEMI">Iguatemi</option>
-        <option value="ANÁLIA FRANCO">Anália Franco</option>
-      </select>
-      <select id="sel-status-ped" onchange="filtrarPedidos()"
-        style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-        <option value="">Todos os status</option>
-        <option value="CONCLU">Concluído</option>
-        <option value="PEND">Pendente</option>
-        <option value="AGUARDANDO NF">Aguardando NF</option>
-        <option value="AGUARDANDO">Aguardando</option>
-        <option value="AG. COLETA">Ag. Coleta</option>
-        <option value="SEM ESTOQUE">Sem Estoque</option>
-        <option value="SEM SALDO">Sem Saldo no Webgex</option>
-        <option value="DUPLICADO">Duplicado</option>
-        <option value="CANCELADO">Cancelado</option>
-      </select>
-    </div>
-    <div id="ped-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
-    <div id="ped-table"></div>
-  </section>
-
-  <!-- ═ RUPTURAS ═ -->
-  <section id="sec-ruptura" class="sec">
-    <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div><h1>Consulta de Rupturas</h1><p>Itens em ruptura com previsão de chegada confirmada.</p></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="inp-busca-rup" placeholder="Buscar produto..."
-          style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;"
-          oninput="filtrarRuptura(this.value)"
-          onfocus="this.style.borderColor='var(--accent)'"
-          onblur="this.style.borderColor='var(--border)'"/>
-        <button class="btn bg2 bsm" onclick="_rupturaCache=null;loadRuptura()">↻ Atualizar</button>
-      </div>
-    </div>
-    <div id="rup-resumo" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"></div>
-    <div id="rup-grid"></div>
-  </section>
-
-
-
-<!-- MODAL DETALHE REQUISIÇÃO -->
-<div class="mo" id="modal-req" onclick="if(event.target===this)closeModal('modal-req')">
-  <div class="md">
-    <div class="mh"><h2 id="mreq-title">Detalhe</h2><button class="mx" onclick="closeModal('modal-req')">✕</button></div>
-    <div class="mb" id="mreq-body"></div>
-    <div class="mf" id="mreq-foot"></div>
   </div>
 </div>
 
 <!-- MODAL USUÁRIO -->
 <div class="mo" id="modal-user" onclick="if(event.target===this)closeModal('modal-user')">
-  <div class="md md-sm">
-    <div class="mh"><h2 id="muser-title">Usuário</h2><button class="mx" onclick="closeModal('modal-user')">✕</button></div>
-    <div class="mb" id="muser-body"></div>
-    <div class="mf" id="muser-foot"></div>
-  </div>
+  <div class="md md-sm"><div class="mh"><h2 id="muser-title">Usuário</h2><button class="mx" onclick="closeModal('modal-user')">✕</button></div>
+    <div class="mb" id="muser-body"></div><div class="mf" id="muser-foot"></div></div>
 </div>
 
 <!-- MODAL CONFIRMAR DELETE -->
 <div class="mo" id="modal-del" onclick="if(event.target===this)closeModal('modal-del')">
-  <div class="md md-sm">
-    <div class="mh"><h2>Confirmar exclusão</h2><button class="mx" onclick="closeModal('modal-del')">✕</button></div>
+  <div class="md md-sm"><div class="mh"><h2>Confirmar exclusão</h2><button class="mx" onclick="closeModal('modal-del')">✕</button></div>
     <div class="mb"><p style="font-size:14px;color:var(--muted);line-height:1.6" id="del-msg"></p></div>
-    <div class="mf">
-      <button class="btn bg2" onclick="closeModal('modal-del')">Cancelar</button>
-      <button class="btn" style="background:rgba(255,92,92,.2);color:var(--red)" id="del-confirm-btn">Excluir</button>
-    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeModal('modal-del')">Cancelar</button>
+    <button class="btn" style="background:rgba(255,92,92,.2);color:var(--red)" id="del-confirm-btn">Excluir</button></div>
   </div>
 </div>
 
@@ -610,12 +683,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <button class="fab" id="btn-env-float" onclick="enviar()">✓ Enviar Requisição</button>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════════
 const SHEET_ID='1FdmE1CvAusXk3DwjfhyKZ8acF1xLzczlzhaPH3-ack8';
-const GID='1102326416';
 const LOTES_SHEET_ID='1RlcVygtyPgnp08m25PNY1aGaOLvsMnSo8gKyg6bVGGI';
-const LOTES_GID='747704311';
+const PROXY='https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec';
 
-// Lotes mínimos por nome parcial do produto (carregado da planilha, fallback embutido)
 let LOTES_MAP={
   'Garrafa Fresh 650ML':48,'Garrafa Fresh 950ML':40,'Garrafa Urban 500ML':40,
   'Copo Vibe 470ML':40,'Copo Life 1170ML':15,'Copo Life 880ML':15,
@@ -630,116 +704,70 @@ let LOTES_MAP={
   'Necessaire Puffer M':50,'Necessaire Voyage':40,'Powerbank':50,
 };
 
-function getLote(nomeProduto){
-  // Busca correspondência parcial: chave do mapa contida no nome do produto
-  for(const[chave,lote] of Object.entries(LOTES_MAP)){
-    if(nomeProduto.includes(chave))return lote;
-  }
-  return 1; // sem lote mínimo = qualquer quantidade
-}
-
+function getLote(n){for(const[k,v]of Object.entries(LOTES_MAP)){if(n.includes(k))return v;}return 1;}
 async function loadLotes(){
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec?tipo=lotes');
-    if(!r.ok)return;
-    const rows=await r.json();
-    const novoMap={};
-    for(let i=1;i<rows.length;i++){
-      const prod=String(rows[i][1]||'').trim();
-      const qtd=parseInt(String(rows[i][2]||''))||0;
-      if(prod&&qtd>0)novoMap[prod]=qtd;
-    }
-    if(Object.keys(novoMap).length>0)LOTES_MAP=novoMap;
+    const r=await fetch(PROXY+'?tipo=lotes');if(!r.ok)return;
+    const rows=await r.json();const m={};
+    for(let i=1;i<rows.length;i++){const p=String(rows[i][1]||'').trim();const q=parseInt(String(rows[i][2]||''))||0;if(p&&q>0)m[p]=q;}
+    if(Object.keys(m).length>0)LOTES_MAP=m;
   }catch(e){}
 }
 
-// ── DEFAULT USERS ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// USERS
+// ══════════════════════════════════════════════════════════════════
 const DEFAULT_USERS=[
   {id:1,login:'admin',senha:'admin123',role:'admin',loja:null,nome:'Administrador'},
   {id:2,login:'pks',senha:'pks123',role:'loja',loja:'PKS',nome:'Responsável PKS'},
   {id:3,login:'iguatemi',senha:'iguatemi123',role:'loja',loja:'Iguatemi',nome:'Responsável Iguatemi'},
   {id:4,login:'analia',senha:'analia123',role:'loja',loja:'Anália',nome:'Responsável Anália'},
 ];
-
-// ── STORAGE ───────────────────────────────────────────────────────────────────
-const PROXY='https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec';
-
-// Usuários — sincronizados via Apps Script
 let _usersCache=null;
-
 async function getUsers(){
   if(_usersCache)return _usersCache;
-  try{
-    const r=await fetch(PROXY+'?tipo=usuarios');
-    const data=await r.json();
-    _usersCache=Array.isArray(data)&&data.length?data:DEFAULT_USERS;
-    return _usersCache;
-  }catch(e){return DEFAULT_USERS;}
+  try{const r=await fetch(PROXY+'?tipo=usuarios');const d=await r.json();_usersCache=Array.isArray(d)&&d.length?d:DEFAULT_USERS;return _usersCache;}
+  catch(e){return DEFAULT_USERS;}
 }
+async function saveUserRemote(u){_usersCache=null;const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'salvarUser',...u})});return await r.json();}
+async function deleteUserRemote(id){_usersCache=null;const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'deletarUser',id})});return await r.json();}
 
-async function saveUserRemote(u){
-  _usersCache=null;
-  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'salvarUser',...u})});
-  return await r.json();
-}
-
-async function deleteUserRemote(id){
-  _usersCache=null;
-  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'deletarUser',id})});
-  return await r.json();
-}
-
-// Cache local de requisições (evita re-fetch desnecessário)
+// ══════════════════════════════════════════════════════════════════
+// REQUISIÇÕES
+// ══════════════════════════════════════════════════════════════════
 let _reqsCache=null;
-
 async function getReqs(){
   if(_reqsCache!==null)return _reqsCache;
-  try{
-    const r=await fetch(PROXY+'?tipo=requisicoes');
-    const data=await r.json();
-    _reqsCache=Array.isArray(data)?data:[];
-    return _reqsCache;
-  }catch(e){return[];}
+  try{const r=await fetch(PROXY+'?tipo=requisicoes');const d=await r.json();_reqsCache=Array.isArray(d)?d:[];return _reqsCache;}
+  catch(e){return[];}
 }
-
 async function saveReq(req){
-  // Nova requisição
-  const r=await fetch(PROXY,{
-    method:'POST',
-    body:JSON.stringify({acao:'salvar',...req})
-  });
-  const d=await r.json();
-  _reqsCache=null; // invalida cache
-  return d;
+  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'salvar',...req})});
+  const d=await r.json();_reqsCache=null;return d;
 }
-
 async function updateReq(payload){
-  const r=await fetch(PROXY,{
-    method:'POST',
-    body:JSON.stringify({acao:'atualizar',...payload})
-  });
-  _reqsCache=null;
-  return await r.json();
+  const r=await fetch(PROXY,{method:'POST',body:JSON.stringify({acao:'atualizar',...payload})});
+  _reqsCache=null;return await r.json();
 }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
 let currentUser=null,lojaAtual=null,produtos=[],filtroAtual='todos',reqAtual=null,editUserId=null,delUserId=null;
-
 const LOJA_COLORS={PKS:'var(--pks)',Iguatemi:'var(--igu)','Anália':'var(--ana)'};
-const ROLE_COLORS={admin:'#F5B731',loja:'var(--accent)'};
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
 function init(){
-  // init users if first time
-  if(!localStorage.getItem('usuarios'))saveUsers(DEFAULT_USERS);
+  if(!localStorage.getItem('usuarios'))localStorage.setItem('usuarios',JSON.stringify(DEFAULT_USERS));
   const saved=sessionStorage.getItem('currentUser');
   if(saved){currentUser=JSON.parse(saved);showApp();}
+  loadLotes();
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// LOGIN / LOGOUT
+// ══════════════════════════════════════════════════════════════════
 async function doLogin(){
-  const btn=document.querySelector('.login-btn');
-  btn.textContent='Entrando...';btn.disabled=true;
+  const btn=document.querySelector('.login-btn');btn.textContent='Entrando...';btn.disabled=true;
   const login=document.getElementById('inp-user').value.trim();
   const senha=document.getElementById('inp-pass').value;
   const users=await getUsers();
@@ -747,38 +775,32 @@ async function doLogin(){
   btn.textContent='Entrar';btn.disabled=false;
   if(!user){document.getElementById('login-err').classList.add('show');return;}
   document.getElementById('login-err').classList.remove('show');
-  currentUser=user;
-  sessionStorage.setItem('currentUser',JSON.stringify(user));
-  showApp();
+  currentUser=user;sessionStorage.setItem('currentUser',JSON.stringify(user));showApp();
 }
-
 function doLogout(){
   currentUser=null;sessionStorage.removeItem('currentUser');
   document.getElementById('app-wrap').style.display='none';
   document.getElementById('login-wrap').style.display='flex';
-  document.getElementById('inp-user').value='';
-  document.getElementById('inp-pass').value='';
+  document.getElementById('inp-user').value='';document.getElementById('inp-pass').value='';
   lojaAtual=null;produtos=[];
 }
 
-// ── SHOW APP ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// SHOW APP
+// ══════════════════════════════════════════════════════════════════
 function showApp(){
   document.getElementById('login-wrap').style.display='none';
   document.getElementById('app-wrap').style.display='block';
-
-  // topbar
   const isAdmin=currentUser.role==='admin';
   document.getElementById('tb-sub').textContent=isAdmin?'Administrador':'Loja '+currentUser.loja;
   document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;
   document.getElementById('user-dot').style.background=isAdmin?'var(--gold)':LOJA_COLORS[currentUser.loja]||'var(--accent)';
   document.getElementById('nb-usuarios').style.display=isAdmin?'':'none';
-
-  // nova req setup
   if(isAdmin){
     document.getElementById('lojas-grid').style.display='grid';
     document.getElementById('nova-sub').textContent='Selecione a loja, informe as quantidades e envie para aprovação.';
     document.getElementById('form-area').style.display='none';
-  } else {
+  }else{
     document.getElementById('lojas-grid').style.display='none';
     document.getElementById('nova-sub').textContent=`Loja ${currentUser.loja} — informe as quantidades e envie para aprovação.`;
     lojaAtual=currentUser.loja;
@@ -786,9 +808,12 @@ function showApp(){
     document.getElementById('form-area').style.display='block';
     if(!produtos.length)loadEstoque();
   }
+  planInit();
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════════════
 function showSec(id,el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
@@ -796,72 +821,60 @@ function showSec(id,el){
   el.classList.add('active');
   if(id==='gestao')renderGestao();
   if(id==='usuarios')renderUsers();
+  if(id==='pedidos')loadPedidos();
+  if(id==='ruptura')loadRuptura();
 }
 
-// ── LOJA SELECT (admin) ───────────────────────────────────────────────────────
-function selectLoja(nome,el){
+// ══════════════════════════════════════════════════════════════════
+// LOJA SELECT (admin)
+// ══════════════════════════════════════════════════════════════════
+function selectLoja(loja,el){
+  lojaAtual=loja;
   document.querySelectorAll('.lc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
-  lojaAtual=nome;
-  document.getElementById('lbl-loja').textContent=nome;
+  document.getElementById('lbl-loja').textContent=loja;
   document.getElementById('form-area').style.display='block';
-  if(!produtos.length){loadLotes();loadEstoque();}else renderTabela();
+  if(!produtos.length)loadEstoque();else renderTabela();
+  updateCnt();
 }
 
-// ── ESTOQUE ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ESTOQUE
+// ══════════════════════════════════════════════════════════════════
 async function loadEstoque(){
   setEst('loading','Carregando saldo Itapeva [Total]...');
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbz-iMSgGB8P9cb7mQLNfYNESY4Nu3dtqGPIcwtbYgu71D0c8GeZCEQdpKyI8BikVmzgYg/exec?tipo=estoque');
+    const r=await fetch(PROXY+'?tipo=estoque');
     if(!r.ok)throw new Error('HTTP '+r.status);
     const rows=await r.json();
-
     let hRow=-1,colLinha=-1,colItem=-1,colCat=-1,colBruto=-1,colExtrema=-1,colStatus=-1;
     for(let i=0;i<Math.min(10,rows.length);i++){
       const row=rows[i].map(v=>String(v==null?'':v));
       const iItem=row.findIndex(h=>h.trim()==='Item');
       const iBruto=row.findIndex(h=>h.includes('Itapeva')&&h.includes('Bruto'));
       if(iItem>=0){
-        hRow=i;
-        colLinha=row.findIndex(h=>h.trim()==='Linha'); if(colLinha===-1)colLinha=0;
-        colItem=iItem;
-        colCat=row.findIndex(h=>h.trim()==='Categoria');
-        colExtrema=row.findIndex(h=>h.includes('Estoque')&&h.includes('Extrema')); if(colExtrema===-1)colExtrema=7;
-        colBruto=iBruto>=0?iBruto:9;
-        colStatus=row.findIndex(h=>h.trim()==='Status'); if(colStatus===-1)colStatus=4;
-        break;
+        hRow=i;colLinha=row.findIndex(h=>h.trim()==='Linha');if(colLinha===-1)colLinha=0;
+        colItem=iItem;colCat=row.findIndex(h=>h.trim()==='Categoria');
+        colExtrema=row.findIndex(h=>h.includes('Estoque')&&h.includes('Extrema'));if(colExtrema===-1)colExtrema=7;
+        colBruto=iBruto>=0?iBruto:9;colStatus=row.findIndex(h=>h.trim()==='Status');if(colStatus===-1)colStatus=4;break;
       }
     }
     if(hRow===-1)throw new Error('Cabeçalho não encontrado');
-
-    function parseSaldo(val){
-      const raw=String(val==null?'':val).trim().replace(/\./g,'').replace(',','.');
-      return raw?Math.max(0,parseInt(raw)||0):0;
-    }
-
+    function parseSaldo(val){const raw=String(val==null?'':val).trim().replace(/\./g,'').replace(',','.');return raw?Math.max(0,parseInt(raw)||0):0;}
     const list=[];
     for(let i=hRow+1;i<rows.length;i++){
       const row=rows[i].map(v=>String(v==null?'':v));
-      const item=(row[colItem]||'').trim();
-      if(!item)continue;
-      const statusProd=(row[colStatus]||'').trim();
-      if(statusProd.toLowerCase()==='descontinuado')continue;
+      const item=(row[colItem]||'').trim();if(!item)continue;
+      const statusProd=(row[colStatus]||'').trim();if(statusProd.toLowerCase()==='descontinuado')continue;
       const cat=(colCat>=0?(row[colCat]||''):'').trim()||'Geral';
       const linha=(row[colLinha]||'').trim();
       const isUV=cat.trim().toUpperCase()==='UV';
       const isBase=linha.toUpperCase().startsWith('BASE');
       let saldo,fonteLabel;
-      if(isUV){
-        saldo=parseSaldo(row[colExtrema]);
-        fonteLabel='Extrema';
-      }else if(isBase){
-        saldo=parseSaldo(row[colBruto])+parseSaldo(row[colExtrema]);
-        fonteLabel='Bruto+Extrema';
-      }else{
-        saldo=parseSaldo(row[colBruto]);
-        fonteLabel='Itapeva Bruto';
-      }
-      if(saldo<50)continue; // oculta saldo < 50
+      if(isUV){saldo=parseSaldo(row[colExtrema]);fonteLabel='Extrema';}
+      else if(isBase){saldo=parseSaldo(row[colBruto])+parseSaldo(row[colExtrema]);fonteLabel='Bruto+Extrema';}
+      else{saldo=parseSaldo(row[colBruto]);fonteLabel='Itapeva Bruto';}
+      if(saldo<50)continue;
       list.push({item,categoria:cat,linha,saldo,fonteLabel});
     }
     if(!list.length)throw new Error('Nenhum produto encontrado');
@@ -873,33 +886,16 @@ async function loadEstoque(){
   }catch(e){
     setEst('err','Planilha indisponível — usando saldo de demonstração.');
     produtos=[
-      {item:'Bolsa Garrafa Térmica Preta',categoria:'Têxtil',saldo:1100,fonteLabel:'Itapeva Bruto'},
-      {item:'Bolsa Garrafa Térmica Vinho',categoria:'Têxtil',saldo:967,fonteLabel:'Itapeva Bruto'},
-      {item:'Bolsa Fitness Puffer Preta',categoria:'Têxtil',saldo:1411,fonteLabel:'Itapeva Bruto'},
-      {item:'Necessaire Puffer M Preta',categoria:'Têxtil',saldo:1515,fonteLabel:'Itapeva Bruto'},
-      {item:'Necessaire Puffer Básica Preta',categoria:'Gift',saldo:973,fonteLabel:'Itapeva Bruto'},
+      {item:'Bolsa Garrafa Térmica Preta',categoria:'Têxtil',saldo:1100,fonteLabel:'Demo'},
+      {item:'Bolsa Fitness Puffer Preta',categoria:'Têxtil',saldo:1411,fonteLabel:'Demo'},
+      {item:'Necessaire Puffer M Preta',categoria:'Têxtil',saldo:1515,fonteLabel:'Demo'},
+      {item:'Necessaire Puffer Básica Preta',categoria:'Gift',saldo:973,fonteLabel:'Demo'},
     ];
     renderTabela();
   }
 }
-
-
 function setEst(t,m){document.getElementById('edot').className='edot '+t;document.getElementById('emsg').textContent=m;}
 
-function parseCSV(text){
-  const rows=[];
-  for(const line of text.split('\n')){
-    const cols=[];let inQ=false,cur='';
-    for(let i=0;i<line.length;i++){
-      const ch=line[i];
-      if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur);cur='';}else{cur+=ch;}
-    }
-    cols.push(cur);rows.push(cols);
-  }
-  return rows;
-}
-
-// ── TABELA PRODUTOS ───────────────────────────────────────────────────────────
 function renderTabela(){
   const cats={};
   for(const p of produtos){if(!cats[p.categoria])cats[p.categoria]=[];cats[p.categoria].push(p);}
@@ -909,8 +905,7 @@ function renderTabela(){
     for(const p of prods){
       const cls=p.saldo>50?'ok':p.saldo>0?'low':'zero';
       const pid=p.item.replace(/[^a-zA-Z0-9]/g,'_');
-      const lote=getLote(p.item);
-      const temLote=lote>1;
+      const lote=getLote(p.item);const temLote=lote>1;
       const loteTip=temLote?`<div style="font-size:10px;color:var(--gold);margin-top:3px">lote: ${lote} un</div>`:'';
       html+=`<tr>
         <td><div class="pname">${p.item}</div></td>
@@ -928,64 +923,24 @@ function renderTabela(){
       </tr>`;
     }
   }
-  document.getElementById('tbody').innerHTML=html;
-  updateCnt();
+  document.getElementById('tbody').innerHTML=html;updateCnt();
 }
 
 function filtrarTabela(termo){
   const t=termo.trim().toLowerCase();
   const rows=document.querySelectorAll('#tbody tr');
-  let catAtual=null,catRow=null,catVisible=false;
+  let catRow=null,catVisible=false;
   rows.forEach(row=>{
-    if(row.classList.contains('crow')){
-      // linha de categoria: mostrar/ocultar depois de processar filhos
-      if(catRow&&catAtual!==null)catRow.style.display=catVisible?'':'none';
-      catRow=row;catAtual=row;catVisible=false;
-      return;
-    }
-    const produto=row.querySelector('.pname');
-    const cat=row.querySelector('td:nth-child(2)');
-    const texto=((produto?produto.textContent:'')+(cat?cat.textContent:'')).toLowerCase();
-    const visivel=!t||texto.includes(t);
-    row.style.display=visivel?'':'none';
-    if(visivel)catVisible=true;
+    if(row.classList.contains('crow')){if(catRow)catRow.style.display=catVisible?'':'none';catRow=row;catVisible=false;return;}
+    const txt=((row.querySelector('.pname')||{}).textContent||'').toLowerCase();
+    const vis=!t||txt.includes(t);row.style.display=vis?'':'none';if(vis)catVisible=true;
   });
-  // flush last category
   if(catRow)catRow.style.display=catVisible?'':'none';
-
-  // show empty message if nothing visible
-  const anyVisible=[...rows].some(r=>!r.classList.contains('crow')&&r.style.display!=='none');
-  let emptyRow=document.getElementById('tr-empty-search');
-  if(!anyVisible){
-    if(!emptyRow){
-      emptyRow=document.createElement('tr');
-      emptyRow.id='tr-empty-search';
-      emptyRow.innerHTML=`<td colspan="5" style="text-align:center;padding:28px;color:var(--muted)">Nenhum produto encontrado para "<strong style="color:var(--text)">${termo}</strong>"</td>`;
-      document.getElementById('tbody').appendChild(emptyRow);
-    } else {
-      emptyRow.style.display='';
-      emptyRow.querySelector('td').innerHTML=`Nenhum produto encontrado para "<strong style="color:var(--text)">${termo}</strong>"`;
-    }
-  } else if(emptyRow){
-    emptyRow.style.display='none';
-  }
 }
 
 function onQty(inp){
-  const v=parseInt(inp.value)||0;
-  const saldo=parseInt(inp.dataset.saldo)||0;
-  const lote=parseInt(inp.dataset.lote)||1;
-  const excedeSaldo=v>saldo;
-  const naoMultiplo=lote>1&&v>0&&v%lote!==0;
-  inp.classList.toggle('over',excedeSaldo||naoMultiplo);
-  if(naoMultiplo&&!excedeSaldo){
-    inp.title=`Quantidade deve ser múltiplo de ${lote} (lote mínimo por caixa)`;
-  } else if(excedeSaldo){
-    inp.title=`Quantidade não pode exceder o saldo disponível (${saldo})`;
-  } else {
-    inp.title='';
-  }
-  updateCnt();
+  const v=parseInt(inp.value)||0,saldo=parseInt(inp.dataset.saldo)||0,lote=parseInt(inp.dataset.lote)||1;
+  inp.classList.toggle('over',v>saldo||(lote>1&&v>0&&v%lote!==0));updateCnt();
 }
 function updateCnt(){
   let c=0;
@@ -997,7 +952,9 @@ function updateCnt(){
   if(fab){fab.disabled=disabled;fab.classList.toggle('visible',!disabled);}
 }
 
-// ── ENVIAR ────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// ENVIAR REQUISIÇÃO
+// ══════════════════════════════════════════════════════════════════
 async function enviar(){
   const semana=document.getElementById('inp-semana').value.trim();
   const resp=document.getElementById('inp-resp').value.trim();
@@ -1012,238 +969,292 @@ async function enviar(){
     }
   });
   if(!itens.length){toast('Adicione ao menos um item.','error');return;}
-  const btn=document.getElementById('btn-env');
-  const btnF=document.getElementById('btn-env-float');
-  btn.disabled=true;btn.textContent='Enviando...';
-  if(btnF){btnF.disabled=true;btnF.textContent='⏳';}
+  const btn=document.getElementById('btn-env');const btnF=document.getElementById('btn-env-float');
+  btn.disabled=true;btn.textContent='Enviando...';if(btnF){btnF.disabled=true;btnF.textContent='⏳';}
   try{
     const d=await saveReq({semana,loja:lojaAtual,responsavel:resp,usuario:currentUser.login,itens});
     if(d.ok){toast('Requisição enviada! 🎉','success');limpar();}
     else toast('Erro ao enviar: '+(d.erro||''),'error');
   }catch(e){toast('Erro de conexão.','error');}
-  btn.disabled=false;btn.textContent='Enviar Requisição';
-  if(btnF){btnF.disabled=false;btnF.textContent='✓ Enviar';}
+  btn.disabled=false;btn.textContent='Enviar Requisição';if(btnF){btnF.disabled=false;btnF.textContent='✓ Enviar';}
 }
-
 function limpar(){
   document.querySelectorAll('.qi').forEach(i=>{i.value='';i.classList.remove('over');});
   document.querySelectorAll('.oi').forEach(i=>i.value='');
-  const busca=document.getElementById('inp-busca');
-  if(busca){busca.value='';filtrarTabela('');}
-  const fab=document.getElementById('btn-env-float');if(fab)fab.classList.remove('visible');
-  updateCnt();
+  const b=document.getElementById('inp-busca');if(b){b.value='';filtrarTabela('');}
+  const fab=document.getElementById('btn-env-float');if(fab)fab.classList.remove('visible');updateCnt();
 }
 
-// ── GESTÃO ────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// GESTÃO
+// ══════════════════════════════════════════════════════════════════
 async function renderGestao(){
-  const el2=document.getElementById('rlist');
-  el2.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  const el=document.getElementById('rlist');
+  el.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
   let reqs=await getReqs();
   if(currentUser.role==='loja')reqs=reqs.filter(r=>r.loja===currentUser.loja);
   const fil=filtroAtual==='todos'?reqs:reqs.filter(r=>r.status===filtroAtual);
-  const el=el2;
   if(!fil.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><p>Nenhuma requisição encontrada.</p></div>`;return;}
   el.innerHTML=fil.map(r=>`
     <div class="rc" onclick="openReq(${r.id})">
-      <div class="rh">
-        <div class="rl"><div class="rdot" style="background:${LOJA_COLORS[r.loja]||'var(--accent)'}"></div>Loja ${r.loja}</div>
-        <span class="sb s${r.status.replace(/ /g,'')}">${r.status}</span>
-      </div>
-      <div class="ri">
-        <span>📅 ${r.semana}</span><span>👤 ${r.responsavel}</span>
+      <div class="rh"><div class="rl"><div class="rdot" style="background:${LOJA_COLORS[r.loja]||'var(--accent)'}"></div>Loja ${r.loja}</div>
+        <span class="sb s${r.status.replace(/ /g,'')}">${r.status}</span></div>
+      <div class="ri"><span>📅 ${r.semana}</span><span>👤 ${r.responsavel}</span>
         <span>📦 ${r.itens.length} itens</span><span>🕐 ${fmtDate(r.criado)}</span>
-        ${r.aprovador?`<span>✅ Aprovado por: ${r.aprovador}</span>`:''}
-      </div>
+        ${r.aprovador?`<span>✅ Aprovado por: ${r.aprovador}</span>`:''}</div>
     </div>`).join('');
 }
-
 function filtrar(f,el){filtroAtual=f;_reqsCache=null;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderGestao();}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
-// ── MODAL REQUISIÇÃO ──────────────────────────────────────────────────────────
 async function openReq(id){
-  const reqs=await getReqs();
-  const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
-  reqAtual=id;
-  document.getElementById('modal-req').classList.add('open');
+  const reqs=await getReqs();const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
+  reqAtual=id;document.getElementById('modal-req').classList.add('open');
   document.getElementById('mreq-title').textContent=`Loja ${req.loja} — ${req.semana}`;
   let body=`<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)">
     <span>👤 <strong style="color:var(--text)">${req.responsavel}</strong></span>
     <span>📅 ${req.semana}</span>
-    <span class="sb s${req.status.replace(/ /g,'')}">${req.status}</span>
-  </div>
-  <div class="tw"><table style="width:100%">
-    <thead><tr><th>Produto</th><th style="text-align:center">Saldo</th><th style="text-align:center">Solicitado</th><th style="text-align:center">Aprovado</th><th>Obs.</th></tr></thead><tbody>`;
+    <span class="sb s${req.status.replace(/ /g,'')}">${req.status}</span></div>
+  <div class="tw"><table><thead><tr><th>Produto</th><th style="text-align:center">Saldo</th><th style="text-align:center">Solicitado</th><th style="text-align:center">Aprovado</th><th>Obs.</th></tr></thead><tbody>`;
   for(const it of req.itens){
     const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
-    body+=`<tr>
-      <td><div class="pname">${it.produto}</div><div style="font-size:11px;color:var(--muted)">${it.categoria}</div></td>
+    body+=`<tr><td><div class="pname">${it.produto}</div><div style="font-size:11px;color:var(--muted)">${it.categoria}</div></td>
       <td style="text-align:center">${it.saldo.toLocaleString('pt-BR')}</td>
       <td style="text-align:center"><strong>${it.qty}</strong></td>
       <td style="text-align:center"><input type="number" class="qi" style="width:70px" id="${pid}" value="${it.qtyAprov||''}" placeholder="—" min="0" max="${it.qty}"/></td>
-      <td style="font-size:12px;color:var(--muted)">${it.obs||'—'}</td>
-    </tr>`;
+      <td style="font-size:12px;color:var(--muted)">${it.obs||'—'}</td></tr>`;
   }
   body+=`</tbody></table></div>`;
   document.getElementById('mreq-body').innerHTML=body;
-
   const isAdmin=currentUser.role==='admin';
   let foot=`<button class="btn bg2" onclick="closeModal('modal-req')">Fechar</button>`;
-  if(req.status==='Aprovado'){
-    foot+=`<button class="btn" style="background:rgba(46,204,136,.15);color:var(--green)" onclick="exportarExcel(${req.id})">⬇ Exportar Excel</button>`;
-  }
-  if(isAdmin&&req.status==='Pendente'){
-    foot+=`<button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>
-      <button class="btn bp" onclick="aprovar()">✓ Aprovar</button>`;
-  }
+  if(req.status==='Aprovado')foot+=`<button class="btn" style="background:rgba(46,204,136,.15);color:var(--green)" onclick="exportarExcel(${req.id})">⬇ Exportar Excel</button>`;
+  if(isAdmin&&req.status==='Pendente')foot+=`<button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button><button class="btn bp" onclick="aprovar()">✓ Aprovar</button>`;
   document.getElementById('mreq-foot').innerHTML=foot;
 }
 
 async function aprovar(){
-  const reqs=await getReqs();
-  const req=reqs.find(r=>String(r.id)===String(reqAtual));if(!req)return;
-  const itens=req.itens.map(it=>{
-    const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
-    const el=document.getElementById(pid);
-    return {...it,qtyAprov:el?parseInt(el.value)||it.qty:it.qty};
-  });
+  const reqs=await getReqs();const req=reqs.find(r=>String(r.id)===String(reqAtual));if(!req)return;
+  const itens=req.itens.map(it=>{const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);return{...it,qtyAprov:el?parseInt(el.value)||it.qty:it.qty};});
   const d=await updateReq({id:reqAtual,status:'Aprovado',aprovador:currentUser.nome||currentUser.login,aprovadoEm:new Date().toISOString(),itens});
   if(d.ok){toast('Requisição aprovada! ✅','success');closeModal('modal-req');renderGestao();}
   else toast('Erro ao aprovar.','error');
 }
-
 async function reprovar(){
   const d=await updateReq({id:reqAtual,status:'Reprovado'});
   if(d.ok){toast('Requisição reprovada.','error');closeModal('modal-req');renderGestao();}
   else toast('Erro ao reprovar.','error');
 }
 
-// ── EXPORTAR EXCEL ────────────────────────────────────────────────────────────
 async function exportarExcel(id){
-  const reqs=await getReqs();
-  const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
-
-  // Dados
+  const reqs=await getReqs();const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
   const rows=[['Item','Quantidade','Loja']];
-  for(const it of req.itens){
-    rows.push([it.produto, it.qtyAprov||it.qty, req.loja]);
-  }
-
-  // Cria workbook com SheetJS
-  var wb=XLSX.utils.book_new();
-  var ws=XLSX.utils.aoa_to_sheet(rows);
-
-  // Largura das colunas
+  for(const it of req.itens)rows.push([it.produto,it.qtyAprov||it.qty,req.loja]);
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:45},{wch:14},{wch:16}];
-
-  // Estilo do cabeçalho (negrito) — SheetJS CE suporta via cell style parcial
-  ['A1','B1','C1'].forEach(function(ref){
-    if(ws[ref])ws[ref].s={font:{bold:true}};
-  });
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Requisição');
-
-  var nome='Requisicao_'+req.loja+'_'+req.semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx';
-  XLSX.writeFile(wb, nome);
+  ['A1','B1','C1'].forEach(ref=>{if(ws[ref])ws[ref].s={font:{bold:true}};});
+  XLSX.utils.book_append_sheet(wb,ws,'Requisição');
+  XLSX.writeFile(wb,'Requisicao_'+req.loja+'_'+req.semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx');
   toast('Arquivo exportado! ✅','success');
 }
 
+// ══════════════════════════════════════════════════════════════════
+// PEDIDOS
+// ══════════════════════════════════════════════════════════════════
+let _pedidosCache=null,_pedidosAll=[];
+async function loadPedidos(){
+  document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  document.getElementById('ped-resumo').innerHTML='';
+  try{
+    const r=await fetch(PROXY+'?tipo=pedidos');const data=await r.json();
+    if(!Array.isArray(data)||!data.length){document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum pedido encontrado.</p></div>`;return;}
+    _pedidosAll=data;renderPedidosTable(data);
+  }catch(e){document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar pedidos.</p></div>`;}
+}
+function filtrarPedidos(){
+  const busca=(document.getElementById('inp-busca-ped').value||'').toLowerCase();
+  const loja=(document.getElementById('sel-loja-ped').value||'').toLowerCase();
+  const status=(document.getElementById('sel-status-ped').value||'').toLowerCase();
+  const fil=_pedidosAll.filter(p=>{
+    const txt=(p.pedido+p.item+p.destino+p.status).toLowerCase();
+    return(!busca||txt.includes(busca))&&(!loja||(p.destino||'').toLowerCase().includes(loja))&&(!status||(p.status||'').toLowerCase().includes(status));
+  });
+  renderPedidosTable(fil);
+}
+function lojaClass(d){if((d||'').toUpperCase().includes('PKS'))return'ped-loja-pks';if((d||'').toUpperCase().includes('IGU'))return'ped-loja-igu';return'ped-loja-ana';}
+function statusClass(s){const sl=(s||'').toLowerCase();if(sl.includes('conclu'))return'ped-concluido';if(sl.includes('pend')||sl.includes('ag.'))return'ped-pendente';if(sl.includes('sem'))return'ped-semestoque';return'ped-outro';}
+function fmtPedData(val){if(!val)return'—';const ts=Date.parse(val);if(!isNaN(ts)&&String(val).length>6){const d=new Date(ts);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}return String(val).trim();}
+function renderPedidosTable(data){
+  if(!data.length){document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum resultado.</p></div>`;renderPedResumo([]);return;}
+  renderPedResumo(data);
+  document.getElementById('ped-table').innerHTML=`<div class="ped-table-wrap"><table>
+    <thead><tr><th>Pedido</th><th>Data</th><th>Item</th><th style="text-align:center">Solic.</th><th style="text-align:center">Realiz.</th><th style="text-align:center">Pend.</th><th style="text-align:center">% Real.</th><th>Prazo</th><th>Destino</th><th>Status</th></tr></thead>
+    <tbody>${data.map(p=>{
+      const barW=Math.min(100,parseInt(p.pctReal)||0);
+      const barCol=barW>=100?'var(--green)':barW>50?'var(--gold)':'var(--red)';
+      return`<tr>
+        <td style="font-weight:600;color:var(--accent)">${p.pedido}</td>
+        <td style="color:var(--muted)">${fmtPedData(p.dataPedido)}</td>
+        <td style="max-width:220px;white-space:normal;line-height:1.3">${p.item}</td>
+        <td style="text-align:center">${p.solicitado||'—'}</td>
+        <td style="text-align:center">${p.realizado||'—'}</td>
+        <td style="text-align:center;color:${parseInt(p.pendente||0)>0?'var(--gold)':'var(--muted)'}">${p.pendente||'0'}</td>
+        <td style="text-align:center;min-width:80px"><span style="font-size:12px;font-weight:600">${p.pctReal||'0%'}</span>
+          <div class="ped-prog"><div class="ped-prog-bar" style="width:${barW}%;background:${barCol}"></div></div></td>
+        <td style="color:var(--muted)">${fmtPedData(p.prazo)}</td>
+        <td class="${lojaClass(p.destino)}">${p.destino}</td>
+        <td><span class="ped-status ${statusClass(p.status)}">${p.status||'—'}</span></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+function renderPedResumo(data){
+  const el=document.getElementById('ped-resumo');
+  const tot=data.length;if(!tot){el.innerHTML='';return;}
+  const pend=data.filter(p=>(p.status||'').toLowerCase().includes('pend')||(p.status||'').toLowerCase().includes('ag.')).length;
+  const conc=data.filter(p=>(p.status||'').toLowerCase().includes('conclu')).length;
+  el.innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px"><strong style="color:var(--text)">${tot}</strong> <span style="color:var(--muted)">pedidos</span></div>
+    <div style="background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.2);border-radius:8px;padding:7px 14px;font-size:12px"><strong style="color:var(--gold)">${pend}</strong> <span style="color:var(--muted)">pendentes</span></div>
+    <div style="background:rgba(46,204,136,.1);border:1px solid rgba(46,204,136,.2);border-radius:8px;padding:7px 14px;font-size:12px"><strong style="color:var(--green)">${conc}</strong> <span style="color:var(--muted)">concluídos</span></div>`;
+}
 
-// ── GESTÃO DE USUÁRIOS ────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// RUPTURAS
+// ══════════════════════════════════════════════════════════════════
+let _rupturaAll=[];
+async function loadRuptura(){
+  const grid=document.getElementById('rup-grid');
+  grid.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  document.getElementById('rup-resumo').innerHTML='';
+  try{
+    const r=await fetch(PROXY+'?tipo=ruptura');const data=await r.json();
+    if(!Array.isArray(data)||!data.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum item em ruptura com previsão de entrega.</p></div>`;return;}
+    _rupturaAll=data;renderRupturaCards(data);
+  }catch(e){grid.innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar rupturas.</p></div>`;}
+}
+function fmtRupData(val){if(!val)return'—';const ts=Date.parse(val);if(!isNaN(ts)&&String(val).length>6){const d=new Date(ts);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}return String(val).trim();}
+function renderRupturaCards(items){
+  const grid=document.getElementById('rup-grid');
+  if(!items.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum item encontrado.</p></div>`;renderRupturaResumo({});return;}
+  const porData={};items.forEach(it=>{const df=fmtRupData(it.proximaEntrega);if(!porData[df])porData[df]=0;porData[df]++;});
+  renderRupturaResumo(porData,items.length);
+  grid.innerHTML=`<div class="rup-wrap">
+    <div class="rup-header"><span>Produto</span><span>Próxima Entrega</span><span>Volume Esperado</span><span>Categoria</span></div>
+    ${items.map(it=>`<div class="rup-card">
+      <div><div class="rup-item">${it.item}</div><div class="rup-linha">${it.linha}</div></div>
+      <div class="rup-date">📅 ${fmtRupData(it.proximaEntrega)}</div>
+      <div class="rup-vol">${it.volume&&it.volume!=='0'?'📦 '+Number(it.volume).toLocaleString('pt-BR'):'—'}</div>
+      <div><span class="rup-mix">${it.mix||'—'}</span></div>
+    </div>`).join('')}</div>`;
+}
+function renderRupturaResumo(porData,total){
+  const el=document.getElementById('rup-resumo');if(!total){el.innerHTML='';return;}
+  const datas=Object.keys(porData).sort((a,b)=>a.split('/').reverse().join('-').localeCompare(b.split('/').reverse().join('-')));
+  el.innerHTML=`
+    <div style="background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">⚠️</span><span style="color:var(--muted)">Total: </span>
+      <strong style="color:var(--red)">${total} iten${total>1?'s':''} em ruptura</strong></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Por data:</span>
+      ${datas.map(d=>`<span style="background:rgba(245,183,49,.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">📅 ${d} · ${porData[d]}</span>`).join('')}</div>`;
+}
+function filtrarRuptura(termo){
+  if(!_rupturaAll.length)return;
+  const t=termo.trim().toLowerCase();
+  const fil=t?_rupturaAll.filter(it=>(it.item+it.linha+it.mix).toLowerCase().includes(t)):_rupturaAll;
+  renderRupturaCards(fil);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WEEK PICKER
+// ══════════════════════════════════════════════════════════════════
+let wpYear=new Date().getFullYear(),wpMonth=new Date().getMonth();
+function toggleWeekPicker(){const p=document.getElementById('week-picker');p.classList.toggle('open');if(p.classList.contains('open'))renderWP();}
+function wpMes(d){wpMonth+=d;if(wpMonth<0){wpMonth=11;wpYear--;}if(wpMonth>11){wpMonth=0;wpYear++;}renderWP();}
+function getISOWeek(d){const jan4=new Date(d.getFullYear(),0,4);return Math.ceil(((d-jan4)/86400000+jan4.getDay()+1)/7);}
+function renderWP(){
+  document.getElementById('wp-month-label').textContent=new Date(wpYear,wpMonth,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const weeks=[];const first=new Date(wpYear,wpMonth,1);let cur=new Date(first);
+  cur.setDate(cur.getDate()-(cur.getDay()||7)+1);
+  while(cur.getMonth()<=wpMonth||cur.getFullYear()<wpYear){
+    if(cur.getMonth()>=wpMonth||cur.getFullYear()>wpYear){
+      const end=new Date(cur);end.setDate(end.getDate()+6);
+      const wn=getISOWeek(cur);
+      weeks.push({start:new Date(cur),end,wn});
+    }
+    cur.setDate(cur.getDate()+7);
+    if(cur.getMonth()>wpMonth&&cur.getFullYear()>=wpYear)break;
+  }
+  const today=new Date();
+  document.getElementById('wp-weeks').innerHTML=weeks.map(w=>{
+    const selVal=document.getElementById('inp-semana').value;
+    const label=`Semana ${w.wn} · ${w.start.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${w.end.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`;
+    const isSel=selVal===label;
+    const past=w.end<today;
+    return`<div class="wp-week${isSel?' sel':''}${past?' disabled':''}" onclick="selectWeek('${label}')">
+      <span class="wp-week-num">S${w.wn}</span>
+      <span class="wp-week-range">${w.start.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${w.end.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>
+    </div>`;
+  }).join('');
+}
+function selectWeek(label){document.getElementById('inp-semana').value=label;document.getElementById('week-picker').classList.remove('open');}
+document.addEventListener('click',e=>{const wp=document.getElementById('week-picker');if(wp&&!wp.contains(e.target)&&e.target.id!=='inp-semana')wp.classList.remove('open');});
+
+// ══════════════════════════════════════════════════════════════════
+// USUÁRIOS
+// ══════════════════════════════════════════════════════════════════
 async function renderUsers(){
   const users=await getUsers();
   document.getElementById('user-grid').innerHTML=users.map(u=>{
     const isSelf=u.id===currentUser.id;
     const av=u.nome?u.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase():u.login.slice(0,2).toUpperCase();
-    return `<div class="user-card">
+    return`<div class="user-card">
       <div class="user-avatar" style="background:${u.role==='admin'?'rgba(245,183,49,.15)':'rgba(79,126,255,.15)'};color:${u.role==='admin'?'var(--gold)':'var(--accent)'}">${av}</div>
-      <div class="user-details">
-        <div class="user-login">${u.nome||u.login} <span style="font-weight:400;color:var(--muted);font-size:12px">@${u.login}</span></div>
-        <div class="user-role" style="margin-top:4px">
-          <span class="role-badge ${u.role==='admin'?'role-admin':'role-loja'}">${u.role==='admin'?'Administrador':'Loja '+u.loja}</span>
-          ${isSelf?'<span style="font-size:11px;color:var(--muted);margin-left:8px">você</span>':''}
-        </div>
-      </div>
+      <div class="user-details"><div class="user-login">${u.nome||u.login} <span style="font-weight:400;color:var(--muted);font-size:12px">@${u.login}</span></div>
+        <div class="user-role" style="margin-top:4px"><span class="role-badge ${u.role==='admin'?'role-admin':'role-loja'}">${u.role==='admin'?'Administrador':'Loja '+u.loja}</span>
+          ${isSelf?'<span style="font-size:11px;color:var(--muted);margin-left:8px">você</span>':''}</div></div>
       <div class="user-actions">
         <button class="btn bg2 bsm" onclick="openUserModal(${u.id})">Editar</button>
         ${!isSelf?`<button class="btn bsm" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="confirmDelete(${u.id})">Excluir</button>`:''}
-      </div>
-    </div>`;
+      </div></div>`;
   }).join('');
 }
-
 async function openUserModal(id){
-  editUserId=id;
-  const users=await getUsers();
-  const u=id?users.find(x=>x.id===id):null;
+  editUserId=id;const users=await getUsers();const u=id?users.find(x=>x.id===id):null;
   document.getElementById('muser-title').textContent=id?'Editar Usuário':'Novo Usuário';
   document.getElementById('muser-body').innerHTML=`
     <div class="fl"><label>Nome completo</label><input type="text" id="eu-nome" value="${u?u.nome:''}" placeholder="Ex: João Silva"/></div>
-    <div class="fl"><label>Login (usuário)</label><input type="text" id="eu-login" value="${u?u.login:''}" placeholder="Ex: joao.silva"/></div>
-    <div class="fl"><label>Senha ${id?'(deixe em branco para manter)':''}</label><input type="password" id="eu-senha" value="" placeholder="Nova senha"/></div>
-    <div class="fl"><label>Perfil</label>
-      <select id="eu-role" onchange="toggleLojaField()">
-        <option value="loja" ${u&&u.role==='loja'?'selected':''}>Loja</option>
-        <option value="admin" ${u&&u.role==='admin'?'selected':''}>Administrador</option>
-      </select>
-    </div>
-    <div class="fl" id="fl-loja" style="${u&&u.role==='admin'?'display:none':''}">
-      <label>Loja</label>
-      <select id="eu-loja">
-        <option value="PKS" ${u&&u.loja==='PKS'?'selected':''}>PKS</option>
-        <option value="Iguatemi" ${u&&u.loja==='Iguatemi'?'selected':''}>Iguatemi</option>
-        <option value="Anália" ${u&&u.loja==='Anália'?'selected':''}>Anália</option>
-      </select>
-    </div>`;
-  document.getElementById('muser-foot').innerHTML=`
-    <button class="btn bg2" onclick="closeModal('modal-user')">Cancelar</button>
-    <button class="btn bp" onclick="saveUser()">Salvar</button>`;
+    <div class="fl"><label>Login</label><input type="text" id="eu-login" value="${u?u.login:''}" placeholder="Ex: joao.silva"/></div>
+    <div class="fl"><label>Senha ${id?'(em branco = manter)':''}</label><input type="password" id="eu-senha" value="" placeholder="Nova senha"/></div>
+    <div class="fl"><label>Perfil</label><select id="eu-role" onchange="toggleLojaField()">
+      <option value="loja" ${u&&u.role==='loja'?'selected':''}>Loja</option>
+      <option value="admin" ${u&&u.role==='admin'?'selected':''}>Administrador</option></select></div>
+    <div class="fl" id="fl-loja" style="${u&&u.role==='admin'?'display:none':''}"><label>Loja</label><select id="eu-loja">
+      <option value="PKS" ${u&&u.loja==='PKS'?'selected':''}>PKS</option>
+      <option value="Iguatemi" ${u&&u.loja==='Iguatemi'?'selected':''}>Iguatemi</option>
+      <option value="Anália" ${u&&u.loja==='Anália'?'selected':''}>Anália Franco</option></select></div>`;
+  document.getElementById('muser-foot').innerHTML=`<button class="btn bg2" onclick="closeModal('modal-user')">Cancelar</button><button class="btn bp" onclick="saveUser()">Salvar</button>`;
   document.getElementById('modal-user').classList.add('open');
 }
-
-function toggleLojaField(){
-  const role=document.getElementById('eu-role').value;
-  document.getElementById('fl-loja').style.display=role==='admin'?'none':'';
-}
-
+function toggleLojaField(){document.getElementById('fl-loja').style.display=document.getElementById('eu-role').value==='admin'?'none':'';}
 async function saveUser(){
-  const nome=document.getElementById('eu-nome').value.trim();
-  const login=document.getElementById('eu-login').value.trim();
-  const senha=document.getElementById('eu-senha').value;
-  const role=document.getElementById('eu-role').value;
+  const nome=document.getElementById('eu-nome').value.trim();const login=document.getElementById('eu-login').value.trim();
+  const senha=document.getElementById('eu-senha').value;const role=document.getElementById('eu-role').value;
   const loja=role==='loja'?document.getElementById('eu-loja').value:'';
   if(!nome||!login){toast('Preencha nome e login.','error');return;}
-  const users=await getUsers();
-  const dup=users.find(u=>u.login===login&&u.id!==editUserId);
-  if(dup){toast('Este login já está em uso.','error');return;}
+  const users=await getUsers();const dup=users.find(u=>u.login===login&&u.id!==editUserId);
+  if(dup){toast('Login já em uso.','error');return;}
   if(!editUserId&&!senha){toast('Informe uma senha.','error');return;}
-  const payload={nome,login,role,loja};
-  if(editUserId)payload.id=editUserId;
-  // Senha: se não informada na edição, mantém a atual
-  if(senha){payload.senha=senha;}
-  else if(editUserId){
-    const u=users.find(x=>x.id===editUserId);
-    payload.senha=u?u.senha:'';
-  }
+  const payload={nome,login,role,loja};if(editUserId)payload.id=editUserId;
+  if(senha){payload.senha=senha;}else if(editUserId){const u=users.find(x=>x.id===editUserId);payload.senha=u?u.senha:'';}
   const d=await saveUserRemote(payload);
-  if(d.ok){
-    // Atualiza sessão se editou o próprio usuário
-    if(editUserId&&editUserId===currentUser.id){
-      currentUser={...currentUser,...payload};
-      sessionStorage.setItem('currentUser',JSON.stringify(currentUser));
-      document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;
-    }
-    closeModal('modal-user');renderUsers();toast('Usuário salvo! ✅','success');
-  } else {
-    toast('Erro ao salvar: '+(d.erro||''),'error');
-  }
+  if(d.ok){if(editUserId&&editUserId===currentUser.id){currentUser={...currentUser,...payload};sessionStorage.setItem('currentUser',JSON.stringify(currentUser));document.getElementById('user-label').textContent=currentUser.nome||currentUser.login;}
+    closeModal('modal-user');renderUsers();toast('Usuário salvo! ✅','success');}
+  else toast('Erro ao salvar: '+(d.erro||''),'error');
 }
-
 async function confirmDelete(id){
-  delUserId=id;
-  const users=await getUsers();
-  const u=users.find(x=>x.id===id);
-  document.getElementById('del-msg').textContent='Tem certeza que deseja excluir o usuário "'+(u?u.nome||u.login:'?')+'"? Esta ação não pode ser desfeita.';
+  delUserId=id;const users=await getUsers();const u=users.find(x=>x.id===id);
+  document.getElementById('del-msg').textContent='Tem certeza que deseja excluir o usuário "'+(u?u.nome||u.login:'?')+'"?';
   document.getElementById('del-confirm-btn').onclick=async function(){
     const d=await deleteUserRemote(delUserId);
     if(d.ok){closeModal('modal-del');renderUsers();toast('Usuário excluído.','error');}
@@ -1252,332 +1263,275 @@ async function confirmDelete(id){
   document.getElementById('modal-del').classList.add('open');
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// MODAL / TOAST HELPERS
+// ══════════════════════════════════════════════════════════════════
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-function toast(msg,type){
-  type=type||'success';
-  var el=document.getElementById('toast');
-  el.textContent=msg;el.className='toast show '+type;
-  setTimeout(function(){el.classList.remove('show');},3500);
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast show '+(type==='error'?'error':'success');
+  setTimeout(()=>{t.classList.remove('show');},3500);
 }
 
-// ── WEEK PICKER ──────────────────────────────────────────────────────────────
-const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const MESES_ABREV=['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
-let wpDate=new Date();
+// ══════════════════════════════════════════════════════════════════
+// ██████████████████████████████████████████████████████████████████
+// PLANO DE REPOSIÇÃO — lógica completa integrada
+// ██████████████████████████████████████████████████████████████████
+// ══════════════════════════════════════════════════════════════════
 
-function toggleWeekPicker(){
-  const el=document.getElementById('week-picker');
-  if(el.classList.contains('open')){el.classList.remove('open');return;}
-  wpDate=new Date();
-  renderWeekPicker();
-  el.classList.add('open');
-  setTimeout(()=>document.addEventListener('click',wpOutsideClick,{once:true}),10);
+const PLAN_LOTES={
+  'Garrafa Fresh 650':48,'Garrafa Fresh 950':40,'Garrafa Urban 500':40,
+  'Copo Vibe 470':40,'Copo Life 1170':15,'Copo Life 880':15,'Copo Life 1180':15,
+  'Garrafa Pro 7':24,'Garrafa Magsafe':24,'Garrafa Mini 350':24,
+  'Garrafa Kids':24,'Taça Térmica':24,'Taça Drink':24,
+  'Bolsa Moove':30,'Mini Tote':30,'Tote Pop':20,'Tote Shopper':30,
+  'Tote Bag':25,'Tote Puff':25,'Lancheira Fun':10,'Mochila Fun':10,
+  'Lancheira Mix':20,'Lancheira Fruit':20,'Lancheira Play':32,
+  'Mochila Pop':10,'Bolsa Voyage':16,'Mochila Casual':20,
+  'Bolsa de Garrafa':40,'Bolsa Tote Moon Puffer':25,'Mochila Executiva':20,
+  'Necessaire MakeUp':40,'Necessaire Makeup':40,'Necessaire Puffer':50,
+  'Necessaire Voyage':40,'Powerbank':50,'Mala Joy':16,
+  'Mala de Bordo':10,'Mochila BTS':10,'Mochila Voyage':10,
+  'Lancheira BTS':10,'Estojo BTS':20,'Bolsa Térmica Mix':20,
+  'Bolsa Térmica Fruit':20,'Bolsa Térmica Daily':20,
+};
+function planGetLote(n){for(const[k,v]of Object.entries(PLAN_LOTES)){if(n.includes(k))return v;}return 1;}
+function planCalcQtd(seg,est,lote){
+  const diff=Math.max(0,Math.ceil(seg-(est||0)));if(diff===0)return 0;
+  if(lote<=1)return diff;return Math.ceil(diff/lote)*lote;
 }
 
-function wpOutsideClick(e){
-  const wp=document.getElementById('week-picker');
-  const inp=document.getElementById('inp-semana');
-  if(!wp.contains(e.target)&&e.target!==inp)wp.classList.remove('open');
-  else if(wp.classList.contains('open'))setTimeout(()=>document.addEventListener('click',wpOutsideClick,{once:true}),10);
-}
+// ─── Dados Metabase (reais) ─────────────────────────────────────
+const PLAN_DADOS={
+  PKS:[
+    {prod:'Lancheira Play Azul Claro',cat:'Lancheiras',classe:'A',est:30,seg:17.68,u:'URGENTE',fat:16297},
+    {prod:'Lancheira Play Melancia',cat:'Lancheiras',classe:'A',est:29,seg:15.04,u:'URGENTE',fat:8992},
+    {prod:'Mochila Casual Pro / Casual Preta',cat:'Mochilas',classe:'B',est:5,seg:7.04,u:'URGENTE',fat:8455},
+    {prod:'Infinite Air / iPhone 13',cat:'Capinhas',classe:'B',est:0,seg:32.68,u:'URGENTE',fat:7527},
+    {prod:'Infinite Air / iPhone 14',cat:'Capinhas',classe:'B',est:0,seg:20.68,u:'URGENTE',fat:7348},
+    {prod:'Bolsa de Garrafa Off White',cat:'Bolsas',classe:'B',est:14,seg:12.37,u:'URGENTE',fat:7355},
+    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:22,seg:17.32,u:'URGENTE',fat:6476},
+    {prod:'Garrafa Térmica Fresh 360 Glitter Vinho 650ml',cat:'Garrafas',classe:'B',est:0,seg:12.47,u:'URGENTE',fat:5848},
+    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:269,seg:15.07,u:'URGENTE',fat:26517},
+    {prod:'Necessaire Voyage Off White',cat:'Necessaires',classe:'A',est:1,seg:7.64,u:'URGENTE',fat:12173},
+    {prod:'Lancheira BTS Preta',cat:'Lancheiras',classe:'A',est:83,seg:8.47,u:'URGENTE',fat:10603},
+    {prod:'Bolsa Térmica Urban Preta',cat:'Bolsas Térmicas',classe:'A',est:50,seg:37.84,u:'URGENTE',fat:13011},
+    {prod:'Bolsa Térmica Urban Marrom',cat:'Bolsas Térmicas',classe:'A',est:50,seg:32.72,u:'URGENTE',fat:10824},
+    {prod:'Mala de Bordo Trip 20" Off White',cat:'Malas',classe:'A',est:16,seg:8.9,u:'ALERTA',fat:30952},
+    {prod:'Mala Joy - WaitList',cat:'Malas',classe:'A',est:5,seg:6.73,u:'ALERTA',fat:19573},
+    {prod:'Anti Impacto Slim Air / Samsung Galaxy A56',cat:'Capinhas',classe:'B',est:80,seg:10.25,u:'ALERTA',fat:5610},
+  ],
+  Iguatemi:[
+    {prod:'Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:15,seg:67.86,u:'URGENTE',fat:148355},
+    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:46.46,u:'URGENTE',fat:83980},
+    {prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',classe:'A',est:50,seg:71.79,u:'URGENTE',fat:76464},
+    {prod:'Mochila Voyage Off White',cat:'Mochilas',classe:'A',est:39,seg:13.97,u:'URGENTE',fat:61795},
+    {prod:'Necessaire Makeup Double - Preta',cat:'Necessaires',classe:'A',est:0,seg:43.51,u:'URGENTE',fat:57575},
+    {prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',classe:'A',est:0,seg:27.42,u:'URGENTE',fat:57400},
+    {prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',classe:'A',est:0,seg:20.98,u:'URGENTE',fat:51703},
+    {prod:'Base Preta - Mala de Bordo Trip 20"',cat:'Acessórios',classe:'A',est:6,seg:21.39,u:'URGENTE',fat:35640},
+    {prod:'Case Slim Air iPhone 15 Pro Max',cat:'Capinhas',classe:'A',est:8,seg:49.23,u:'URGENTE',fat:34496},
+    {prod:'Lancheira Play Preta',cat:'Lancheiras',classe:'A',est:19,seg:43.48,u:'URGENTE',fat:34181},
+    {prod:'Case Slim Air iPhone 13',cat:'Capinhas',classe:'A',est:4,seg:74.65,u:'URGENTE',fat:19743},
+    {prod:'Mochila Rodinha BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:7.69,u:'URGENTE',fat:28994},
+    {prod:'Lancheira Midi - Poeira das Estrelas',cat:'Lancheiras',classe:'A',est:2,seg:60.92,u:'URGENTE',fat:17980},
+    {prod:'Impact Slim Standard iPhone 11',cat:'Capinhas',classe:'A',est:40,seg:132.7,u:'URGENTE',fat:24040},
+    {prod:'Tote Bag Off White',cat:'Tote Bags',classe:'A',est:76,seg:52.5,u:'ALERTA',fat:79133},
+    {prod:'Case Slim Air iPhone 16 Pro Max',cat:'Capinhas',classe:'A',est:71,seg:42.46,u:'ALERTA',fat:51944},
+    {prod:'Necessaire Makeup Double Preta (alerta)',cat:'Necessaires',classe:'A',est:59,seg:43.51,u:'ALERTA',fat:57575},
+    {prod:'Mala Joy Vinho',cat:'Malas',classe:'A',est:32,seg:14.61,u:'ALERTA',fat:24801},
+    {prod:'Garrafa Térmica Urban 360 Branca 500ml',cat:'Garrafas',classe:'B',est:93,seg:12.76,u:'ALERTA',fat:7831},
+  ],
+  'Anália Franco':[
+    {prod:'Mala Joy CD Joy Azul',cat:'Malas',classe:'A',est:2,seg:7.01,u:'URGENTE',fat:11385},
+    {prod:'Tote Bag CD Tote Amora',cat:'Tote Bags',classe:'A',est:5,seg:9.49,u:'URGENTE',fat:10905},
+    {prod:'NecessaireCD Rosa',cat:'Necessaires',classe:'A',est:1,seg:14.04,u:'URGENTE',fat:8102},
+    {prod:'Tote Shopper Preta',cat:'Tote Bags',classe:'A',est:2,seg:3.43,u:'URGENTE',fat:7707},
+    {prod:'Tote Shopper Marrom',cat:'Tote Bags',classe:'A',est:0,seg:6.2,u:'URGENTE',fat:7147},
+    {prod:'Tote Shopper Vinho',cat:'Tote Bags',classe:'A',est:0,seg:1.52,u:'URGENTE',fat:5937},
+    {prod:'Case Slim Air Samsung Galaxy A56',cat:'Capinhas',classe:'A',est:0,seg:5.45,u:'URGENTE',fat:5857},
+    {prod:'Tote Shopper Off White',cat:'Tote Bags',classe:'B',est:0,seg:2.86,u:'URGENTE',fat:4238},
+    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:17,seg:9.9,u:'URGENTE',fat:4557},
+    {prod:'Lunch Bag CD Mix Corações Flutuantes',cat:'Lancheiras',classe:'B',est:1,seg:3.38,u:'URGENTE',fat:4107},
+    {prod:'Powerbank Fast Charge Branco 10000mah',cat:'Eletrônicos',classe:'B',est:0,seg:4.72,u:'URGENTE',fat:3717},
+    {prod:'Bags Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:134,seg:34.86,u:'ALERTA',fat:56756},
+    {prod:'Base Travel Case Trip Preta',cat:'Acessórios',classe:'A',est:10,seg:11.79,u:'ALERTA',fat:22642},
+    {prod:'Powerbank Fast Charge Preto 20000mah',cat:'Eletrônicos',classe:'A',est:8,seg:4.36,u:'ALERTA',fat:12494},
+    {prod:'Powerbank Fast Charge Branco 20000mah',cat:'Eletrônicos',classe:'A',est:15,seg:4.34,u:'ALERTA',fat:7556},
+  ],
+};
 
-function wpMes(delta){
-  wpDate=new Date(wpDate.getFullYear(),wpDate.getMonth()+delta,1);
-  renderWeekPicker();
-}
-
-function getWeeksOfMonth(year,month){
-  const weeks=[];
-  // Começa na segunda-feira da semana que contém o dia 1
-  const firstDay=new Date(year,month,1);
-  const dow=firstDay.getDay()||7; // 1=seg ... 7=dom
-  let start=new Date(firstDay);
-  start.setDate(1-(dow-1));
-  while(start.getMonth()<=month||start.getFullYear()<year){
-    const end=new Date(start);end.setDate(start.getDate()+6);
-    // inclui semana se tiver pelo menos 1 dia no mês
-    if(end.getMonth()>=month&&end.getFullYear()>=year){
-      weeks.push({start:new Date(start),end:new Date(end)});
+function planRenderLoja(lojaKey,twId,urgId,altId,totId,selId){
+  const dados=PLAN_DADOS[lojaKey]||[];
+  const cats={};
+  for(const d of dados){if(!cats[d.cat])cats[d.cat]=[];cats[d.cat].push(d);}
+  let html=`<table><thead><tr>
+    <th style="width:34%">Produto</th><th>Categoria</th>
+    <th style="text-align:center">Classe</th>
+    <th style="text-align:center">Estoque</th>
+    <th style="text-align:center">Est. Seg.</th>
+    <th style="text-align:center">Qtd Sugerida</th>
+    <th style="text-align:center">Lote</th>
+    <th style="text-align:center">Urgência</th>
+  </tr></thead><tbody>`;
+  let urgCnt=0,altCnt=0;
+  for(const[cat,prods]of Object.entries(cats)){
+    html+=`<tr class="crow"><td colspan="8">${cat}</td></tr>`;
+    for(const p of prods){
+      const lote=planGetLote(p.prod);
+      const qtd=planCalcQtd(p.seg,p.est,lote);
+      const uCls=p.u==='URGENTE'?'b-urg':p.u==='ALERTA'?'b-alt':'b-cob';
+      const cCls=p.classe==='A'?'b-clA':p.classe==='B'?'b-clB':'b-clC';
+      if(p.u==='URGENTE')urgCnt++;if(p.u==='ALERTA')altCnt++;
+      html+=`<tr>
+        <td><div style="font-weight:500;font-size:13px">${p.prod}</div></td>
+        <td style="color:var(--muted);font-size:12px">${p.cat}</td>
+        <td style="text-align:center"><span class="badge ${cCls}">${p.classe}</span></td>
+        <td style="text-align:center;font-weight:600;color:${(p.est||0)<=0?'var(--red)':(p.est||0)<10?'var(--gold)':'var(--text)'}">${p.est!=null?p.est:'?'}</td>
+        <td style="text-align:center;color:var(--muted)">${p.seg.toFixed(0)}</td>
+        <td style="text-align:center">
+          <span class="qty-cell" style="color:${qtd>0?'var(--green)':'var(--muted)'}">${qtd>0?qtd:'—'}</span>
+          ${lote>1?`<div class="lote-tag">×${lote}</div>`:''}
+        </td>
+        <td style="text-align:center;color:var(--muted);font-size:12px">${lote>1?lote:'—'}</td>
+        <td style="text-align:center"><span class="badge ${uCls}">${p.u}</span></td>
+      </tr>`;
     }
-    start.setDate(start.getDate()+7);
-    if(start.getMonth()>month&&start.getFullYear()>=year)break;
   }
-  return weeks;
+  html+='</tbody></table>';
+  document.getElementById(twId).innerHTML=html;
+  document.getElementById(urgId).textContent=urgCnt;
+  document.getElementById(altId).textContent=altCnt;
+  document.getElementById(totId).textContent=urgCnt+altCnt;
+  document.getElementById(selId).textContent=urgCnt+altCnt;
+  return{urgCnt,altCnt};
 }
 
-function fmtWpDate(d){return `${String(d.getDate()).padStart(2,'0')} ${MESES_ABREV[d.getMonth()]}`;}
-
-// Prazo mínimo em dias úteis por loja
-const PRAZOS_LOJA={PKS:15,Iguatemi:20,'Anália':10};
-
-function diasUteisAte(dataAlvo){
-  // Conta dias úteis entre hoje e dataAlvo
-  const hoje=new Date();hoje.setHours(0,0,0,0);
-  const alvo=new Date(dataAlvo);alvo.setHours(0,0,0,0);
-  if(alvo<=hoje)return 0;
-  let count=0,d=new Date(hoje);
-  while(d<alvo){
-    d.setDate(d.getDate()+1);
-    const dow=d.getDay();
-    if(dow!==0&&dow!==6)count++;
-  }
-  return count;
+function planShowTab(id,btn){
+  document.querySelectorAll('.plan-section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.plan-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('plan-tab-'+id).classList.add('on');
+  btn.classList.add('active');
 }
 
-function renderWeekPicker(){
-  const yr=wpDate.getFullYear(),mo=wpDate.getMonth();
-  document.getElementById('wp-month-label').textContent=`${MESES[mo]} ${yr}`;
-  const weeks=getWeeksOfMonth(yr,mo);
-  const sel=document.getElementById('inp-semana').value;
-  const prazoMin=lojaAtual?PRAZOS_LOJA[lojaAtual]||0:0;
-  document.getElementById('wp-weeks').innerHTML=weeks.map((w,i)=>{
-    const label=`${fmtWpDate(w.start)} – ${fmtWpDate(w.end)} ${w.end.getFullYear()}`;
-    const isSel=sel===label;
-    // Bloqueia se o início da semana não tem dias úteis suficientes
-    const diasUteis=diasUteisAte(w.start);
-    const bloqueada=prazoMin>0&&diasUteis<prazoMin;
-    const cls='wp-week'+(isSel?' sel':'')+(bloqueada?' disabled':'');
-    const onclick=bloqueada?'':` onclick="selectWeek('${label}')"`;
-    const dica=bloqueada?` title="Mínimo ${prazoMin} dias úteis para loja ${lojaAtual} (faltam ${diasUteis})"`:
-                         ` title="${diasUteis} dias úteis até o início da semana"`;
-    return `<div class="${cls}"${onclick}${dica}>
-      <span class="wp-week-num">S${i+1}</span>
-      <span class="wp-week-range">${label}</span>
-    </div>`;
+function planBuildResumo(){
+  const urgentes=[],alertas=[];
+  const tabela={};
+  for(const[loja,dados]of Object.entries(PLAN_DADOS)){
+    for(const d of dados){
+      const k=d.prod.substring(0,45);
+      if(!tabela[k])tabela[k]={prod:d.prod,classe:d.classe,lojas:{}};
+      const lote=planGetLote(d.prod);
+      tabela[k].lojas[loja]={u:d.u,qtd:planCalcQtd(d.seg,d.est,lote)};
+      if(d.u==='URGENTE'&&d.classe==='A'&&!urgentes.find(u=>u.prod===d.prod))urgentes.push({prod:d.prod,loja,cat:d.cat,fat:d.fat});
+      else if(d.u==='ALERTA'&&!alertas.find(a=>a.prod===d.prod))alertas.push({prod:d.prod,loja,cat:d.cat});
+    }
+  }
+  const lojaColor=l=>l==='PKS'?'var(--pks)':l==='Iguatemi'?'var(--igu)':'var(--ana)';
+  document.getElementById('plan-resumo-urgentes').innerHTML=urgentes.sort((a,b)=>b.fat-a.fat).slice(0,8).map(u=>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:500">${u.prod}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${u.cat}</div></div>
+      <span style="font-size:11px;font-weight:600;color:${lojaColor(u.loja)};flex-shrink:0;margin-left:10px">${u.loja}</span></div>`
+  ).join('');
+  document.getElementById('plan-resumo-alertas').innerHTML=alertas.slice(0,8).map(a=>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:500">${a.prod}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${a.cat}</div></div>
+      <span style="font-size:11px;font-weight:600;color:${lojaColor(a.loja)};flex-shrink:0;margin-left:10px">${a.loja}</span></div>`
+  ).join('');
+  const rows=Object.values(tabela).filter(r=>Object.values(r.lojas).some(v=>v.u==='URGENTE'||v.u==='ALERTA'));
+  document.getElementById('plan-resumo-table').innerHTML=rows.slice(0,30).map(r=>{
+    const pks=r.lojas['PKS'],igu=r.lojas['Iguatemi'],ana=r.lojas['Anália Franco'];
+    const isUrg=Object.values(r.lojas).some(v=>v.u==='URGENTE');
+    return`<tr>
+      <td style="font-weight:500;max-width:250px;white-space:normal;line-height:1.3">${r.prod}</td>
+      <td style="text-align:center;color:${pks&&pks.qtd>0?'var(--pks)':'var(--border)'}">${pks&&pks.qtd>0?pks.qtd:'—'}</td>
+      <td style="text-align:center;color:${igu&&igu.qtd>0?'var(--igu)':'var(--border)'}">${igu&&igu.qtd>0?igu.qtd:'—'}</td>
+      <td style="text-align:center;color:${ana&&ana.qtd>0?'var(--ana)':'var(--border)'}">${ana&&ana.qtd>0?ana.qtd:'—'}</td>
+      <td style="text-align:center"><span class="badge ${r.classe==='A'?'b-clA':r.classe==='B'?'b-clB':'b-clC'}">${r.classe}</span></td>
+      <td style="text-align:center"><span class="badge ${isUrg?'b-urg':'b-alt'}">${isUrg?'URGENTE':'ALERTA'}</span></td>
+    </tr>`;
   }).join('');
 }
 
-function selectWeek(label){
-  document.getElementById('inp-semana').value=label;
-  document.getElementById('week-picker').classList.remove('open');
-}
-
-// ── PEDIDOS ──────────────────────────────────────────────────────────────────
-let _pedidosCache=null;
-let _pedidosAll=[];
-
-async function loadPedidos(){
-  document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
-  document.getElementById('ped-resumo').innerHTML='';
-  try{
-    const r=await fetch(PROXY+'?tipo=pedidos');
-    const data=await r.json();
-    if(!Array.isArray(data)||!data.length){
-      document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">📋</div><p>Nenhum pedido encontrado.</p></div>`;
-      return;
-    }
-    _pedidosAll=data;
-    filtrarPedidos();
-  }catch(e){
-    document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar pedidos.</p></div>`;
+function planExportarLoja(loja){
+  const dados=PLAN_DADOS[loja];if(!dados)return;
+  const rows=[['Item','Categoria','Classe','Estoque Atual','Est. Segurança','Qtd Sugerida','Lote Mínimo','Urgência']];
+  for(const d of dados){
+    const lote=planGetLote(d.prod);const qtd=planCalcQtd(d.seg,d.est,lote);
+    rows.push([d.prod,d.cat,d.classe,d.est??0,d.seg.toFixed(0),qtd,lote>1?lote:'—',d.u]);
   }
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:45},{wch:18},{wch:8},{wch:14},{wch:16},{wch:14},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws,loja.substring(0,31));
+  XLSX.writeFile(wb,'PlanoReposicao_'+loja.replace(/ /g,'_')+'_Sem20.xlsx');
+  toast('Exportado com sucesso! ✅','success');
 }
 
-function fmtPedData(val){
-  if(!val||val==='null'||val==='undefined')return'—';
-  const ts=Date.parse(val);
-  if(!isNaN(ts)&&String(val).length>6){
-    return new Date(ts).toLocaleDateString('pt-BR');
+function planExportarTudo(){
+  const wb=XLSX.utils.book_new();
+  for(const[loja,dados]of Object.entries(PLAN_DADOS)){
+    const rows=[['Item','Categoria','Classe','Estoque Atual','Est. Segurança','Qtd Sugerida','Lote Mínimo','Urgência']];
+    for(const d of dados){const lote=planGetLote(d.prod);const qtd=planCalcQtd(d.seg,d.est,lote);rows.push([d.prod,d.cat,d.classe,d.est??0,d.seg.toFixed(0),qtd,lote>1?lote:1,d.u]);}
+    const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:45},{wch:18},{wch:8},{wch:14},{wch:16},{wch:14},{wch:12},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws,loja.substring(0,31));
   }
-  return String(val).trim().split(' ')[0]||'—';
+  XLSX.writeFile(wb,'PlanoReposicao_Gocase_Semana20_Todas.xlsx');
+  toast('Exportado — todas as lojas! ✅','success');
 }
 
-function statusClass(s){
-  const u=(s||'').toUpperCase();
-  if(u.includes('CONCLU'))   return 'ped-concluido';
-  if(u.includes('SEM EST'))  return 'ped-semestoque';
-  if(u.includes('SEM SALDO'))return 'ped-semestoque';
-  if(u.includes('CANCEL'))   return 'ped-semestoque';
-  if(u.includes('DUPLIC'))   return 'ped-semestoque';
-  if(u.includes('AGUARD'))   return 'ped-aguard';
-  if(u.includes('AG. COL'))  return 'ped-aguard';
-  if(u.includes('PEND'))     return 'ped-pendente';
-  return 'ped-outro';
-}
-
-function lojaClass(d){
-  const u=(d||'').toUpperCase();
-  if(u.includes('PKS'))return 'ped-loja-pks';
-  if(u.includes('IGUATEMI'))return 'ped-loja-igu';
-  if(u.includes('ANÁL')||u.includes('ANAL'))return 'ped-loja-ana';
-  return '';
-}
-
-function filtrarPedidos(){
-  const busca=(document.getElementById('inp-busca-ped').value||'').toLowerCase();
-  const loja=(document.getElementById('sel-loja-ped').value||'').toUpperCase();
-  const status=(document.getElementById('sel-status-ped').value||'').toUpperCase();
-
-  let fil=_pedidosAll.filter(p=>{
-    const matchBusca=!busca||(p.pedido+p.item).toLowerCase().includes(busca);
-    const matchLoja=!loja||p.destino.toUpperCase().includes(loja);
-    const matchStatus=!status||p.status.toUpperCase().includes(status);
-    return matchBusca&&matchLoja&&matchStatus;
-  });
-  renderPedidosTable(fil);
-  renderPedidosResumo(fil);
-}
-
-function renderPedidosResumo(items){
-  const el=document.getElementById('ped-resumo');
-  const total=items.length;
-  const conc=items.filter(p=>p.status.toUpperCase().includes('CONCLU')).length;
-  const semEst=items.filter(p=>p.status.toUpperCase().includes('SEM EST')).length;
-  const pend=items.filter(p=>!p.status.toUpperCase().includes('CONCLU')&&!p.status.toUpperCase().includes('SEM EST')).length;
-  el.innerHTML=`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;gap:6px;align-items:center">
-      <span style="color:var(--muted)">Total:</span><strong>${total} itens</strong>
-    </div>
-    <div style="background:rgba(46,204,136,.1);border:1px solid rgba(46,204,136,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;gap:6px;align-items:center">
-      <span style="color:var(--muted)">✅ Concluídos:</span><strong style="color:var(--green)">${conc}</strong>
-    </div>
-    <div style="background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;gap:6px;align-items:center">
-      <span style="color:var(--muted)">⚠️ Sem Estoque:</span><strong style="color:var(--red)">${semEst}</strong>
-    </div>
-    <div style="background:rgba(245,183,49,.1);border:1px solid rgba(245,183,49,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;gap:6px;align-items:center">
-      <span style="color:var(--muted)">⏳ Pendentes:</span><strong style="color:var(--gold)">${pend}</strong>
-    </div>`;
-}
-
-function renderPedidosTable(items){
-  const el=document.getElementById('ped-table');
-  if(!items.length){
-    el.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum pedido encontrado.</p></div>`;
-    return;
+let _planModalLoja=null;
+function planGerarReq(loja){
+  _planModalLoja=loja;
+  const dados=PLAN_DADOS[loja]||[];
+  const itens=dados.map(d=>{const lote=planGetLote(d.prod);return{...d,qtdSug:planCalcQtd(d.seg,d.est,lote),lote};}).filter(d=>d.qtdSug>0);
+  document.getElementById('mplan-title').textContent=`Requisição sugerida — ${loja}`;
+  let body=`<div style="font-size:13px;color:var(--muted);margin-bottom:14px">${itens.length} itens · Semana 20 · Aprovação necessária antes do processamento</div>
+    <div style="max-height:340px;overflow-y:auto;margin-bottom:14px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="padding:8px 10px;text-align:left;color:var(--muted);font-size:11px">Produto</th>
+      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Qtd</th>
+      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Lote</th>
+      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Urgência</th>
+    </tr></thead><tbody>`;
+  for(const it of itens){
+    const uCol=it.u==='URGENTE'?'var(--red)':'var(--gold)';
+    body+=`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 10px;font-weight:500;max-width:220px;white-space:normal;line-height:1.3">${it.prod}</td>
+      <td style="padding:8px 10px;text-align:center;font-weight:700;color:var(--green)">${it.qtdSug}</td>
+      <td style="padding:8px 10px;text-align:center;font-size:11px;color:var(--muted)">${it.lote>1?it.lote+' un':'—'}</td>
+      <td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:600;color:${uCol}">${it.u}</td>
+    </tr>`;
   }
-  el.innerHTML=`<div class="ped-table-wrap"><table>
-    <thead><tr>
-      <th>Pedido</th><th>Data</th><th>Item</th>
-      <th style="text-align:center">Solicitado</th>
-      <th style="text-align:center">Realizado</th>
-      <th style="text-align:center">Pendente</th>
-      <th style="text-align:center">% Real.</th>
-      <th>Prazo</th><th>Destino</th><th>Status</th>
-    </tr></thead>
-    <tbody>
-      ${items.map(p=>{
-        const pct=parseFloat((p.pctReal||'0').replace('%','').replace(',','.'))||0;
-        const barW=Math.min(100,Math.max(0,pct));
-        const barCol=pct>=100?'var(--green)':pct>50?'var(--gold)':'var(--red)';
-        return `<tr>
-          <td style="font-weight:600;color:var(--accent)">${p.pedido}</td>
-          <td style="color:var(--muted)">${fmtPedData(p.dataPedido)}</td>
-          <td style="max-width:220px;white-space:normal;line-height:1.3">${p.item}</td>
-          <td style="text-align:center">${p.solicitado||'—'}</td>
-          <td style="text-align:center">${p.realizado||'—'}</td>
-          <td style="text-align:center;color:${parseInt(p.pendente||0)>0?'var(--gold)':'var(--muted)'}">${p.pendente||'0'}</td>
-          <td style="text-align:center;min-width:80px">
-            <span style="font-size:12px;font-weight:600">${p.pctReal||'0%'}</span>
-            <div class="ped-prog"><div class="ped-prog-bar" style="width:${barW}%;background:${barCol}"></div></div>
-          </td>
-          <td style="color:var(--muted)">${fmtPedData(p.prazo)}</td>
-          <td class="${lojaClass(p.destino)}">${p.destino}</td>
-          <td><span class="ped-status ${statusClass(p.status)}">${p.status||'—'}</span></td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table></div>`;
-}
-
-// ── RUPTURAS ─────────────────────────────────────────────────────────────────
-let _rupturaCache=null;
-let _rupturaAll=[];
-
-async function loadRuptura(){
-  const grid=document.getElementById('rup-grid');
-  grid.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
-  document.getElementById('rup-resumo').innerHTML='';
-  try{
-    const r=await fetch(PROXY+'?tipo=ruptura');
-    const data=await r.json();
-    if(!Array.isArray(data)||data.length===0){
-      grid.innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum item em ruptura com previsão de entrega.</p></div>`;
-      return;
-    }
-    _rupturaAll=data;
-    renderRupturaCards(data);
-  }catch(e){
-    grid.innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar rupturas.</p></div>`;
-  }
-}
-
-// Formata data: "08/05/2026", timestamp JS, "Itapeva - 09/02" → sempre DD/MM/AAAA ou texto curto
-function fmtRupData(val){
-  if(!val)return'—';
-  // Já é uma date object ou timestamp numérico do Sheets
-  const ts=Date.parse(val);
-  if(!isNaN(ts)&&String(val).length>6){
-    const d=new Date(ts);
-    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  }
-  // Texto como "Itapeva - 09/02" — retorna como está
-  return String(val).trim();
-}
-
-function renderRupturaCards(items){
-  const grid=document.getElementById('rup-grid');
-  if(!items.length){
-    grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum item encontrado.</p></div>`;
-    renderRupturaResumo({});
-    return;
-  }
-  // Agrupa por data formatada
-  const porData={};
-  items.forEach(it=>{
-    const df=fmtRupData(it.proximaEntrega);
-    if(!porData[df])porData[df]=0;
-    porData[df]++;
-  });
-  renderRupturaResumo(porData,items.length);
-  grid.innerHTML=`<div class="rup-wrap">
-    <div class="rup-header">
-      <span>Produto</span>
-      <span>Próxima Entrega</span>
-      <span>Volume Esperado</span>
-      <span>Categoria</span>
-    </div>
-    ${items.map(it=>`
-    <div class="rup-card">
-      <div>
-        <div class="rup-item">${it.item}</div>
-        <div class="rup-linha">${it.linha}</div>
-      </div>
-      <div class="rup-date">📅 ${fmtRupData(it.proximaEntrega)}</div>
-      <div class="rup-vol">${it.volume&&it.volume!=='0'?'📦 '+Number(it.volume).toLocaleString('pt-BR'):'—'}</div>
-      <div><span class="rup-mix">${it.mix||'—'}</span></div>
-    </div>`).join('')}
+  body+=`</tbody></table></div>
+  <div style="background:rgba(79,126,255,.07);border:1px solid rgba(79,126,255,.2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);line-height:1.5">
+    📌 Insira esta lista em <strong style="color:var(--text)">Nova Requisição</strong>, selecione a loja <strong style="color:var(--text)">${loja}</strong>, escolha a semana 20 e envie até <strong style="color:var(--gold)">terça-feira 18h</strong>.
   </div>`;
+  document.getElementById('mplan-body').innerHTML=body;
+  document.getElementById('mplan-export-btn').onclick=()=>{planExportarLoja(loja);closeModal('modal-plan-req');};
+  document.getElementById('modal-plan-req').classList.add('open');
 }
 
-function renderRupturaResumo(porData,total){
-  const el=document.getElementById('rup-resumo');
-  if(!total){el.innerHTML='';return;}
-  const datas=Object.keys(porData).sort((a,b)=>{
-    // Ordena por data — tenta parsear dd/mm/aaaa
-    const pa=a.split('/').reverse().join('-');
-    const pb=b.split('/').reverse().join('-');
-    return pa.localeCompare(pb);
-  });
-  el.innerHTML=`
-    <div style="background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.2);border-radius:9px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:8px">
-      <span style="font-size:16px">⚠️</span>
-      <span style="color:var(--muted)">Total: </span>
-      <strong style="color:var(--red)">${total} iten${total>1?'s':''} em ruptura</strong>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <span style="color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Por data:</span>
-      ${datas.map(d=>`<span style="background:rgba(245,183,49,.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">📅 ${d} · ${porData[d]}</span>`).join('')}
-    </div>`;
+function planInit(){
+  const r1=planRenderLoja('PKS','plan-tw-pks','plan-pks-urg','plan-pks-alt','plan-pks-tot','plan-pks-sel');
+  const r2=planRenderLoja('Iguatemi','plan-tw-igu','plan-igu-urg','plan-igu-alt','plan-igu-tot','plan-igu-sel');
+  const r3=planRenderLoja('Anália Franco','plan-tw-ana','plan-ana-urg','plan-ana-alt','plan-ana-tot','plan-ana-sel');
+  const tot=r1.urgCnt+r1.altCnt+r2.urgCnt+r2.altCnt+r3.urgCnt+r3.altCnt;
+  const totUrg=r1.urgCnt+r2.urgCnt+r3.urgCnt;
+  document.getElementById('plan-total-itens').textContent=tot;
+  document.getElementById('plan-total-urg').textContent=totUrg;
+  const crit=[{n:'Iguatemi',v:r2.urgCnt},{n:'PKS',v:r1.urgCnt},{n:'Anália Franco',v:r3.urgCnt}].sort((a,b)=>b.v-a.v)[0];
+  document.getElementById('plan-loja-crit').textContent=crit.n;
+  document.getElementById('plan-loja-crit-sub').textContent=crit.v+' itens urgentes';
+  document.getElementById('plan-cnt-pks').textContent=r1.urgCnt+r1.altCnt;
+  document.getElementById('plan-cnt-igu').textContent=r2.urgCnt+r2.altCnt;
+  document.getElementById('plan-cnt-ana').textContent=r3.urgCnt+r3.altCnt;
+  planBuildResumo();
 }
 
-function filtrarRuptura(termo){
-  if(!_rupturaAll.length)return;
-  const t=termo.trim().toLowerCase();
-  const fil=t?_rupturaAll.filter(it=>(it.item+it.linha+it.mix).toLowerCase().includes(t)):_rupturaAll;
-  renderRupturaCards(fil);
-}
-
+// ══════════════════════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════════════════════
 init();
 </script>
 </body>
