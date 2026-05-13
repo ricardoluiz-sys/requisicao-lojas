@@ -233,6 +233,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .b-alt{background:rgba(245,183,49,.15);color:var(--gold);}
 .b-cob{background:rgba(79,126,255,.15);color:var(--accent);}
 .b-np{background:rgba(107,114,128,.12);color:var(--muted);}
+.b-rev{background:rgba(245,183,49,.08);color:#B8860B;border:1px solid rgba(245,183,49,.25);}
 .b-clA{background:rgba(255,92,92,.1);color:var(--red);}
 .b-clB{background:rgba(245,183,49,.1);color:var(--gold);}
 .b-clC{background:rgba(79,126,255,.1);color:var(--accent);}
@@ -304,6 +305,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="nb"        id="nb-gestao"  onclick="showSec('gestao',this)">Gestão</button>
       <button class="nb"        id="nb-plano"   onclick="showSec('plano',this)">📊 Plano de Reposição</button>
       <button class="nb"        id="nb-pedidos" onclick="showSec('pedidos',this)">Pedidos</button>
+      <button class="nb"        id="nb-consumo" onclick="showSec('consumo',this)">🏆 Top Consumo</button>
       <button class="nb"        id="nb-ruptura" onclick="showSec('ruptura',this)">Rupturas</button>
       <button class="nb"        id="nb-fluxo"   onclick="showSec('fluxo',this)">Fluxo &amp; Prazos</button>
       <button class="nb"        id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
@@ -571,6 +573,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div id="ped-table"></div>
     </section>
 
+    <!-- ═ TOP CONSUMO ═ -->
+    <section id="sec-consumo" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><h1>Top Produtos Consumidos</h1><p>Ranking por faturamento e consumo real · dados Metabase</p></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="tc-periodo" onchange="tcRender()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <option value="30">Últimos 30 dias</option>
+            <option value="60">Últimos 60 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="180" selected>Últimos 180 dias</option>
+          </select>
+          <select id="tc-loja" onchange="tcRender()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <option value="todas">Todas as lojas</option>
+            <option value="PKS">PKS Brasília</option>
+            <option value="Iguatemi">Iguatemi</option>
+            <option value="Anália Franco">Anália Franco</option>
+          </select>
+          <select id="tc-cat" onchange="tcRender()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <option value="todas">Todas as categorias</option>
+            <option value="Bolsas">Bolsas</option>
+            <option value="Capinhas">Capinhas</option>
+            <option value="Garrafas">Garrafas</option>
+            <option value="Lancheiras">Lancheiras</option>
+            <option value="Malas">Malas</option>
+            <option value="Mochilas">Mochilas</option>
+            <option value="Necessaires">Necessaires</option>
+            <option value="Tote Bags">Tote Bags</option>
+            <option value="Bolsas Térmicas">Bolsas Térmicas</option>
+            <option value="Copos">Copos</option>
+            <option value="Eletrônicos">Eletrônicos</option>
+            <option value="Acessórios">Acessórios</option>
+          </select>
+          <input type="text" id="tc-busca" placeholder="Buscar produto..."
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:190px;"
+            oninput="tcRender()"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--border)'"/>
+        </div>
+      </div>
+
+      <!-- Métricas rápidas -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px" id="tc-metrics"></div>
+
+      <!-- Grid lado a lado PKS / IGU / ANA ou tabela unificada -->
+      <div id="tc-content"></div>
+    </section>
+
     <!-- ═ RUPTURAS ═ -->
     <section id="sec-ruptura" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
@@ -823,6 +875,7 @@ function showSec(id,el){
   if(id==='usuarios')renderUsers();
   if(id==='pedidos')loadPedidos();
   if(id==='ruptura')loadRuptura();
+  if(id==='consumo')tcRender();
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1301,99 +1354,134 @@ function planCalcQtd(seg,est,lote){
   if(lote<=1)return diff;return Math.ceil(diff/lote)*lote;
 }
 
-// ─── Dados Metabase (reais) ─────────────────────────────────────
+// c30 = consumo últimos 30 dias (null = sem dados)
+// sem_consumo = true quando Metabase retornou null → urgência rebaixada para REVISAR
 const PLAN_DADOS={
   PKS:[
-    {prod:'Lancheira Play Azul Claro',cat:'Lancheiras',classe:'A',est:30,seg:17.68,u:'URGENTE',fat:16297},
-    {prod:'Lancheira Play Melancia',cat:'Lancheiras',classe:'A',est:29,seg:15.04,u:'URGENTE',fat:8992},
-    {prod:'Mochila Casual Pro / Casual Preta',cat:'Mochilas',classe:'B',est:5,seg:7.04,u:'URGENTE',fat:8455},
-    {prod:'Infinite Air / iPhone 13',cat:'Capinhas',classe:'B',est:0,seg:32.68,u:'URGENTE',fat:7527},
-    {prod:'Infinite Air / iPhone 14',cat:'Capinhas',classe:'B',est:0,seg:20.68,u:'URGENTE',fat:7348},
-    {prod:'Bolsa de Garrafa Off White',cat:'Bolsas',classe:'B',est:14,seg:12.37,u:'URGENTE',fat:7355},
-    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:22,seg:17.32,u:'URGENTE',fat:6476},
-    {prod:'Garrafa Térmica Fresh 360 Glitter Vinho 650ml',cat:'Garrafas',classe:'B',est:0,seg:12.47,u:'URGENTE',fat:5848},
-    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:269,seg:15.07,u:'URGENTE',fat:26517},
-    {prod:'Necessaire Voyage Off White',cat:'Necessaires',classe:'A',est:1,seg:7.64,u:'URGENTE',fat:12173},
-    {prod:'Lancheira BTS Preta',cat:'Lancheiras',classe:'A',est:83,seg:8.47,u:'URGENTE',fat:10603},
-    {prod:'Bolsa Térmica Urban Preta',cat:'Bolsas Térmicas',classe:'A',est:50,seg:37.84,u:'URGENTE',fat:13011},
-    {prod:'Bolsa Térmica Urban Marrom',cat:'Bolsas Térmicas',classe:'A',est:50,seg:32.72,u:'URGENTE',fat:10824},
-    {prod:'Mala de Bordo Trip 20" Off White',cat:'Malas',classe:'A',est:16,seg:8.9,u:'ALERTA',fat:30952},
-    {prod:'Mala Joy - WaitList',cat:'Malas',classe:'A',est:5,seg:6.73,u:'ALERTA',fat:19573},
-    {prod:'Anti Impacto Slim Air / Samsung Galaxy A56',cat:'Capinhas',classe:'B',est:80,seg:10.25,u:'ALERTA',fat:5610},
+    {prod:'Lancheira Play Azul Claro',cat:'Lancheiras',classe:'A',est:30,seg:17.68,c30:50,u:'URGENTE',fat:16297},
+    {prod:'Lancheira Play Melancia',cat:'Lancheiras',classe:'A',est:29,seg:15.04,c30:37,u:'URGENTE',fat:8992},
+    {prod:'Mochila Casual Pro / Casual Preta',cat:'Mochilas',classe:'B',est:5,seg:7.04,c30:9,u:'URGENTE',fat:8455},
+    {prod:'Infinite Air / iPhone 13',cat:'Capinhas',classe:'B',est:0,seg:32.68,c30:44,u:'URGENTE',fat:7527},
+    {prod:'Infinite Air / iPhone 14',cat:'Capinhas',classe:'B',est:0,seg:20.68,c30:57,u:'URGENTE',fat:7348},
+    {prod:'Bolsa de Garrafa Off White',cat:'Bolsas',classe:'B',est:14,seg:12.37,c30:36,u:'URGENTE',fat:7355},
+    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:22,seg:17.32,c30:30,u:'URGENTE',fat:6476},
+    {prod:'Garrafa Térmica Fresh 360 Glitter Vinho 650ml',cat:'Garrafas',classe:'B',est:0,seg:12.47,c30:19,u:'URGENTE',fat:5848},
+    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:269,seg:15.07,c30:null,sem_consumo:true,u:'REVISAR',fat:26517},
+    {prod:'Necessaire Voyage Off White',cat:'Necessaires',classe:'A',est:1,seg:7.64,c30:2,u:'URGENTE',fat:12173},
+    {prod:'Lancheira BTS Preta',cat:'Lancheiras',classe:'A',est:83,seg:8.47,c30:null,sem_consumo:true,u:'REVISAR',fat:10603},
+    {prod:'Bolsa Térmica Urban Preta',cat:'Bolsas Térmicas',classe:'A',est:50,seg:37.84,c30:null,sem_consumo:true,u:'REVISAR',fat:13011},
+    {prod:'Bolsa Térmica Urban Marrom',cat:'Bolsas Térmicas',classe:'A',est:50,seg:32.72,c30:null,sem_consumo:true,u:'REVISAR',fat:10824},
+    {prod:'Mala de Bordo Trip 20" Off White',cat:'Malas',classe:'A',est:16,seg:8.9,c30:9,u:'ALERTA',fat:30952},
+    {prod:'Mala Joy - WaitList',cat:'Malas',classe:'A',est:5,seg:6.73,c30:5,u:'ALERTA',fat:19573},
+    {prod:'Anti Impacto Slim Air / Samsung Galaxy A56',cat:'Capinhas',classe:'B',est:80,seg:10.25,c30:41,u:'ALERTA',fat:5610},
   ],
   Iguatemi:[
-    {prod:'Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:15,seg:67.86,u:'URGENTE',fat:148355},
-    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:46.46,u:'URGENTE',fat:83980},
-    {prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',classe:'A',est:50,seg:71.79,u:'URGENTE',fat:76464},
-    {prod:'Mochila Voyage Off White',cat:'Mochilas',classe:'A',est:39,seg:13.97,u:'URGENTE',fat:61795},
-    {prod:'Necessaire Makeup Double - Preta',cat:'Necessaires',classe:'A',est:0,seg:43.51,u:'URGENTE',fat:57575},
-    {prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',classe:'A',est:0,seg:27.42,u:'URGENTE',fat:57400},
-    {prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',classe:'A',est:0,seg:20.98,u:'URGENTE',fat:51703},
-    {prod:'Base Preta - Mala de Bordo Trip 20"',cat:'Acessórios',classe:'A',est:6,seg:21.39,u:'URGENTE',fat:35640},
-    {prod:'Case Slim Air iPhone 15 Pro Max',cat:'Capinhas',classe:'A',est:8,seg:49.23,u:'URGENTE',fat:34496},
-    {prod:'Lancheira Play Preta',cat:'Lancheiras',classe:'A',est:19,seg:43.48,u:'URGENTE',fat:34181},
-    {prod:'Case Slim Air iPhone 13',cat:'Capinhas',classe:'A',est:4,seg:74.65,u:'URGENTE',fat:19743},
-    {prod:'Mochila Rodinha BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:7.69,u:'URGENTE',fat:28994},
-    {prod:'Lancheira Midi - Poeira das Estrelas',cat:'Lancheiras',classe:'A',est:2,seg:60.92,u:'URGENTE',fat:17980},
-    {prod:'Impact Slim Standard iPhone 11',cat:'Capinhas',classe:'A',est:40,seg:132.7,u:'URGENTE',fat:24040},
-    {prod:'Tote Bag Off White',cat:'Tote Bags',classe:'A',est:76,seg:52.5,u:'ALERTA',fat:79133},
-    {prod:'Case Slim Air iPhone 16 Pro Max',cat:'Capinhas',classe:'A',est:71,seg:42.46,u:'ALERTA',fat:51944},
-    {prod:'Necessaire Makeup Double Preta (alerta)',cat:'Necessaires',classe:'A',est:59,seg:43.51,u:'ALERTA',fat:57575},
-    {prod:'Mala Joy Vinho',cat:'Malas',classe:'A',est:32,seg:14.61,u:'ALERTA',fat:24801},
-    {prod:'Garrafa Térmica Urban 360 Branca 500ml',cat:'Garrafas',classe:'B',est:93,seg:12.76,u:'ALERTA',fat:7831},
+    {prod:'Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:15,seg:67.86,c30:44,u:'URGENTE',fat:148355},
+    {prod:'Mochila BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:46.46,c30:9,u:'URGENTE',fat:83980},
+    {prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',classe:'A',est:50,seg:71.79,c30:56,u:'URGENTE',fat:76464},
+    {prod:'Mochila Voyage Off White',cat:'Mochilas',classe:'A',est:39,seg:13.97,c30:49,u:'URGENTE',fat:61795},
+    {prod:'Necessaire Makeup Double - Preta',cat:'Necessaires',classe:'A',est:0,seg:43.51,c30:37,u:'URGENTE',fat:57575},
+    {prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',classe:'A',est:0,seg:27.42,c30:15,u:'URGENTE',fat:57400},
+    {prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',classe:'A',est:0,seg:20.98,c30:51,u:'URGENTE',fat:51703},
+    {prod:'Base Preta - Mala de Bordo Trip 20"',cat:'Acessórios',classe:'A',est:6,seg:21.39,c30:24,u:'URGENTE',fat:35640},
+    {prod:'Case Slim Air iPhone 15 Pro Max',cat:'Capinhas',classe:'A',est:8,seg:49.23,c30:64,u:'URGENTE',fat:34496},
+    {prod:'Lancheira Play Preta',cat:'Lancheiras',classe:'A',est:19,seg:43.48,c30:23,u:'URGENTE',fat:34181},
+    {prod:'Case Slim Air iPhone 13',cat:'Capinhas',classe:'A',est:4,seg:74.65,c30:97,u:'URGENTE',fat:19743},
+    {prod:'Mochila Rodinha BTS Preta',cat:'Mochilas',classe:'A',est:0,seg:7.69,c30:null,sem_consumo:true,u:'REVISAR',fat:28994},
+    {prod:'Lancheira Midi - Poeira das Estrelas',cat:'Lancheiras',classe:'A',est:2,seg:60.92,c30:null,sem_consumo:true,u:'REVISAR',fat:17980},
+    {prod:'Impact Slim Standard iPhone 11',cat:'Capinhas',classe:'A',est:40,seg:132.7,c30:46,u:'URGENTE',fat:24040},
+    {prod:'Tote Bag Off White',cat:'Tote Bags',classe:'A',est:76,seg:52.5,c30:51,u:'ALERTA',fat:79133},
+    {prod:'Case Slim Air iPhone 16 Pro Max',cat:'Capinhas',classe:'A',est:71,seg:42.46,c30:66,u:'ALERTA',fat:51944},
+    {prod:'Necessaire Makeup Double Preta (alerta)',cat:'Necessaires',classe:'A',est:59,seg:43.51,c30:37,u:'ALERTA',fat:57575},
+    {prod:'Mala Joy Vinho',cat:'Malas',classe:'A',est:32,seg:14.61,c30:23,u:'ALERTA',fat:24801},
+    {prod:'Garrafa Térmica Urban 360 Branca 500ml',cat:'Garrafas',classe:'B',est:93,seg:12.76,c30:68,u:'ALERTA',fat:7831},
   ],
   'Anália Franco':[
-    {prod:'Mala Joy CD Joy Azul',cat:'Malas',classe:'A',est:2,seg:7.01,u:'URGENTE',fat:11385},
-    {prod:'Tote Bag CD Tote Amora',cat:'Tote Bags',classe:'A',est:5,seg:9.49,u:'URGENTE',fat:10905},
-    {prod:'NecessaireCD Rosa',cat:'Necessaires',classe:'A',est:1,seg:14.04,u:'URGENTE',fat:8102},
-    {prod:'Tote Shopper Preta',cat:'Tote Bags',classe:'A',est:2,seg:3.43,u:'URGENTE',fat:7707},
-    {prod:'Tote Shopper Marrom',cat:'Tote Bags',classe:'A',est:0,seg:6.2,u:'URGENTE',fat:7147},
-    {prod:'Tote Shopper Vinho',cat:'Tote Bags',classe:'A',est:0,seg:1.52,u:'URGENTE',fat:5937},
-    {prod:'Case Slim Air Samsung Galaxy A56',cat:'Capinhas',classe:'A',est:0,seg:5.45,u:'URGENTE',fat:5857},
-    {prod:'Tote Shopper Off White',cat:'Tote Bags',classe:'B',est:0,seg:2.86,u:'URGENTE',fat:4238},
-    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:17,seg:9.9,u:'URGENTE',fat:4557},
-    {prod:'Lunch Bag CD Mix Corações Flutuantes',cat:'Lancheiras',classe:'B',est:1,seg:3.38,u:'URGENTE',fat:4107},
-    {prod:'Powerbank Fast Charge Branco 10000mah',cat:'Eletrônicos',classe:'B',est:0,seg:4.72,u:'URGENTE',fat:3717},
-    {prod:'Bags Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:134,seg:34.86,u:'ALERTA',fat:56756},
-    {prod:'Base Travel Case Trip Preta',cat:'Acessórios',classe:'A',est:10,seg:11.79,u:'ALERTA',fat:22642},
-    {prod:'Powerbank Fast Charge Preto 20000mah',cat:'Eletrônicos',classe:'A',est:8,seg:4.36,u:'ALERTA',fat:12494},
-    {prod:'Powerbank Fast Charge Branco 20000mah',cat:'Eletrônicos',classe:'A',est:15,seg:4.34,u:'ALERTA',fat:7556},
+    {prod:'Mala Joy CD Joy Azul',cat:'Malas',classe:'A',est:2,seg:7.01,c30:7,u:'URGENTE',fat:11385},
+    {prod:'Tote Bag CD Tote Amora',cat:'Tote Bags',classe:'A',est:5,seg:9.49,c30:14,u:'URGENTE',fat:10905},
+    {prod:'NecessaireCD Rosa',cat:'Necessaires',classe:'A',est:1,seg:14.04,c30:4,u:'URGENTE',fat:8102},
+    {prod:'Tote Shopper Preta',cat:'Tote Bags',classe:'A',est:2,seg:3.43,c30:4,u:'URGENTE',fat:7707},
+    {prod:'Tote Shopper Marrom',cat:'Tote Bags',classe:'A',est:0,seg:6.2,c30:null,sem_consumo:true,u:'REVISAR',fat:7147},
+    {prod:'Tote Shopper Vinho',cat:'Tote Bags',classe:'A',est:0,seg:1.52,c30:4,u:'URGENTE',fat:5937},
+    {prod:'Case Slim Air Samsung Galaxy A56',cat:'Capinhas',classe:'A',est:0,seg:5.45,c30:2,u:'URGENTE',fat:5857},
+    {prod:'Tote Shopper Off White',cat:'Tote Bags',classe:'B',est:0,seg:2.86,c30:null,sem_consumo:true,u:'REVISAR',fat:4238},
+    {prod:'Bolsa de Garrafa Preta',cat:'Bolsas',classe:'B',est:17,seg:9.9,c30:20,u:'URGENTE',fat:4557},
+    {prod:'Lunch Bag CD Mix Coracoes Flutuantes',cat:'Lancheiras',classe:'B',est:1,seg:3.38,c30:null,sem_consumo:true,u:'REVISAR',fat:4107},
+    {prod:'Powerbank Fast Charge Branco 10000mah',cat:'Eletrônicos',classe:'B',est:0,seg:4.72,c30:null,sem_consumo:true,u:'REVISAR',fat:3717},
+    {prod:'Bags Bolsa Moove Preta',cat:'Bolsas',classe:'A',est:134,seg:34.86,c30:120,u:'ALERTA',fat:56756},
+    {prod:'Base Travel Case Trip Preta',cat:'Acessórios',classe:'A',est:10,seg:11.79,c30:10,u:'ALERTA',fat:22642},
+    {prod:'Powerbank Fast Charge Preto 20000mah',cat:'Eletrônicos',classe:'A',est:8,seg:4.36,c30:8,u:'ALERTA',fat:12494},
+    {prod:'Powerbank Fast Charge Branco 20000mah',cat:'Eletrônicos',classe:'A',est:15,seg:4.34,c30:15,u:'ALERTA',fat:7556},
   ],
 };
+
+// Gera texto de motivo para a coluna "Motivo" e tooltip
+function planMotivo(p,qtd,lote){
+  if(p.sem_consumo){
+    const cob=p.est>0?Math.round(p.est/p.seg):0;
+    return{
+      texto: p.est>0
+        ? `Sem histórico de consumo no período. Cobertura calculada: ${cob}m. Verifique manualmente.`
+        : `Sem histórico de consumo e estoque zerado. Verifique se ainda é vendido.`,
+      curto: p.est>0 ? `Sem consumo no período (${cob}m cobertura)` : `Sem consumo e estoque zero`
+    };
+  }
+  if(p.est===0){
+    return{texto:`Ruptura total. Consumo médio: ${p.c30}/mês. Qtd = 1 lote mínimo (${lote} un).`,curto:`Ruptura · consumo ${p.c30}/mês`};
+  }
+  const cob=(p.est/p.c30).toFixed(1);
+  const diff=Math.ceil(p.seg-p.est);
+  if(p.u==='URGENTE'){
+    return{texto:`Estoque abaixo do mínimo de segurança. Est: ${p.est} · Seg: ${Math.ceil(p.seg)} · Consumo: ${p.c30}/mês · Cobertura: ${cob}m · Diferença: ${diff} un ajustada para lote de ${lote}.`,
+      curto:`Est ${p.est} < Seg ${Math.ceil(p.seg)} · consumo ${p.c30}/mês`};
+  }
+  if(p.u==='ALERTA'){
+    return{texto:`Estoque próximo ao mínimo de segurança. Est: ${p.est} · Seg: ${Math.ceil(p.seg)} · Consumo: ${p.c30}/mês · Cobertura: ${cob}m.`,
+      curto:`Próximo ao mínimo (${cob}m cobertura)`};
+  }
+  return{texto:'',curto:''};
+}
 
 function planRenderLoja(lojaKey,twId,urgId,altId,totId,selId){
   const dados=PLAN_DADOS[lojaKey]||[];
   const cats={};
   for(const d of dados){if(!cats[d.cat])cats[d.cat]=[];cats[d.cat].push(d);}
   let html=`<table><thead><tr>
-    <th style="width:34%">Produto</th><th>Categoria</th>
+    <th style="width:26%">Produto</th>
     <th style="text-align:center">Classe</th>
     <th style="text-align:center">Estoque</th>
     <th style="text-align:center">Est. Seg.</th>
     <th style="text-align:center">Qtd Sugerida</th>
     <th style="text-align:center">Lote</th>
+    <th>Motivo da sugestão</th>
     <th style="text-align:center">Urgência</th>
   </tr></thead><tbody>`;
-  let urgCnt=0,altCnt=0;
+  let urgCnt=0,altCnt=0,revCnt=0;
   for(const[cat,prods]of Object.entries(cats)){
     html+=`<tr class="crow"><td colspan="8">${cat}</td></tr>`;
     for(const p of prods){
       const lote=planGetLote(p.prod);
       const qtd=planCalcQtd(p.seg,p.est,lote);
-      const uCls=p.u==='URGENTE'?'b-urg':p.u==='ALERTA'?'b-alt':'b-cob';
+      const uCls=p.u==='URGENTE'?'b-urg':p.u==='ALERTA'?'b-alt':p.u==='REVISAR'?'b-rev':'b-cob';
       const cCls=p.classe==='A'?'b-clA':p.classe==='B'?'b-clB':'b-clC';
-      if(p.u==='URGENTE')urgCnt++;if(p.u==='ALERTA')altCnt++;
+      if(p.u==='URGENTE')urgCnt++;
+      else if(p.u==='ALERTA')altCnt++;
+      else if(p.u==='REVISAR')revCnt++;
+      const motivo=planMotivo(p,qtd,lote);
       html+=`<tr>
         <td><div style="font-weight:500;font-size:13px">${p.prod}</div></td>
-        <td style="color:var(--muted);font-size:12px">${p.cat}</td>
         <td style="text-align:center"><span class="badge ${cCls}">${p.classe}</span></td>
         <td style="text-align:center;font-weight:600;color:${(p.est||0)<=0?'var(--red)':(p.est||0)<10?'var(--gold)':'var(--text)'}">${p.est!=null?p.est:'?'}</td>
         <td style="text-align:center;color:var(--muted)">${p.seg.toFixed(0)}</td>
         <td style="text-align:center">
-          <span class="qty-cell" style="color:${qtd>0?'var(--green)':'var(--muted)'}">${qtd>0?qtd:'—'}</span>
-          ${lote>1?`<div class="lote-tag">×${lote}</div>`:''}
+          <span class="qty-cell" style="color:${qtd>0?'var(--green)':p.u==='REVISAR'?'var(--gold)':'var(--muted)'}">${qtd>0?qtd:'—'}</span>
+          ${lote>1?`<div class="lote-tag">x${lote}</div>`:''}
         </td>
         <td style="text-align:center;color:var(--muted);font-size:12px">${lote>1?lote:'—'}</td>
+        <td>
+          <div style="font-size:11px;color:var(--muted);line-height:1.4;max-width:260px"
+               title="${motivo.texto.replace(/"/g,'&quot;')}">${motivo.curto||'—'}</div>
+        </td>
         <td style="text-align:center"><span class="badge ${uCls}">${p.u}</span></td>
       </tr>`;
     }
@@ -1402,9 +1490,9 @@ function planRenderLoja(lojaKey,twId,urgId,altId,totId,selId){
   document.getElementById(twId).innerHTML=html;
   document.getElementById(urgId).textContent=urgCnt;
   document.getElementById(altId).textContent=altCnt;
-  document.getElementById(totId).textContent=urgCnt+altCnt;
-  document.getElementById(selId).textContent=urgCnt+altCnt;
-  return{urgCnt,altCnt};
+  document.getElementById(totId).textContent=urgCnt+altCnt+revCnt;
+  document.getElementById(selId).textContent=urgCnt+altCnt+revCnt;
+  return{urgCnt,altCnt,revCnt};
 }
 
 function planShowTab(id,btn){
@@ -1480,43 +1568,95 @@ function planExportarTudo(){
 }
 
 let _planModalLoja=null;
+// Valida se qtd é múltiplo do lote
+function planValidaQtd(inp,lote){
+  const v=parseInt(inp.value)||0;
+  const ok=(lote<=1)||(v===0)||(v%lote===0);
+  inp.style.borderColor=ok?'var(--border)':'var(--red)';
+  inp.title=ok?'':'Quantidade deve ser múltiplo de '+lote;
+}
+
 function planGerarReq(loja){
   _planModalLoja=loja;
   const dados=PLAN_DADOS[loja]||[];
-  const itens=dados.map(d=>{const lote=planGetLote(d.prod);return{...d,qtdSug:planCalcQtd(d.seg,d.est,lote),lote};}).filter(d=>d.qtdSug>0);
+  const itens=dados.map(d=>{const lote=planGetLote(d.prod);return{...d,qtdSug:planCalcQtd(d.seg,d.est,lote),lote};}).filter(d=>d.qtdSug>0||d.u==='REVISAR');
   document.getElementById('mplan-title').textContent=`Requisição sugerida — ${loja}`;
-  let body=`<div style="font-size:13px;color:var(--muted);margin-bottom:14px">${itens.length} itens · Semana 20 · Aprovação necessária antes do processamento</div>
-    <div style="max-height:340px;overflow-y:auto;margin-bottom:14px">
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="border-bottom:1px solid var(--border)">
-      <th style="padding:8px 10px;text-align:left;color:var(--muted);font-size:11px">Produto</th>
-      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Qtd</th>
-      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Lote</th>
-      <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:11px">Urgência</th>
-    </tr></thead><tbody>`;
-  for(const it of itens){
-    const uCol=it.u==='URGENTE'?'var(--red)':'var(--gold)';
-    body+=`<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:8px 10px;font-weight:500;max-width:220px;white-space:normal;line-height:1.3">${it.prod}</td>
-      <td style="padding:8px 10px;text-align:center;font-weight:700;color:var(--green)">${it.qtdSug}</td>
-      <td style="padding:8px 10px;text-align:center;font-size:11px;color:var(--muted)">${it.lote>1?it.lote+' un':'—'}</td>
-      <td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:600;color:${uCol}">${it.u}</td>
-    </tr>`;
+
+  const urgentes=itens.filter(i=>i.u==='URGENTE');
+  const alertas=itens.filter(i=>i.u==='ALERTA');
+  const revisar=itens.filter(i=>i.u==='REVISAR');
+
+  function buildSection(lista,label,color){
+    if(!lista.length)return'';
+    let h=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${color};padding:10px 0 6px">${label} (${lista.length})</div>`;
+    for(const it of lista){
+      const motivo=planMotivo(it,it.qtdSug,it.lote);
+      const pid='mreq_'+it.prod.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30);
+      const isRev=it.u==='REVISAR';
+      h+=`<div style="display:grid;grid-template-columns:1fr 90px 80px;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:500;font-size:13px;line-height:1.3">${it.prod}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4">${motivo.curto||'—'}</div>
+          ${it.lote>1?`<div style="font-size:10px;color:var(--gold);margin-top:2px">Lote mín: ${it.lote} un</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <input type="number" id="${pid}" value="${isRev?0:it.qtdSug}" min="0"
+            step="${it.lote>1?it.lote:1}"
+            style="width:80px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;text-align:center;"
+            oninput="planValidaQtd(this,${it.lote})"
+            data-prod="${it.prod.replace(/"/g,'&quot;')}" data-lote="${it.lote}" data-sug="${it.qtdSug}"/>
+          ${isRev?`<div style="font-size:10px;color:var(--gold)">confirme a qtd</div>`:''}
+        </div>
+        <div style="text-align:center;padding-top:6px">
+          <span style="font-size:11px;font-weight:600;color:${color}">${it.u}</span>
+          ${!isRev&&it.qtdSug>0?`<div style="font-size:10px;color:var(--muted);margin-top:2px">sugestão: ${it.qtdSug}</div>`:''}
+        </div>
+      </div>`;
+    }
+    return h;
   }
-  body+=`</tbody></table></div>
-  <div style="background:rgba(79,126,255,.07);border:1px solid rgba(79,126,255,.2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);line-height:1.5">
-    📌 Insira esta lista em <strong style="color:var(--text)">Nova Requisição</strong>, selecione a loja <strong style="color:var(--text)">${loja}</strong>, escolha a semana 20 e envie até <strong style="color:var(--gold)">terça-feira 18h</strong>.
+
+  let body=`
+  <div style="font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap">
+    <span>✏️ <strong style="color:var(--text)">Quantidades editáveis</strong> — ajuste conforme necessário</span>
+    <span>· Semana 20 · Aprovação necessária</span>
+  </div>
+  <div style="max-height:420px;overflow-y:auto;padding-right:4px">
+    ${buildSection(urgentes,'🚨 Urgentes','var(--red)')}
+    ${buildSection(alertas,'⚠️ Alertas','var(--gold)')}
+    ${buildSection(revisar,'🔍 Revisar (sem dados de consumo)','#B8860B')}
+  </div>
+  <div style="background:rgba(79,126,255,.07);border:1px solid rgba(79,126,255,.2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px">
+    📌 Ajuste as quantidades se necessário, depois exporte. Insira em <strong style="color:var(--text)">Nova Requisição</strong> → loja <strong style="color:var(--text)">${loja}</strong> → semana 20 → envie até <strong style="color:var(--gold)">terça-feira 18h</strong>.
   </div>`;
+
   document.getElementById('mplan-body').innerHTML=body;
-  document.getElementById('mplan-export-btn').onclick=()=>{planExportarLoja(loja);closeModal('modal-plan-req');};
+  document.getElementById('mplan-export-btn').onclick=()=>{planExportarModal(loja);};
   document.getElementById('modal-plan-req').classList.add('open');
+}
+
+// Exporta usando quantidades editadas no modal
+function planExportarModal(loja){
+  const inputs=document.querySelectorAll('#mplan-body input[type=number]');
+  const rows=[['Item','Quantidade Aprovada','Lote Mínimo','Loja']];
+  inputs.forEach(inp=>{
+    const v=parseInt(inp.value)||0;
+    if(v>0)rows.push([inp.dataset.prod,v,parseInt(inp.dataset.lote)||1,loja]);
+  });
+  if(rows.length<=1){toast('Nenhuma quantidade preenchida.','error');return;}
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:45},{wch:18},{wch:12},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,loja.substring(0,31));
+  XLSX.writeFile(wb,'Requisicao_'+loja.replace(/ /g,'_')+'_Sem20_Editada.xlsx');
+  toast('Exportado com sucesso! ✅','success');
+  closeModal('modal-plan-req');
 }
 
 function planInit(){
   const r1=planRenderLoja('PKS','plan-tw-pks','plan-pks-urg','plan-pks-alt','plan-pks-tot','plan-pks-sel');
   const r2=planRenderLoja('Iguatemi','plan-tw-igu','plan-igu-urg','plan-igu-alt','plan-igu-tot','plan-igu-sel');
   const r3=planRenderLoja('Anália Franco','plan-tw-ana','plan-ana-urg','plan-ana-alt','plan-ana-tot','plan-ana-sel');
-  const tot=r1.urgCnt+r1.altCnt+r2.urgCnt+r2.altCnt+r3.urgCnt+r3.altCnt;
+  const tot=r1.urgCnt+r1.altCnt+(r1.revCnt||0)+r2.urgCnt+r2.altCnt+(r2.revCnt||0)+r3.urgCnt+r3.altCnt+(r3.revCnt||0);
   const totUrg=r1.urgCnt+r2.urgCnt+r3.urgCnt;
   document.getElementById('plan-total-itens').textContent=tot;
   document.getElementById('plan-total-urg').textContent=totUrg;
@@ -1527,6 +1667,226 @@ function planInit(){
   document.getElementById('plan-cnt-igu').textContent=r2.urgCnt+r2.altCnt;
   document.getElementById('plan-cnt-ana').textContent=r3.urgCnt+r3.altCnt;
   planBuildResumo();
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// TOP CONSUMO — dados reais Metabase (faturamento 180d + consumo 30d)
+// ══════════════════════════════════════════════════════════════════
+
+// Base de dados: todos os SKUs das 3 lojas com faturamento e consumo
+const TC_BASE = [
+  // PKS
+  {loja:'PKS',prod:'Tote Bag Preta',cat:'Tote Bags',fat180:109934,c30:54,est:991},
+  {loja:'PKS',prod:'Mini Tote Preta / Tote Bag',cat:'Tote Bags',fat180:72427,c30:61,est:598},
+  {loja:'PKS',prod:'Mala Joy Sarja Preto CD',cat:'Malas',fat180:71653,c30:29,est:501},
+  {loja:'PKS',prod:'Bolsa Moove Preta',cat:'Bolsas',fat180:70625,c30:1,est:213},
+  {loja:'PKS',prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:56695,c30:126,est:500},
+  {loja:'PKS',prod:'Mini Tote Off White / Tote Bag',cat:'Tote Bags',fat180:47896,c30:28,est:257},
+  {loja:'PKS',prod:'Case Anti Impacto Slim Air / iPhone 15',cat:'Capinhas',fat180:47462,c30:53,est:304},
+  {loja:'PKS',prod:'Mochila Pop / Pop Preta',cat:'Mochilas',fat180:45453,c30:22,est:687},
+  {loja:'PKS',prod:'Mala de Bordo Trip 20" - Preta',cat:'Malas',fat180:43629,c30:4,est:27},
+  {loja:'PKS',prod:'Mini Tote Cinza / Tote Bag',cat:'Tote Bags',fat180:41789,c30:9,est:320},
+  {loja:'PKS',prod:'Case Slim Air / iPhone 16 Pro Max',cat:'Capinhas',fat180:37303,c30:63,est:300},
+  {loja:'PKS',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:34542,c30:70,est:364},
+  {loja:'PKS',prod:'Tote Bag Off White',cat:'Tote Bags',fat180:33015,c30:23,est:104},
+  {loja:'PKS',prod:'Mala de Bordo Trip 20" - Off White',cat:'Malas',fat180:30952,c30:9,est:16},
+  {loja:'PKS',prod:'Copo Life Preto / 1180mL',cat:'Copos',fat180:27676,c30:157,est:441},
+  {loja:'PKS',prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',fat180:27535,c30:10,est:112},
+  {loja:'PKS',prod:'Tote Puff Preto / Tote Bag',cat:'Tote Bags',fat180:27430,c30:27,est:340},
+  {loja:'PKS',prod:'Mochila BTS Preta',cat:'Mochilas',fat180:26517,c30:null,est:269},
+  {loja:'PKS',prod:'Lancheira Play Preta',cat:'Lancheiras',fat180:26309,c30:51,est:106},
+  {loja:'PKS',prod:'Mochila Rodinha BTS Preta',cat:'Mochilas',fat180:25835,c30:1,est:80},
+  {loja:'PKS',prod:'Garrafa Térmica Fresh 360 v3 Branca 650ml',cat:'Garrafas',fat180:25185,c30:65,est:574},
+  {loja:'PKS',prod:'Mala Joy - Marrom',cat:'Malas',fat180:25131,c30:19,est:65},
+  {loja:'PKS',prod:'Mochila Voyage Preta',cat:'Mochilas',fat180:24354,c30:1,est:113},
+  {loja:'PKS',prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',fat180:24208,c30:18,est:71},
+  {loja:'PKS',prod:'Garrafa Flow Preto 500ml',cat:'Garrafas',fat180:24148,c30:3,est:240},
+  // IGUATEMI
+  {loja:'Iguatemi',prod:'Tote Bag Preta',cat:'Tote Bags',fat180:215474,c30:60,est:608},
+  {loja:'Iguatemi',prod:'Mala Joy Sarja Preto CD',cat:'Malas',fat180:192248,c30:64,est:334},
+  {loja:'Iguatemi',prod:'Bolsa Moove Preta',cat:'Bolsas',fat180:148355,c30:44,est:15},
+  {loja:'Iguatemi',prod:'Mala de Bordo Trip 20" - Preta',cat:'Malas',fat180:107416,c30:24,est:420},
+  {loja:'Iguatemi',prod:'Mini Tote Preta / Tote Bag',cat:'Tote Bags',fat180:94057,c30:91,est:505},
+  {loja:'Iguatemi',prod:'Tote Bag Rosa',cat:'Tote Bags',fat180:84071,c30:19,est:264},
+  {loja:'Iguatemi',prod:'Mochila BTS Preta',cat:'Mochilas',fat180:83980,c30:9,est:127},
+  {loja:'Iguatemi',prod:'Tote Bag Off White',cat:'Tote Bags',fat180:79133,c30:51,est:76},
+  {loja:'Iguatemi',prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:76464,c30:56,est:50},
+  {loja:'Iguatemi',prod:'Mini Tote Off White / Tote Bag',cat:'Tote Bags',fat180:73305,c30:50,est:582},
+  {loja:'Iguatemi',prod:'Mala Joy Sarja Rosa CH',cat:'Malas',fat180:67487,c30:11,est:244},
+  {loja:'Iguatemi',prod:'Mochila Voyage Off White',cat:'Mochilas',fat180:61795,c30:49,est:39},
+  {loja:'Iguatemi',prod:'Necessaire Makeup Double - Preta',cat:'Necessaires',fat180:57575,c30:37,est:59},
+  {loja:'Iguatemi',prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',fat180:57400,c30:15,est:0},
+  {loja:'Iguatemi',prod:'Case Slim Air / iPhone 16 Pro Max',cat:'Capinhas',fat180:51944,c30:66,est:71},
+  {loja:'Iguatemi',prod:'Tote Puff Marrom / Tote Bag',cat:'Tote Bags',fat180:52482,c30:54,est:467},
+  {loja:'Iguatemi',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:53768,c30:82,est:122},
+  {loja:'Iguatemi',prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',fat180:51703,c30:51,est:145},
+  {loja:'Iguatemi',prod:'Mala Joy - WaitList',cat:'Malas',fat180:48342,c30:29,est:181},
+  {loja:'Iguatemi',prod:'Mini Tote Marrom / Tote Bag',cat:'Tote Bags',fat180:41672,c30:14,est:50},
+  {loja:'Iguatemi',prod:'Impact Slim Standard iPhone 11',cat:'Capinhas',fat180:24040,c30:46,est:40},
+  {loja:'Iguatemi',prod:'Infinite Air / iPhone 17 Pro',cat:'Capinhas',fat180:17792,c30:37,est:243},
+  {loja:'Iguatemi',prod:'Base Preta - Mala de Bordo Trip 20"',cat:'Acessórios',fat180:35640,c30:24,est:6},
+  {loja:'Iguatemi',prod:'Case Slim Air iPhone 15 Pro Max',cat:'Capinhas',fat180:34496,c30:64,est:8},
+  {loja:'Iguatemi',prod:'Case Slim Air iPhone 13',cat:'Capinhas',fat180:19743,c30:97,est:4},
+  // ANÁLIA FRANCO
+  {loja:'Anália Franco',prod:'Tote Bag CD Tote Bag Preta',cat:'Tote Bags',fat180:77326,c30:28,est:1063},
+  {loja:'Anália Franco',prod:'Bags Bolsa Moove Preta',cat:'Bolsas',fat180:56756,c30:120,est:134},
+  {loja:'Anália Franco',prod:'Mala Joy CD Sarja Preta',cat:'Malas',fat180:54630,c30:21,est:112},
+  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Off White',cat:'Tote Bags',fat180:50244,c30:32,est:180},
+  {loja:'Anália Franco',prod:'Travel Case CD Trip Preta / Mala Trip 20"',cat:'Malas',fat180:44519,c30:10,est:163},
+  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Preta',cat:'Tote Bags',fat180:43890,c30:21,est:325},
+  {loja:'Anália Franco',prod:'NecessaireCD Preta',cat:'Necessaires',fat180:33948,c30:66,est:134},
+  {loja:'Anália Franco',prod:'Case Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:33364,c30:38,est:744},
+  {loja:'Anália Franco',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:31760,c30:45,est:707},
+  {loja:'Anália Franco',prod:'Mala Joy CD Joy Marrom',cat:'Malas',fat180:25171,c30:6,est:141},
+  {loja:'Anália Franco',prod:'Base Travel Case Trip Preta',cat:'Acessórios',fat180:22642,c30:10,est:10},
+  {loja:'Anália Franco',prod:'Mochila Rodinhas BTS Preta',cat:'Mochilas',fat180:21316,c30:1,est:48},
+  {loja:'Anália Franco',prod:'Tote Off White / Tote Bag',cat:'Tote Bags',fat180:19790,c30:6,est:145},
+  {loja:'Anália Franco',prod:'Travel Case Trip Off White',cat:'Malas',fat180:19271,c30:6,est:122},
+  {loja:'Anália Franco',prod:'Case Slim Air / iPhone 15',cat:'Capinhas',fat180:18624,c30:38,est:111},
+  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Cinza',cat:'Tote Bags',fat180:17791,c30:7,est:204},
+  {loja:'Anália Franco',prod:'BackpackCD Pop Preta',cat:'Mochilas',fat180:15182,c30:15,est:60},
+  {loja:'Anália Franco',prod:'Mala Joy CD Joy Off White',cat:'Malas',fat180:15095,c30:11,est:84},
+  {loja:'Anália Franco',prod:'Mala Joy CD Sarja Rosa',cat:'Malas',fat180:13725,c30:8,est:79},
+  {loja:'Anália Franco',prod:'Tote Bag CD Tote Bag Rosa',cat:'Tote Bags',fat180:13323,c30:9,est:97},
+  {loja:'Anália Franco',prod:'NecessaireCD Rosa',cat:'Necessaires',fat180:8102,c30:4,est:1},
+  {loja:'Anália Franco',prod:'Tote Bag CD Tote Amora',cat:'Tote Bags',fat180:10905,c30:14,est:5},
+  {loja:'Anália Franco',prod:'Bolsa de Garrafa Preta',cat:'Bolsas',fat180:4557,c30:20,est:17},
+  {loja:'Anália Franco',prod:'Mala Joy CD Joy Azul',cat:'Malas',fat180:11385,c30:7,est:2},
+  {loja:'Anália Franco',prod:'Powerbank Fast Charge Preto 20000mah',cat:'Eletrônicos',fat180:12494,c30:8,est:8},
+];
+
+// Fator de escalonamento por período selecionado
+function tcEscalonar(fat180, dias){
+  if(dias>=180)return fat180;
+  return Math.round(fat180*(dias/180));
+}
+function tcConsumoPeriodo(c30,dias){
+  if(c30==null)return null;
+  return Math.round(c30*(dias/30));
+}
+
+function tcRender(){
+  const dias=parseInt(document.getElementById('tc-periodo').value)||180;
+  const lojaFiltro=document.getElementById('tc-loja').value;
+  const catFiltro=document.getElementById('tc-cat').value;
+  const busca=(document.getElementById('tc-busca').value||'').toLowerCase().trim();
+
+  // Filtrar
+  let lista=TC_BASE.filter(p=>{
+    if(lojaFiltro!=='todas'&&p.loja!==lojaFiltro)return false;
+    if(catFiltro!=='todas'&&p.cat!==catFiltro)return false;
+    if(busca&&!p.prod.toLowerCase().includes(busca)&&!p.cat.toLowerCase().includes(busca))return false;
+    return true;
+  });
+
+  // Agrupar por produto se "todas as lojas" — soma faturamento e consumo
+  if(lojaFiltro==='todas'){
+    const map={};
+    for(const p of lista){
+      if(!map[p.prod])map[p.prod]={...p,fat180:0,c30_sum:0,c30_cnt:0,lojas:[]};
+      map[p.prod].fat180+=p.fat180;
+      if(p.c30!=null){map[p.prod].c30_sum+=p.c30;map[p.prod].c30_cnt++;}
+      map[p.prod].lojas.push(p.loja);
+    }
+    lista=Object.values(map).map(p=>({...p,c30:p.c30_cnt>0?Math.round(p.c30_sum):null}));
+  }
+
+  // Calcular valor do período e ordenar
+  lista=lista.map(p=>({...p,
+    fatPeriodo:tcEscalonar(p.fat180,dias),
+    cPeriodo:tcConsumoPeriodo(p.c30,dias),
+  })).sort((a,b)=>b.fatPeriodo-a.fatPeriodo);
+
+  const top=lista.slice(0,30);
+
+  // Métricas
+  const totalFat=top.reduce((s,p)=>s+p.fatPeriodo,0);
+  const totalCons=top.filter(p=>p.cPeriodo!=null).reduce((s,p)=>s+(p.cPeriodo||0),0);
+  const topProd=top[0];
+  const nLojas=lojaFiltro==='todas'?3:1;
+  document.getElementById('tc-metrics').innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Produtos no ranking</div>
+      <div style="font-size:24px;font-weight:700">${top.length}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">de ${lista.length} filtrados</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Faturamento top 30</div>
+      <div style="font-size:24px;font-weight:700">R$ ${(totalFat/1000).toFixed(0)}k</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">últimos ${dias} dias</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px"># 1 produto</div>
+      <div style="font-size:14px;font-weight:700;line-height:1.3">${topProd?topProd.prod.substring(0,30)+'…':'—'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">${topProd?'R$ '+(topProd.fatPeriodo/1000).toFixed(0)+'k':'—'}</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Consumo total (${dias}d)</div>
+      <div style="font-size:24px;font-weight:700">${totalCons.toLocaleString('pt-BR')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">unidades vendidas</div>
+    </div>`;
+
+  if(!top.length){
+    document.getElementById('tc-content').innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum produto encontrado para os filtros selecionados.</p></div>`;
+    return;
+  }
+
+  // Valor máximo para barra proporcional
+  const maxFat=top[0].fatPeriodo||1;
+  const lojaColor={PKS:'var(--pks)',Iguatemi:'var(--igu)','Anália Franco':'var(--ana)'};
+
+  let html=`<div style="background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--surface);border-bottom:1px solid var(--border)">
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);width:32px">#</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Produto</th>
+          ${lojaFiltro==='todas'?'<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Lojas</th>':''}
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Categoria</th>
+          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Faturamento (${dias}d)</th>
+          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Consumo (${dias}d)</th>
+          <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Estoque atual</th>
+          <th style="padding:10px 8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);width:140px">Participação</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  top.forEach((p,i)=>{
+    const pct=Math.round(p.fatPeriodo/maxFat*100);
+    const podium=i===0?'🥇':i===1?'🥈':i===2?'🥉':null;
+    const numStyle=i<3?'font-weight:700;font-size:14px':'color:var(--muted);font-size:13px';
+    const lojaTag=lojaFiltro!=='todas'?'':`
+      <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+        ${(p.lojas||[]).map(l=>`<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${lojaColor[l]||'var(--muted)'}">${l==='Anália Franco'?'AF':l}</span>`).join('')}
+      </div>`;
+    const estCorColor=(p.est||0)===0?'var(--red)':(p.est||0)<20?'var(--gold)':'var(--text)';
+    html+=`<tr style="border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+      <td style="padding:10px 14px;${numStyle}">${podium||('#'+(i+1))}</td>
+      <td style="padding:10px 14px">
+        <div style="font-weight:500;font-size:13px;line-height:1.3">${p.prod}</div>
+        ${lojaTag}
+      </td>
+      ${lojaFiltro==='todas'?`<td style="padding:10px 14px"></td>`:''}
+      <td style="padding:10px 14px;color:var(--muted);font-size:12px">${p.cat}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:600;font-size:13px">R$ ${(p.fatPeriodo/1000).toFixed(1)}k</td>
+      <td style="padding:10px 14px;text-align:right;font-size:13px;color:${p.cPeriodo!=null?'var(--text)':'var(--muted)'}">
+        ${p.cPeriodo!=null?p.cPeriodo.toLocaleString('pt-BR')+'<span style=\'font-size:11px;color:var(--muted)\'>  un</span>':'<span style=\'color:var(--muted);font-style:italic\'>s/ dados</span>'}
+      </td>
+      <td style="padding:10px 14px;text-align:center;font-weight:600;color:${estCorColor}">${p.est!=null?(p.est||0).toLocaleString('pt-BR'):'—'}</td>
+      <td style="padding:10px 8px">
+        <div style="display:flex;align-items:center;gap:7px">
+          <div style="flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${i===0?'var(--accent)':i<3?'var(--green)':'var(--muted)'};border-radius:99px;transition:width .4s ease"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);min-width:30px;text-align:right">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html+=`</tbody></table></div>`;
+  document.getElementById('tc-content').innerHTML=html;
 }
 
 // ══════════════════════════════════════════════════════════════════
