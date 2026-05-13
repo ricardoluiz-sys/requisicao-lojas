@@ -407,7 +407,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <h1>Plano de Reposição</h1>
           <p>Gerado a partir dos dados do Metabase · Curva ABC · Urgência por cobertura de estoque</p>
         <div id="plan-saldo-ind" style="margin-top:8px;font-size:12px;color:var(--muted);background:rgba(107,114,128,.07);border:1px solid var(--border);border-radius:7px;padding:6px 12px;display:inline-block;">
-          ⏳ Aguardando carga do saldo Itapeva — usando dados Metabase como base
+          ⏳ Aguardando saldo do CD (Itapeva) — quantidade sugerida sem limite de depósito
         </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -809,7 +809,7 @@ async function updateReq(payload){
 // STATE
 // ══════════════════════════════════════════════════════════════════
 let currentUser=null,lojaAtual=null,produtos=[],filtroAtual='todos',reqAtual=null,editUserId=null,delUserId=null;
-let _saldoItapeva=null; // Map normalizado item->saldo após loadEstoque
+let _saldoCD=null; // Map item→saldo disponível no CD/Depósito (Itapeva) — limita o que pode ser pedido
 const LOJA_COLORS={PKS:'var(--pks)',Iguatemi:'var(--igu)','Anália':'var(--ana)'};
 
 function init(){
@@ -936,16 +936,16 @@ async function loadEstoque(){
     }
     if(!list.length)throw new Error('Nenhum produto encontrado');
     produtos=list;
-    // Montar Map normalizado para cruzamento com PLAN_DADOS
-    _saldoItapeva=new Map();
+    // Montar Map CD: item → saldo disponível no depósito (limita o pedido)
+    _saldoCD=new Map();
     for(const p of list){
-      _saldoItapeva.set(planNorm(p.item), p.saldo);
+      _saldoCD.set(planNorm(p.item), p.saldo);
     }
     const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     setEst('ok',`${list.length} produtos carregados`);
     document.getElementById('etime').textContent=`Atualizado às ${t}`;
     renderTabela();
-    planAplicarSaldoReal(); // atualiza plano com saldo real
+    planAplicarSaldoCD(); // aplica limite de pedido do CD no plano
   }catch(e){
     setEst('err','Planilha indisponível — usando saldo de demonstração.');
     produtos=[
@@ -1360,9 +1360,21 @@ const PLAN_LOTES={
   'Bolsa Térmica Fruit':20,'Bolsa Térmica Daily':20,
 };
 function planGetLote(n){for(const[k,v]of Object.entries(PLAN_LOTES)){if(n.includes(k))return v;}return 1;}
-function planCalcQtd(seg,est,lote){
-  const diff=Math.max(0,Math.ceil(seg-(est||0)));if(diff===0)return 0;
-  if(lote<=1)return diff;return Math.ceil(diff/lote)*lote;
+function planCalcQtd(seg,est,lote,saldoCD){
+  // Necessidade = seg - est_loja
+  const diff=Math.max(0,Math.ceil(seg-(est||0)));
+  if(diff===0)return 0;
+  // Ajusta para múltiplo de lote
+  const qtdBruta=lote<=1?diff:Math.ceil(diff/lote)*lote;
+  // Aplica teto do CD se disponível
+  if(saldoCD!=null){
+    if(saldoCD<=0)return 0; // sem saldo no CD — não pode pedir
+    // Arredonda para baixo até o múltiplo de lote que cabe no CD
+    if(lote<=1)return Math.min(qtdBruta,saldoCD);
+    const maxLotes=Math.floor(saldoCD/lote);
+    return maxLotes>0?Math.min(Math.ceil(diff/lote),maxLotes)*lote:0;
+  }
+  return qtdBruta;
 }
 
 // c30 = consumo últimos 30 dias (null = sem dados)
@@ -1460,9 +1472,9 @@ function planRenderLoja(lojaKey,twId,urgId,altId,totId,selId){
   let html=`<table><thead><tr>
     <th style="width:26%">Produto</th>
     <th style="text-align:center">Classe</th>
-    <th style="text-align:center">Estoque</th>
+    <th style="text-align:center">Est. Loja</th>
     <th style="text-align:center">Est. Seg.</th>
-    <th style="text-align:center">Qtd Sugerida</th>
+    <th style="text-align:center">Qtd Sugerida<br><span style="font-size:9px;font-weight:400;color:var(--muted)">limitada pelo CD</span></th>
     <th style="text-align:center">Lote</th>
     <th>Motivo da sugestão</th>
     <th style="text-align:center">Urgência</th>
@@ -1472,34 +1484,40 @@ function planRenderLoja(lojaKey,twId,urgId,altId,totId,selId){
     html+=`<tr class="crow"><td colspan="8">${cat}</td></tr>`;
     for(const p of prods){
       const lote=planGetLote(p.prod);
-      // Usa saldo real da Itapeva se disponível, senão usa Metabase
-      const estAtual = p.est_real!==null&&p.est_real!==undefined ? p.est_real : p.est;
-      const estFonte = p.est_fonte||'Metabase';
-      const estReal  = p.est_real!==null&&p.est_real!==undefined;
-      const qtd=planCalcQtd(p.seg,estAtual,lote);
+      // est = estoque na LOJA (Metabase) — base para urgência e necessidade
+      // saldo_cd = disponível no DEPÓSITO (Itapeva) — teto do pedido
+      const estLoja=p.est;
+      const saldoCD=p.saldo_cd!=null?p.saldo_cd:null;
+      const qtd=planCalcQtd(p.seg,estLoja,lote,saldoCD);
+      const bloqueadoCD=saldoCD!=null&&saldoCD<=0;
+      const limitadoCD=saldoCD!=null&&qtd<planCalcQtd(p.seg,estLoja,lote,null)&&!bloqueadoCD;
       const uCls=p.u==='URGENTE'?'b-urg':p.u==='ALERTA'?'b-alt':p.u==='REVISAR'?'b-rev':p.u==='COBERTO'?'b-cob':'b-np';
       const cCls=p.classe==='A'?'b-clA':p.classe==='B'?'b-clB':'b-clC';
       if(p.u==='URGENTE')urgCnt++;
       else if(p.u==='ALERTA')altCnt++;
       else if(p.u==='REVISAR')revCnt++;
-      // planMotivo usa est atualizado
-      const pMot={...p,est:estAtual};
-      const motivo=planMotivo(pMot,qtd,lote);
-      const estColor=estAtual<=0?'var(--red)':estAtual<10?'var(--gold)':'var(--text)';
-      const fonteBadge=estReal
-        ?`<div style="font-size:9px;color:var(--green);margin-top:2px;font-weight:600">✓ Itapeva</div>`
-        :`<div style="font-size:9px;color:var(--muted);margin-top:2px">Metabase</div>`;
+      const motivo=planMotivo(p,qtd,lote);
+      const estColor=estLoja<=0?'var(--red)':estLoja<10?'var(--gold)':'var(--text)';
+      // Badge do CD: mostra saldo disponível + aviso se limita ou bloqueia
+      const cdBadge=saldoCD!=null
+        ?(bloqueadoCD
+          ?`<div style="font-size:9px;color:var(--red);margin-top:2px;font-weight:600">⚠ CD sem estoque</div>`
+          :(limitadoCD
+            ?`<div style="font-size:9px;color:var(--gold);margin-top:2px;font-weight:600">CD: ${saldoCD} un (limita)</div>`
+            :`<div style="font-size:9px;color:var(--green);margin-top:2px">CD: ${saldoCD} un</div>`))
+        :`<div style="font-size:9px;color:var(--muted);margin-top:2px">CD: sem dados</div>`;
       html+=`<tr>
         <td><div style="font-weight:500;font-size:13px">${p.prod}</div></td>
         <td style="text-align:center"><span class="badge ${cCls}">${p.classe}</span></td>
         <td style="text-align:center">
-          <span style="font-weight:600;color:${estColor}">${estAtual!=null?estAtual:'?'}</span>
-          ${fonteBadge}
+          <span style="font-weight:600;color:${estColor}">${estLoja!=null?estLoja:'?'}</span>
+          <div style="font-size:9px;color:var(--muted);margin-top:1px">loja</div>
         </td>
         <td style="text-align:center;color:var(--muted)">${p.seg.toFixed(0)}</td>
         <td style="text-align:center">
-          <span class="qty-cell" style="color:${qtd>0?'var(--green)':p.u==='REVISAR'?'var(--gold)':'var(--muted)'}">${qtd>0?qtd:'—'}</span>
+          <span class="qty-cell" style="color:${bloqueadoCD?'var(--red)':qtd>0?'var(--green)':p.u==='REVISAR'?'var(--gold)':'var(--muted)'}">${bloqueadoCD?'0 ⚠':qtd>0?qtd:'—'}</span>
           ${lote>1?`<div class="lote-tag">x${lote}</div>`:''}
+          ${cdBadge}
         </td>
         <td style="text-align:center;color:var(--muted);font-size:12px">${lote>1?lote:'—'}</td>
         <td>
@@ -1534,7 +1552,7 @@ function planBuildResumo(){
       const k=d.prod.substring(0,45);
       if(!tabela[k])tabela[k]={prod:d.prod,classe:d.classe,lojas:{}};
       const lote=planGetLote(d.prod);
-      tabela[k].lojas[loja]={u:d.u,qtd:planCalcQtd(d.seg,d.est,lote)};
+      tabela[k].lojas[loja]={u:d.u,qtd:planCalcQtd(d.seg,d.est,lote,d.saldo_cd!=null?d.saldo_cd:null)};
       if(d.u==='URGENTE'&&d.classe==='A'&&!urgentes.find(u=>u.prod===d.prod))urgentes.push({prod:d.prod,loja,cat:d.cat,fat:d.fat});
       else if(d.u==='ALERTA'&&!alertas.find(a=>a.prod===d.prod))alertas.push({prod:d.prod,loja,cat:d.cat});
     }
@@ -1567,12 +1585,11 @@ function planBuildResumo(){
 
 function planExportarLoja(loja){
   const dados=PLAN_DADOS[loja];if(!dados)return;
-  const rows=[['Item','Categoria','Classe','Estoque Atual','Est. Segurança','Qtd Sugerida','Lote Mínimo','Urgência','Fonte Saldo']];
+  const rows=[['Item','Categoria','Classe','Est. Loja (Metabase)','Est. Segurança','Saldo CD (Itapeva)','Qtd Sugerida','Lote Mínimo','Urgência']];
   for(const d of dados){
     const lote=planGetLote(d.prod);
-    const estAtual=d.est_real!==null&&d.est_real!==undefined?d.est_real:d.est;
-    const qtd=planCalcQtd(d.seg,estAtual,lote);
-    rows.push([d.prod,d.cat,d.classe,estAtual??0,d.seg.toFixed(0),qtd,lote>1?lote:'—',d.u,d.est_fonte||'Metabase']);
+    const qtd=planCalcQtd(d.seg,d.est,lote,d.saldo_cd!=null?d.saldo_cd:null);
+    rows.push([d.prod,d.cat,d.classe,d.est??0,d.seg.toFixed(0),d.saldo_cd!=null?d.saldo_cd:'—',qtd,lote>1?lote:'—',d.u]);
   }
   const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:45},{wch:18},{wch:8},{wch:14},{wch:16},{wch:14},{wch:12},{wch:12}];
@@ -1584,8 +1601,8 @@ function planExportarLoja(loja){
 function planExportarTudo(){
   const wb=XLSX.utils.book_new();
   for(const[loja,dados]of Object.entries(PLAN_DADOS)){
-    const rows=[['Item','Categoria','Classe','Estoque Atual','Est. Segurança','Qtd Sugerida','Lote Mínimo','Urgência','Fonte Saldo']];
-    for(const d of dados){const lote=planGetLote(d.prod);const qtd=planCalcQtd(d.seg,d.est,lote);rows.push([d.prod,d.cat,d.classe,d.est??0,d.seg.toFixed(0),qtd,lote>1?lote:1,d.u]);}
+    const rows=[['Item','Categoria','Classe','Est. Loja (Metabase)','Est. Segurança','Saldo CD (Itapeva)','Qtd Sugerida','Lote Mínimo','Urgência']];
+    for(const d of dados){const lote=planGetLote(d.prod);const qtd=planCalcQtd(d.seg,d.est,lote,d.saldo_cd!=null?d.saldo_cd:null);rows.push([d.prod,d.cat,d.classe,d.est??0,d.seg.toFixed(0),d.saldo_cd!=null?d.saldo_cd:'—',qtd,lote>1?lote:'—',d.u]);}
     const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:45},{wch:18},{wch:8},{wch:14},{wch:16},{wch:14},{wch:12},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws,loja.substring(0,31));
   }
@@ -1594,18 +1611,26 @@ function planExportarTudo(){
 }
 
 let _planModalLoja=null;
-// Valida se qtd é múltiplo do lote
+// Valida lote mínimo e teto do CD
 function planValidaQtd(inp,lote){
   const v=parseInt(inp.value)||0;
   const ok=(lote<=1)||(v===0)||(v%lote===0);
   inp.style.borderColor=ok?'var(--border)':'var(--red)';
   inp.title=ok?'':'Quantidade deve ser múltiplo de '+lote;
 }
+function planValidaQtdCD(inp,lote,cdMax){
+  const v=parseInt(inp.value)||0;
+  const semLote=(lote<=1)||(v===0)||(v%lote===0);
+  const semCD=cdMax==null||cdMax<=0||v<=cdMax;
+  if(!semLote){inp.style.borderColor='var(--red)';inp.title='Deve ser múltiplo de '+lote;return;}
+  if(!semCD){inp.style.borderColor='var(--red)';inp.title='Máximo disponível no CD: '+cdMax+' un';return;}
+  inp.style.borderColor='var(--border)';inp.title='';
+}
 
 function planGerarReq(loja){
   _planModalLoja=loja;
   const dados=PLAN_DADOS[loja]||[];
-  const itens=dados.map(d=>{const lote=planGetLote(d.prod);const estAtual=d.est_real!==null&&d.est_real!==undefined?d.est_real:d.est;return{...d,est:estAtual,qtdSug:planCalcQtd(d.seg,estAtual,lote),lote};}).filter(d=>d.qtdSug>0||d.u==='REVISAR'||d.u==='COBERTO'&&d.qtdSug>0);
+  const itens=dados.map(d=>{const lote=planGetLote(d.prod);const qtdSug=planCalcQtd(d.seg,d.est,lote,d.saldo_cd!=null?d.saldo_cd:null);return{...d,qtdSug,lote};}).filter(d=>d.qtdSug>0||d.u==='REVISAR');
   document.getElementById('mplan-title').textContent=`Requisição sugerida — ${loja}`;
 
   const urgentes=itens.filter(i=>i.u==='URGENTE');
@@ -1624,13 +1649,15 @@ function planGerarReq(loja){
           <div style="font-weight:500;font-size:13px;line-height:1.3">${it.prod}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4">${motivo.curto||'—'}</div>
           ${it.lote>1?`<div style="font-size:10px;color:var(--gold);margin-top:2px">Lote mín: ${it.lote} un</div>`:''}
+          ${it.saldo_cd!=null?`<div style="font-size:10px;color:var(--muted);margin-top:2px">Disp. CD: <strong style="color:${it.saldo_cd<=0?'var(--red)':it.saldo_cd<it.qtdSug*2?'var(--gold)':'var(--green)'}">${it.saldo_cd} un</strong></div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
           <input type="number" id="${pid}" value="${isRev?0:it.qtdSug}" min="0"
+            max="${it.saldo_cd!=null?it.saldo_cd:99999}"
             step="${it.lote>1?it.lote:1}"
             style="width:80px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;text-align:center;"
-            oninput="planValidaQtd(this,${it.lote})"
-            data-prod="${it.prod.replace(/"/g,'&quot;')}" data-lote="${it.lote}" data-sug="${it.qtdSug}"/>
+            oninput="planValidaQtdCD(this,${it.lote},${it.saldo_cd!=null?it.saldo_cd:'null'})"
+            data-prod="${it.prod.replace(/"/g,'&quot;')}" data-lote="${it.lote}" data-sug="${it.qtdSug}" data-cdmax="${it.saldo_cd!=null?it.saldo_cd:''}"/>
           ${isRev?`<div style="font-size:10px;color:var(--gold)">confirme a qtd</div>`:''}
         </div>
         <div style="text-align:center;padding-top:6px">
@@ -1679,8 +1706,12 @@ function planExportarModal(loja){
 }
 
 
-// ─── Cruzamento saldo Itapeva x PLAN_DADOS ─────────────────────
-// Normaliza nome: minúscula, sem acentos, só alfanum+espaço, colapsa espaços
+// ─── Saldo CD (Depósito/Itapeva) × PLAN_DADOS ──────────────────
+// O saldo do CD é o LIMITE MÁXIMO que pode ser pedido para a loja.
+// NÃO representa o estoque da loja — não altera urgência nem est.
+// ────────────────────────────────────────────────────────────────
+
+// Normaliza nome para busca fuzzy
 function planNorm(s){
   return (s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -1688,70 +1719,45 @@ function planNorm(s){
     .replace(/\s+/g,' ').trim();
 }
 
-// Busca saldo no Map pelo melhor match (exato ou contido)
-function planBuscarSaldo(nomeProd){
-  if(!_saldoItapeva||!_saldoItapeva.size)return null;
+// Busca saldo no CD pelo melhor match (exato → parcial)
+function planBuscarSaldoCD(nomeProd){
+  if(!_saldoCD||!_saldoCD.size)return null;
   const n=planNorm(nomeProd);
-  // 1. Exato
-  if(_saldoItapeva.has(n))return _saldoItapeva.get(n);
-  // 2. O nome do plano está contido no nome da planilha (ou vice-versa)
-  for(const[k,v]of _saldoItapeva){
+  if(_saldoCD.has(n))return _saldoCD.get(n);
+  for(const[k,v]of _saldoCD){
     if(k.includes(n)||n.includes(k))return v;
   }
   return null;
 }
 
-// Recalcula urgência com base no novo saldo real
-function planRecalcUrgencia(p){
-  const est=p.est_real??p.est;
-  const cob=p.c30?est/p.c30:null;
-  if(p.sem_consumo){
-    // Sem consumo: só urgente se estoque zerado, senão revisar
-    return est<=0?'URGENTE':'REVISAR';
-  }
-  if(est<=0)return'URGENTE';
-  if(cob!=null){
-    if(cob<0.5)return'URGENTE';   // menos de 15 dias
-    if(cob<1.5)return'ALERTA';    // menos de 45 dias
-    return'COBERTO';
-  }
-  // sem c30: baseado em est vs seg
-  const diff=est-p.seg;
-  if(diff<0)return'URGENTE';
-  if(diff<p.seg*0.3)return'ALERTA';
-  return'COBERTO';
-}
-
-function planAplicarSaldoReal(){
-  if(!_saldoItapeva||!_saldoItapeva.size)return;
+// Aplica saldo_cd como teto do pedido — NÃO altera est nem urgência
+function planAplicarSaldoCD(){
+  if(!_saldoCD||!_saldoCD.size)return;
 
   let matches=0,misses=0;
-  for(const[lojaKey,lista]of Object.entries(PLAN_DADOS)){
+  for(const[,lista]of Object.entries(PLAN_DADOS)){
     for(const p of lista){
-      const saldo=planBuscarSaldo(p.prod);
-      if(saldo!==null){
-        p.est_real=saldo;         // guarda saldo real
-        p.est_fonte='Itapeva';    // fonte
-        p.u=planRecalcUrgencia(p);
+      const saldoCD=planBuscarSaldoCD(p.prod);
+      if(saldoCD!==null){
+        p.saldo_cd=saldoCD;   // teto: máximo que pode ser pedido
         matches++;
       } else {
-        p.est_real=null;
-        p.est_fonte='Metabase';
+        p.saldo_cd=null;      // sem correspondência no CD
         misses++;
       }
+      // est e urgência NÃO são alterados — seguem sendo do Metabase (estoque loja)
     }
   }
 
-  // Atualiza indicador visual no cabeçalho do plano
+  // Indicador visual
   const ind=document.getElementById('plan-saldo-ind');
   if(ind){
     const pct=Math.round(matches/(matches+misses)*100);
-    ind.innerHTML=`<span style="color:var(--green)">✓ Saldo Itapeva</span> · ${matches} SKUs atualizados (${pct}%) · ${misses} mantidos do Metabase`;
+    ind.innerHTML=`<span style="color:var(--green)">✓ Saldo CD carregado</span> · ${matches} SKUs com limite do depósito (${pct}%) · ${misses} sem correspondência`;
     ind.style.borderColor='rgba(46,204,136,.3)';
     ind.style.background='rgba(46,204,136,.06)';
   }
 
-  // Re-renderiza o plano com os novos saldos
   planInit();
 }
 
