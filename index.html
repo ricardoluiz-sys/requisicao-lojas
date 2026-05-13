@@ -573,8 +573,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div><h1>Pedidos das Lojas</h1><p>Acompanhe os pedidos em andamento por loja.</p></div>
         <button class="btn bg2 bsm" onclick="_pedidosCache=null;loadPedidos()">↻ Atualizar</button>
       </div>
-      <div class="ped-filtros">
-        <input type="text" id="inp-busca-ped" placeholder="Buscar pedido ou item..."
+      <!-- Filtros linha 1: busca + loja + status -->
+      <div class="ped-filtros" style="margin-bottom:8px">
+        <input type="text" id="inp-busca-ped" placeholder="Buscar pedido, item ou NF..."
           style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;flex:1;min-width:180px;"
           oninput="filtrarPedidos()"
           onfocus="this.style.borderColor='var(--accent)'"
@@ -599,7 +600,54 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <option value="DUPLICADO">Duplicado</option>
           <option value="CANCELADO">Cancelado</option>
         </select>
+        <button class="btn bg2 bsm" onclick="pedLimparFiltros()" title="Limpar filtros">✕ Limpar</button>
       </div>
+      <!-- Filtros linha 2: período -->
+      <div class="ped-filtros" style="margin-bottom:16px;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Período:</span>
+        <!-- Atalhos rápidos -->
+        <div style="display:flex;gap:5px;flex-wrap:wrap" id="ped-periodo-chips">
+          <button class="ped-chip active" data-periodo="todos"     onclick="pedSetPeriodo('todos',this)">Todos</button>
+          <button class="ped-chip"        data-periodo="hoje"      onclick="pedSetPeriodo('hoje',this)">Hoje</button>
+          <button class="ped-chip"        data-periodo="7d"        onclick="pedSetPeriodo('7d',this)">7 dias</button>
+          <button class="ped-chip"        data-periodo="30d"       onclick="pedSetPeriodo('30d',this)">30 dias</button>
+          <button class="ped-chip"        data-periodo="60d"       onclick="pedSetPeriodo('60d',this)">60 dias</button>
+          <button class="ped-chip"        data-periodo="90d"       onclick="pedSetPeriodo('90d',this)">90 dias</button>
+          <button class="ped-chip"        data-periodo="mesatual"  onclick="pedSetPeriodo('mesatual',this)">Mês atual</button>
+          <button class="ped-chip"        data-periodo="mesant"    onclick="pedSetPeriodo('mesant',this)">Mês anterior</button>
+          <button class="ped-chip"        data-periodo="custom"    onclick="pedSetPeriodo('custom',this)">Personalizado</button>
+        </div>
+        <!-- Seletor de mês -->
+        <select id="sel-mes-ped" onchange="pedSetMes()" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <option value="">-- Mês --</option>
+          <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+          <option value="03">Março</option><option value="04">Abril</option>
+          <option value="05">Maio</option><option value="06">Junho</option>
+          <option value="07">Julho</option><option value="08">Agosto</option>
+          <option value="09">Setembro</option><option value="10">Outubro</option>
+          <option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <select id="sel-ano-ped" onchange="pedSetMes()" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+          <option value="2027">2027</option>
+        </select>
+        <!-- Range personalizado -->
+        <div id="ped-range-wrap" style="display:none;display:flex;gap:6px;align-items:center;display:none">
+          <input type="date" id="ped-dt-de" onchange="filtrarPedidos()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"/>
+          <span style="color:var(--muted);font-size:12px">até</span>
+          <input type="date" id="ped-dt-ate" onchange="filtrarPedidos()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"/>
+        </div>
+        <!-- Label período ativo -->
+        <span id="ped-periodo-label" style="font-size:12px;color:var(--muted);margin-left:4px"></span>
+      </div>
+      <style>
+        .ped-chip{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap;}
+        .ped-chip:hover{border-color:var(--accent);color:var(--text);}
+        .ped-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+      </style>
       <div id="ped-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
       <div id="ped-table"></div>
     </section>
@@ -1279,13 +1327,128 @@ async function loadPedidos(){
     </div>`;
   }
 }
+// Estado do filtro de período
+let _pedPeriodo={tipo:'todos',de:null,ate:null};
+
+function pedParseData(str){
+  // Converte "dd/mm/yyyy" ou "yyyy-mm-dd" para Date (00:00 local)
+  if(!str)return null;
+  const s=str.trim();
+  // dd/mm/yyyy
+  const m1=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(m1)return new Date(+m1[3],+m1[2]-1,+m1[1]);
+  // yyyy-mm-dd
+  const m2=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m2)return new Date(+m2[1],+m2[2]-1,+m2[3]);
+  return null;
+}
+
+function pedSetPeriodo(tipo,btn){
+  document.querySelectorAll('.ped-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const agora=new Date();
+  const hoje=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
+  const rangeWrap=document.getElementById('ped-range-wrap');
+  const mesWrap=document.getElementById('sel-mes-ped');
+  const anoWrap=document.getElementById('sel-ano-ped');
+  rangeWrap.style.display='none'; mesWrap.style.display='none'; anoWrap.style.display='none';
+  const label=document.getElementById('ped-periodo-label');
+
+  if(tipo==='todos'){
+    _pedPeriodo={tipo,de:null,ate:null};
+    label.textContent='';
+  } else if(tipo==='hoje'){
+    _pedPeriodo={tipo,de:hoje,ate:hoje};
+    label.textContent=hoje.toLocaleDateString('pt-BR');
+  } else if(tipo==='7d'){
+    const de=new Date(hoje);de.setDate(de.getDate()-6);
+    _pedPeriodo={tipo,de,ate:hoje};
+    label.textContent=de.toLocaleDateString('pt-BR')+' – '+hoje.toLocaleDateString('pt-BR');
+  } else if(tipo==='30d'){
+    const de=new Date(hoje);de.setDate(de.getDate()-29);
+    _pedPeriodo={tipo,de,ate:hoje};
+    label.textContent=de.toLocaleDateString('pt-BR')+' – '+hoje.toLocaleDateString('pt-BR');
+  } else if(tipo==='60d'){
+    const de=new Date(hoje);de.setDate(de.getDate()-59);
+    _pedPeriodo={tipo,de,ate:hoje};
+    label.textContent=de.toLocaleDateString('pt-BR')+' – '+hoje.toLocaleDateString('pt-BR');
+  } else if(tipo==='90d'){
+    const de=new Date(hoje);de.setDate(de.getDate()-89);
+    _pedPeriodo={tipo,de,ate:hoje};
+    label.textContent=de.toLocaleDateString('pt-BR')+' – '+hoje.toLocaleDateString('pt-BR');
+  } else if(tipo==='mesatual'){
+    const de=new Date(agora.getFullYear(),agora.getMonth(),1);
+    const ate=new Date(agora.getFullYear(),agora.getMonth()+1,0);
+    _pedPeriodo={tipo,de,ate};
+    label.textContent=de.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    mesWrap.style.display=''; anoWrap.style.display='';
+    mesWrap.value=String(agora.getMonth()+1).padStart(2,'0');
+    anoWrap.value=String(agora.getFullYear());
+  } else if(tipo==='mesant'){
+    const d=new Date(agora.getFullYear(),agora.getMonth()-1,1);
+    const de=d;const ate=new Date(agora.getFullYear(),agora.getMonth(),0);
+    _pedPeriodo={tipo,de,ate};
+    label.textContent=de.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    mesWrap.style.display=''; anoWrap.style.display='';
+    mesWrap.value=String(d.getMonth()+1).padStart(2,'0');
+    anoWrap.value=String(d.getFullYear());
+  } else if(tipo==='custom'){
+    rangeWrap.style.display='flex';
+    _pedPeriodo={tipo,de:null,ate:null};
+    label.textContent='';
+  }
+  filtrarPedidos();
+}
+
+function pedSetMes(){
+  const mes=parseInt(document.getElementById('sel-mes-ped').value)||0;
+  const ano=parseInt(document.getElementById('sel-ano-ped').value)||new Date().getFullYear();
+  if(!mes){filtrarPedidos();return;}
+  const de=new Date(ano,mes-1,1);
+  const ate=new Date(ano,mes,0);
+  _pedPeriodo={tipo:'mes',de,ate};
+  const label=document.getElementById('ped-periodo-label');
+  label.textContent=de.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  filtrarPedidos();
+}
+
+function pedLimparFiltros(){
+  document.getElementById('inp-busca-ped').value='';
+  document.getElementById('sel-loja-ped').value='';
+  document.getElementById('sel-status-ped').value='';
+  document.querySelectorAll('.ped-chip').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.ped-chip[data-periodo="todos"]').classList.add('active');
+  _pedPeriodo={tipo:'todos',de:null,ate:null};
+  document.getElementById('ped-range-wrap').style.display='none';
+  document.getElementById('sel-mes-ped').style.display='none';
+  document.getElementById('sel-ano-ped').style.display='none';
+  document.getElementById('ped-periodo-label').textContent='';
+  filtrarPedidos();
+}
+
 function filtrarPedidos(){
   const busca=(document.getElementById('inp-busca-ped').value||'').toLowerCase();
   const loja=(document.getElementById('sel-loja-ped').value||'').toLowerCase();
   const status=(document.getElementById('sel-status-ped').value||'').toLowerCase();
+  // Filtro de data (range personalizado)
+  let de=_pedPeriodo.de, ate=_pedPeriodo.ate;
+  if(_pedPeriodo.tipo==='custom'){
+    de=pedParseData(document.getElementById('ped-dt-de').value);
+    ate=pedParseData(document.getElementById('ped-dt-ate').value);
+  }
   const fil=_pedidosAll.filter(p=>{
-    const txt=(p.pedido+p.item+p.destino+p.status).toLowerCase();
-    return(!busca||txt.includes(busca))&&(!loja||(p.destino||'').toLowerCase().includes(loja))&&(!status||(p.status||'').toLowerCase().includes(status));
+    const txt=(p.pedido+(p.nf||'')+p.item+p.destino+p.status).toLowerCase();
+    if(busca&&!txt.includes(busca))return false;
+    if(loja&&!(p.destino||'').toLowerCase().includes(loja))return false;
+    if(status&&!(p.status||'').toLowerCase().includes(status))return false;
+    // Filtro de data
+    if(de||ate){
+      const dp=pedParseData(p.dataPedido);
+      if(!dp)return false;
+      if(de&&dp<de)return false;
+      if(ate&&dp>ate)return false;
+    }
+    return true;
   });
   renderPedidosTable(fil);
 }
