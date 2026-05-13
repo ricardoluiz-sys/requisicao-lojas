@@ -909,6 +909,7 @@ function showSec(id,el){
   if(id==='pedidos')loadPedidos();
   if(id==='ruptura')loadRuptura();
   if(id==='consumo')tcRender();
+  if(id==='plano')planCheckSaldo();
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -927,6 +928,21 @@ function selectLoja(loja,el){
 // ══════════════════════════════════════════════════════════════════
 // ESTOQUE
 // ══════════════════════════════════════════════════════════════════
+// Garante que o saldo CD está carregado quando o Plano é aberto
+function planCheckSaldo(){
+  if(_saldoCD && _saldoCD.size > 0) return; // já carregado, nada a fazer
+  // Ainda não carregou — acionar loadEstoque e atualizar indicador
+  const ind = document.getElementById('plan-saldo-ind');
+  const spinner = document.getElementById('plan-saldo-spinner');
+  const msg = document.getElementById('plan-saldo-msg');
+  const sub = document.getElementById('plan-saldo-sub');
+  if(spinner) spinner.style.display = '';
+  if(msg) msg.textContent = 'Carregando saldo do CD (Itapeva)…';
+  if(sub) sub.textContent = 'Quantidades sugeridas sem limite de depósito até concluir';
+  if(ind){ ind.style.borderColor='var(--border)'; ind.style.background='rgba(107,114,128,.07)'; }
+  loadEstoque(); // carrega planilha → ao terminar chama planAplicarSaldoCD → planInit
+}
+
 async function loadEstoque(){
   setEst('loading','Carregando saldo Itapeva [Total]...');
   try{
@@ -1104,33 +1120,84 @@ async function openReq(id){
   const reqs=await getReqs();const req=reqs.find(r=>String(r.id)===String(id));if(!req)return;
   reqAtual=id;document.getElementById('modal-req').classList.add('open');
   document.getElementById('mreq-title').textContent=`Loja ${req.loja} — ${req.semana}`;
-  let body=`<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)">
+
+  const isPlano=(req.origem||'').includes('Plano');
+  const origemBadge=isPlano
+    ?`<span style="background:rgba(79,126,255,.15);color:var(--accent);border-radius:10px;padding:2px 9px;font-size:11px;font-weight:600">📊 Plano de Reposição</span>`:'';
+
+  let body=`<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center">
     <span>👤 <strong style="color:var(--text)">${req.responsavel}</strong></span>
     <span>📅 ${req.semana}</span>
-    <span class="sb s${req.status.replace(/ /g,'')}">${req.status}</span></div>
-  <div class="tw"><table><thead><tr><th>Produto</th><th style="text-align:center">Saldo</th><th style="text-align:center">Solicitado</th><th style="text-align:center">Aprovado</th><th>Obs.</th></tr></thead><tbody>`;
+    <span class="sb s${req.status.replace(/ /g,'')}">${req.status}</span>
+    ${origemBadge}
+  </div>`;
+
+  // Aviso visual quando veio do plano e está Pendente — qtds já pré-aprovadas
+  if(isPlano&&req.status==='Pendente'){
+    body+=`<div style="background:rgba(46,204,136,.07);border:1px solid rgba(46,204,136,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">✅</span>
+      <span>Quantidades <strong style="color:var(--text)">pré-preenchidas pelo Plano de Reposição</strong>. Revise se necessário e clique em Aprovar para gerar o Excel.</span>
+    </div>`;
+  }
+
+  body+=`<div class="tw"><table>
+    <thead><tr>
+      <th>Produto</th>
+      <th style="text-align:center">Saldo CD</th>
+      <th style="text-align:center">Solicitado</th>
+      <th style="text-align:center">Aprovado</th>
+      <th>Obs.</th>
+    </tr></thead><tbody>`;
+
   for(const it of req.itens){
     const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
-    body+=`<tr><td><div class="pname">${it.produto}</div><div style="font-size:11px;color:var(--muted)">${it.categoria}</div></td>
-      <td style="text-align:center">${it.saldo.toLocaleString('pt-BR')}</td>
+    // qtyAprov pré-preenchido: vem do plano (igual ao qty) ou de aprovação anterior
+    const apvVal=it.qtyAprov!=null&&it.qtyAprov!==''?it.qtyAprov:it.qty;
+    const saldoFmt=(it.saldo||0).toLocaleString('pt-BR');
+    const obsLimpa=(it.obs||'—').replace('Via Plano de Reposição · urgência: ','🔸 ');
+    body+=`<tr>
+      <td><div class="pname">${it.produto}</div><div style="font-size:11px;color:var(--muted)">${it.categoria||'—'}</div></td>
+      <td style="text-align:center;color:var(--muted)">${saldoFmt}</td>
       <td style="text-align:center"><strong>${it.qty}</strong></td>
-      <td style="text-align:center"><input type="number" class="qi" style="width:70px" id="${pid}" value="${it.qtyAprov||''}" placeholder="—" min="0" max="${it.qty}"/></td>
-      <td style="font-size:12px;color:var(--muted)">${it.obs||'—'}</td></tr>`;
+      <td style="text-align:center">
+        <input type="number" class="qi" style="width:70px${isPlano?';border-color:rgba(46,204,136,.4)':''}" id="${pid}"
+          value="${apvVal}" min="0" max="${it.qty}"/>
+      </td>
+      <td style="font-size:12px;color:var(--muted)">${obsLimpa}</td>
+    </tr>`;
   }
   body+=`</tbody></table></div>`;
   document.getElementById('mreq-body').innerHTML=body;
+
   const isAdmin=currentUser.role==='admin';
   let foot=`<button class="btn bg2" onclick="closeModal('modal-req')">Fechar</button>`;
-  if(req.status==='Aprovado')foot+=`<button class="btn" style="background:rgba(46,204,136,.15);color:var(--green)" onclick="exportarExcel(${req.id})">⬇ Exportar Excel</button>`;
-  if(isAdmin&&req.status==='Pendente')foot+=`<button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button><button class="btn bp" onclick="aprovar()">✓ Aprovar</button>`;
+  if(req.status==='Aprovado'){
+    foot+=`<button class="btn" style="background:rgba(46,204,136,.15);color:var(--green)" onclick="exportarExcel(${req.id})">⬇ Exportar Excel</button>`;
+  }
+  if(isAdmin&&req.status==='Pendente'){
+    foot+=`<button class="btn" style="background:rgba(255,92,92,.15);color:var(--red)" onclick="reprovar()">Reprovar</button>`;
+    foot+=`<button class="btn bp" onclick="aprovar()">✓ Aprovar e Exportar</button>`;
+  }
   document.getElementById('mreq-foot').innerHTML=foot;
 }
 
 async function aprovar(){
   const reqs=await getReqs();const req=reqs.find(r=>String(r.id)===String(reqAtual));if(!req)return;
-  const itens=req.itens.map(it=>{const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');const el=document.getElementById(pid);return{...it,qtyAprov:el?parseInt(el.value)||it.qty:it.qty};});
+  const itens=req.itens.map(it=>{
+    const pid='apv_'+it.produto.replace(/[^a-zA-Z0-9]/g,'_');
+    const el=document.getElementById(pid);
+    // Usa valor do campo; se vazio, mantém qty original
+    const apv=el?(parseInt(el.value)||it.qty):it.qty;
+    return{...it,qtyAprov:apv};
+  });
   const d=await updateReq({id:reqAtual,status:'Aprovado',aprovador:currentUser.nome||currentUser.login,aprovadoEm:new Date().toISOString(),itens});
-  if(d.ok){toast('Requisição aprovada! ✅','success');closeModal('modal-req');renderGestao();}
+  if(d.ok){
+    toast('Requisição aprovada! ✅','success');
+    closeModal('modal-req');
+    renderGestao();
+    // Gera Excel automaticamente após aprovação
+    setTimeout(()=>exportarExcel(reqAtual),400);
+  }
   else toast('Erro ao aprovar.','error');
 }
 async function reprovar(){
@@ -1156,13 +1223,61 @@ async function exportarExcel(id){
 // ══════════════════════════════════════════════════════════════════
 let _pedidosCache=null,_pedidosAll=[];
 async function loadPedidos(){
-  document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>`;
+  const elTable=document.getElementById('ped-table');
+  elTable.innerHTML=`<div class="empty"><div class="empty-icon">⏳</div><p>Carregando pedidos…</p></div>`;
   document.getElementById('ped-resumo').innerHTML='';
+  let rawText='';
   try{
-    const r=await fetch(PROXY+'?tipo=pedidos');const data=await r.json();
-    if(!Array.isArray(data)||!data.length){document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum pedido encontrado.</p></div>`;return;}
-    _pedidosAll=data;renderPedidosTable(data);
-  }catch(e){document.getElementById('ped-table').innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>Erro ao carregar pedidos.</p></div>`;}
+    const anoAtual=new Date().getFullYear();
+    const r=await fetch(PROXY+'?tipo=pedidos&ano='+anoAtual);
+    const httpStatus=r.status;
+    rawText=await r.text();
+
+    // Tenta parsear como JSON
+    let data;
+    try{ data=JSON.parse(rawText); }
+    catch(parseErr){
+      elTable.innerHTML=`<div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <p style="color:var(--gold);font-weight:600">Resposta não é JSON válido (HTTP ${httpStatus})</p>
+        <pre style="margin-top:10px;font-size:11px;color:var(--muted);text-align:left;max-width:600px;overflow-x:auto;white-space:pre-wrap;word-break:break-all">${rawText.substring(0,500)}</pre>
+      </div>`;
+      return;
+    }
+
+    // Verifica se é array
+    if(!Array.isArray(data)){
+      elTable.innerHTML=`<div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <p style="color:var(--gold);font-weight:600">Apps Script retornou um objeto, não um array</p>
+        <pre style="margin-top:10px;font-size:11px;color:var(--muted);text-align:left;max-width:600px;overflow-x:auto;white-space:pre-wrap">${JSON.stringify(data,null,2).substring(0,600)}</pre>
+      </div>`;
+      return;
+    }
+
+    if(!data.length){
+      elTable.innerHTML=`<div class="empty"><div class="empty-icon">📦</div><p>Nenhum pedido encontrado (array vazio).</p></div>`;
+      return;
+    }
+
+    // Sucesso — mostra campos disponíveis na tela E no console
+    const campos=Object.keys(data[0]);
+    console.log('[Pedidos] Campos disponíveis:', campos);
+    console.log('[Pedidos] Exemplo linha 1:', data[0]);
+
+    _pedidosAll=data;
+    renderPedidosTable(data);
+
+    // Log para diagnóstico apenas no console
+    if(data.length>0) console.log('[Pedidos] Campos:', Object.keys(data[0]));
+
+  }catch(e){
+    elTable.innerHTML=`<div class="empty">
+      <div class="empty-icon">❌</div>
+      <p style="color:var(--red);font-weight:600">Erro ao carregar: ${e.message}</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px">Verifique se o Apps Script está publicado e acessível.</p>
+    </div>`;
+  }
 }
 function filtrarPedidos(){
   const busca=(document.getElementById('inp-busca-ped').value||'').toLowerCase();
@@ -1185,7 +1300,12 @@ function renderPedidosTable(data){
     <tbody>${data.map(p=>{
       const barW=Math.min(100,parseInt(p.pctReal)||0);
       const barCol=barW>=100?'var(--green)':barW>50?'var(--gold)':'var(--red)';
-      const nfVal=p.nf||p.NF||p.notaFiscal||p.nota_fiscal||'';
+      // NF: número direto (se disponível) ou datas de sol./emissão
+      const nfNum   = String(p.nf||'').trim();
+      const nfSolDt = p.dataSolNF||'';
+      const nfEmDt  = p.dataEmNF||'';
+      // Exibe número se preenchido; senão datas de sol./emissão
+      const nfVal   = nfNum || nfSolDt || nfEmDt || '';
       return`<tr>
         <td style="font-weight:600;color:var(--accent)">${p.pedido}</td>
         <td style="color:var(--muted)">${fmtPedData(p.dataPedido)}</td>
@@ -1195,7 +1315,13 @@ function renderPedidosTable(data){
         <td style="text-align:center;color:${parseInt(p.pendente||0)>0?'var(--gold)':'var(--muted)'}">${p.pendente||'0'}</td>
         <td style="text-align:center;min-width:80px"><span style="font-size:12px;font-weight:600">${p.pctReal||'0%'}</span>
           <div class="ped-prog"><div class="ped-prog-bar" style="width:${barW}%;background:${barCol}"></div></div></td>
-        <td style="color:var(--accent);font-weight:500;font-size:12px">${nfVal||'<span style=\'color:var(--border)\'>—</span>'}</td>
+        <td style="min-width:90px">
+          ${nfNum
+            ? `<span style="color:var(--accent);font-weight:600;font-size:12px">${nfNum}</span>`
+            : (nfSolDt||nfEmDt)
+              ? `<div style="font-size:11px;color:var(--muted);line-height:1.5">${nfSolDt?'Sol: '+nfSolDt:''}${nfSolDt&&nfEmDt?'<br>':''}${nfEmDt?'Em: '+nfEmDt:''}</div>`
+              : `<span style="color:var(--border)">—</span>`}
+        </td>
         <td style="color:var(--muted)">${fmtPedData(p.prazo)}</td>
         <td class="${lojaClass(p.destino)}">${p.destino}</td>
         <td><span class="ped-status ${statusClass(p.status)}">${p.status||'—'}</span></td>
@@ -1781,16 +1907,25 @@ async function planEnviarParaGestao(){
   const resp=(currentUser.nome||currentUser.login);
 
   // Coleta itens com qtd > 0 dos inputs do modal
+  // Busca dados reais do PLAN_DADOS para categoria e urgência
+  const dadosLoja=PLAN_DADOS[loja]||[];
+  const dadosMap=Object.fromEntries(dadosLoja.map(d=>[d.prod,d]));
+
   const inputs=document.querySelectorAll('#mplan-body input[type=number]');
   const itens=[];
   inputs.forEach(inp=>{
     const v=parseInt(inp.value)||0;
-    if(v>0)itens.push({
-      produto:inp.dataset.prod,
-      categoria:'—',
-      saldo:parseInt(inp.dataset.cdmax)||0,
-      qty:v,
-      obs:'Via Plano de Reposição'
+    if(v<=0)return;
+    const nomeProd=inp.dataset.prod||'';
+    const dadoProd=dadosMap[nomeProd]||{};
+    const saldoCD=parseInt(inp.dataset.cdmax)||dadoProd.saldo_cd||0;
+    itens.push({
+      produto:   nomeProd,
+      categoria: dadoProd.cat||'—',
+      saldo:     saldoCD,           // saldo CD (teto)
+      qty:       v,                  // quantidade solicitada
+      qtyAprov:  v,                  // pré-aprovado com a qtd do plano
+      obs:       'Via Plano de Reposição · urgência: '+(dadoProd.u||'—')
     });
   });
   if(!itens.length){toast('Nenhuma quantidade preenchida.','error');return;}
