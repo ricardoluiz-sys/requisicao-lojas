@@ -253,28 +253,130 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .plan-sday{font-size:10px;color:var(--border);}
 
 /* ── MOBILE ── */
-@media(max-width:900px){.lojas{grid-template-columns:1fr 1fr;}.igrid{grid-template-columns:1fr;}.main{padding:20px 16px;}.plan-metrics{grid-template-columns:1fr 1fr;}.plan-prazo-grid{grid-template-columns:1fr;}}
+/* ─── TABLET (≤900px) ─── */
+@media(max-width:900px){
+  .lojas{grid-template-columns:1fr 1fr;}
+  .igrid{grid-template-columns:1fr;}
+  .main{padding:20px 16px;}
+  .plan-metrics{grid-template-columns:1fr 1fr;}
+  .plan-prazo-grid{grid-template-columns:1fr;}
+  .plan-resumo-grid{grid-template-columns:1fr;}
+  .ped-filtros{flex-wrap:wrap;}
+  .tc-table th:nth-child(6),.tc-table td:nth-child(6){display:none;}
+}
+
+/* ─── MOBILE (≤640px) ─── */
 @media(max-width:640px){
-  .topbar{padding:10px 14px;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:100;}
-  .brand-name{font-size:13px;}.brand-sub{display:none;}.logo{width:28px;height:28px;font-size:14px;}
-  .nav{order:3;width:100%;display:flex;overflow-x:auto;gap:2px;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
-  .nav::-webkit-scrollbar{display:none;}
-  .nb{flex-shrink:0;text-align:center;padding:6px 8px;font-size:12px;white-space:nowrap;}
-  .user-info{gap:6px;}.user-chip{padding:4px 8px;font-size:11px;}.logout-btn{padding:4px 8px;font-size:11px;}
-  .main{padding:14px 12px;}.ph h1{font-size:20px;}.lojas{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+  /* Topbar — hamburger menu */
+  .topbar{padding:0;flex-direction:column;gap:0;position:sticky;top:0;z-index:200;}
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;width:100%;background:var(--surface);}
+  .brand-sub{display:none;}
+  .logo{width:28px;height:28px;font-size:14px;}
+  .brand-name{font-size:13px;}
+
+  /* Nav como drawer deslizante */
+  .nav{
+    display:flex;flex-direction:column;gap:3px;
+    position:fixed;top:0;left:-260px;width:260px;height:100vh;
+    background:var(--surface);border-right:1px solid var(--border);
+    padding:60px 12px 20px;z-index:300;
+    transition:left .25s ease;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .nav.open{left:0;box-shadow:4px 0 20px rgba(0,0,0,.5);}
+  .nav-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+    z-index:299;opacity:0;transition:opacity .25s;
+  }
+  .nav-overlay.open{display:block;opacity:1;}
+  .nb{
+    width:100%;text-align:left;padding:11px 14px;font-size:14px;
+    border-radius:8px;justify-content:flex-start;
+  }
+  .nb.active{background:var(--accent);color:#fff;}
+
+  /* Hamburger button */
+  .ham-btn{
+    display:flex;flex-direction:column;gap:4px;
+    background:none;border:none;cursor:pointer;padding:6px;
+  }
+  .ham-btn span{display:block;width:20px;height:2px;background:var(--text);border-radius:2px;transition:all .2s;}
+
+  /* User info compacto */
+  .user-info{gap:6px;}
+  .user-chip{padding:4px 9px;font-size:11px;}
+  .logout-btn{padding:4px 9px;font-size:11px;}
+
+  /* Layout */
+  .main{padding:14px 12px;}
+  .ph h1{font-size:20px;}
+  .lojas{grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
   .fr{flex-direction:column;gap:10px;margin-bottom:14px;}
-  .tw table{display:block;}.tw thead{display:none;}.tw tbody{display:block;}
-  .tw tbody tr{display:flex;flex-direction:column;padding:12px 14px;gap:6px;border-bottom:1px solid var(--border);}
-  .tw tbody tr.crow{flex-direction:row;padding:6px 14px;}
-  .tw td{padding:0;border:none;font-size:13px;}
-  .qi{width:100px;padding:8px 10px;font-size:15px;}
+  .igrid{grid-template-columns:1fr!important;}
+  .row2,.row3,.row4,.grid-2,.grid-3{grid-template-columns:1fr!important;gap:10px;}
+
+  /* Tabelas — cards em mobile */
+  .tw{overflow-x:auto;}
+  .tw table{min-width:500px;}
+
+  /* Tabela pedidos — scroll horizontal */
+  .ped-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .ped-table-wrap table{min-width:700px;}
+
+  /* Inputs */
+  .qi{width:100%;padding:9px 10px;font-size:15px;}
+  input[type=text],input[type=number],input[type=date],select{font-size:16px!important;} /* evita zoom iOS */
+
+  /* Action bar */
   .abar{flex-direction:column;gap:10px;align-items:stretch;padding:12px 14px;}
-  .abar div:last-child{display:flex;gap:8px;}.abar .btn{flex:1;}
-  .plan-metrics{grid-template-columns:1fr 1fr;}.plan-prazo-grid{grid-template-columns:1fr;}
+  .abar div:last-child{display:flex;gap:8px;}
+  .abar .btn{flex:1;}
+
+  /* Plano */
+  .plan-metrics{grid-template-columns:1fr 1fr;}
+  .plan-prazo-grid{grid-template-columns:1fr;}
+  .plan-resumo-grid{grid-template-columns:1fr;}
   .plan-loja-header{flex-direction:column;align-items:flex-start;}
-  .rup-card{grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;}
-  .rup-header{grid-template-columns:1fr 1fr;}
-  .rup-card>*:nth-child(3),.rup-header span:nth-child(3){display:none;}
+  .plan-tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .plan-tabs-wrap::-webkit-scrollbar{display:none;}
+  .plan-tab{white-space:nowrap;}
+  .plan-steps{gap:0;}
+  .plan-slbl{font-size:9px;}
+  .plan-sday{font-size:8px;}
+
+  /* Rupturas */
+  .rup-card{grid-template-columns:1fr;gap:6px;padding:12px;}
+  .rup-header{display:none;}
+  .rup-date,.rup-vol{font-size:12px;}
+
+  /* Filtros pedidos */
+  .ped-filtros{flex-direction:column;gap:8px;}
+  .ped-filtros input,.ped-filtros select{width:100%;}
+  #ped-periodo-chips{flex-wrap:wrap;}
+  .ped-chip{flex:1;text-align:center;min-width:60px;}
+
+  /* Modal */
+  .md{width:96%;max-height:92vh;}
+  .mh h2{font-size:16px;}
+
+  /* Top consumo */
+  #tc-content{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tc-rank-table{min-width:520px;}
+
+  /* Métricas mobile — 2 colunas */
+  #tc-metrics{grid-template-columns:1fr 1fr!important;}
+  .plan-metrics{grid-template-columns:1fr 1fr!important;}
+
+  /* Semana picker */
+  .week-picker{width:290px;left:-10px;}
+}
+
+/* ─── VERY SMALL (≤380px) ─── */
+@media(max-width:380px){
+  .plan-metrics{grid-template-columns:1fr!important;}
+  #tc-metrics{grid-template-columns:1fr!important;}
+  .nb{font-size:13px;padding:10px 12px;}
+  .ped-chip{font-size:11px;padding:5px 8px;}
 }
 </style>
 </head>
@@ -295,26 +397,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 <!-- ═══ APP ═══ -->
 <div id="app-wrap" style="display:none">
-  <div class="topbar">
+  <!-- Overlay para fechar o menu mobile -->
+<div class="nav-overlay" id="nav-overlay" onclick="closeNav()"></div>
+
+<div class="topbar" id="main-topbar">
+  <div class="topbar-inner">
+    <!-- Hamburger (mobile) -->
+    <button class="ham-btn" id="ham-btn" onclick="toggleNav()" aria-label="Menu" style="display:none">
+      <span></span><span></span><span></span>
+    </button>
     <div class="brand">
       <div class="logo">R</div>
       <div><div class="brand-name">Requisição de Produtos</div><div class="brand-sub" id="tb-sub">—</div></div>
     </div>
-    <nav class="nav" id="main-nav">
-      <button class="nb active" id="nb-nova"    onclick="showSec('nova',this)">Nova Requisição</button>
-      <button class="nb"        id="nb-gestao"  onclick="showSec('gestao',this)">Gestão</button>
-      <button class="nb"        id="nb-plano"   onclick="showSec('plano',this)">📊 Plano de Reposição</button>
-      <button class="nb"        id="nb-pedidos" onclick="showSec('pedidos',this)">Pedidos</button>
-      <button class="nb"        id="nb-consumo" onclick="showSec('consumo',this)">🏆 Top Consumo</button>
-      <button class="nb"        id="nb-ruptura" onclick="showSec('ruptura',this)">Rupturas</button>
-      <button class="nb"        id="nb-fluxo"   onclick="showSec('fluxo',this)">Fluxo &amp; Prazos</button>
-      <button class="nb"        id="nb-usuarios" onclick="showSec('usuarios',this)" style="display:none">Usuários</button>
-    </nav>
     <div class="user-info">
       <div class="user-chip"><div class="user-dot" id="user-dot"></div><span id="user-label">—</span></div>
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
+  <nav class="nav" id="main-nav">
+    <button class="nb active" id="nb-nova"    onclick="navClick('nova',this)">Nova Requisição</button>
+    <button class="nb"        id="nb-gestao"  onclick="navClick('gestao',this)">Gestão</button>
+    <button class="nb"        id="nb-plano"   onclick="navClick('plano',this)">📊 Plano de Reposição</button>
+    <button class="nb"        id="nb-pedidos" onclick="navClick('pedidos',this)">Pedidos</button>
+    <button class="nb"        id="nb-consumo" onclick="navClick('consumo',this)">🏆 Top Consumo</button>
+    <button class="nb"        id="nb-ruptura" onclick="navClick('ruptura',this)">Rupturas</button>
+    <button class="nb"        id="nb-fluxo"   onclick="navClick('fluxo',this)">Fluxo &amp; Prazos</button>
+    <button class="nb"        id="nb-usuarios" onclick="navClick('usuarios',this)" style="display:none">Usuários</button>
+  </nav>
+</div>
 
   <div class="main">
 
@@ -894,6 +1005,7 @@ function init(){
   const saved=sessionStorage.getItem('currentUser');
   if(saved){currentUser=JSON.parse(saved);showApp();}
   loadLotes();
+  setTimeout(checkMobileLayout,100);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -947,6 +1059,48 @@ function showApp(){
 // ══════════════════════════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════════════════════════
+// ── Mobile nav helpers ──────────────────────────────────────
+function isMobile(){return window.innerWidth<=640;}
+
+function toggleNav(){
+  const nav=document.getElementById('main-nav');
+  const ov=document.getElementById('nav-overlay');
+  const isOpen=nav.classList.contains('open');
+  if(isOpen){closeNav();}else{nav.classList.add('open');ov.classList.add('open');document.body.style.overflow='hidden';}
+}
+
+function closeNav(){
+  document.getElementById('main-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// navClick: fecha drawer mobile depois de navegar
+function navClick(id,el){
+  showSec(id,el);
+  if(isMobile())closeNav();
+}
+
+// Mostrar/ocultar hamburguer conforme viewport
+function checkMobileLayout(){
+  const ham=document.getElementById('ham-btn');
+  if(!ham)return;
+  if(isMobile()){
+    ham.style.display='flex';
+    // Garante nav não visível por padrão
+    const nav=document.getElementById('main-nav');
+    if(!nav.classList.contains('open'))nav.style.display='flex'; // drawer sempre montado
+  }else{
+    ham.style.display='none';
+    closeNav();
+    const nav=document.getElementById('main-nav');
+    nav.style.display='flex';
+    nav.classList.remove('open');
+  }
+}
+window.addEventListener('resize',checkMobileLayout);
+// Rodar no init (após showApp)
+
 function showSec(id,el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
@@ -2293,7 +2447,10 @@ function tcRender(){
     return true;
   });
 
-  // Agrupar por produto se "todas as lojas" — soma faturamento e consumo
+  // Agrupar por produto se "todas as lojas"
+  // fat180 = soma real entre lojas (receita total do produto no período)
+  // c30 = soma de consumo entre lojas (unidades totais/mês)
+  // ticket = fat180 / (c30*6) = preço médio por unidade
   if(lojaFiltro==='todas'){
     const map={};
     for(const p of lista){
@@ -2302,7 +2459,19 @@ function tcRender(){
       if(p.c30!=null){map[p.prod].c30_sum+=p.c30;map[p.prod].c30_cnt++;}
       map[p.prod].lojas.push(p.loja);
     }
-    lista=Object.values(map).map(p=>({...p,c30:p.c30_cnt>0?Math.round(p.c30_sum):null}));
+    lista=Object.values(map).map(p=>{
+      const c30=p.c30_cnt>0?Math.round(p.c30_sum):null;
+      // Ticket médio = faturamento 180d / unidades vendidas 180d
+      const unid180=c30!=null?c30*6:null;
+      const ticket=unid180?Math.round(p.fat180/unid180):null;
+      return{...p,c30,ticket};
+    });
+  } else {
+    lista=lista.map(p=>{
+      const unid180=p.c30!=null?p.c30*6:null;
+      const ticket=unid180?Math.round(p.fat180/unid180):null;
+      return{...p,ticket};
+    });
   }
 
   // Calcular valor do período e ordenar
@@ -2326,13 +2495,13 @@ function tcRender(){
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Faturamento top 30</div>
-      <div style="font-size:24px;font-weight:700">R$ ${(totalFat/1000).toFixed(0)}k</div>
+      <div style="font-size:20px;font-weight:700">R$ ${totalFat.toLocaleString('pt-BR')}</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">últimos ${dias} dias</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px"># 1 produto</div>
       <div style="font-size:14px;font-weight:700;line-height:1.3">${topProd?topProd.prod.substring(0,30)+'…':'—'}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">${topProd?'R$ '+(topProd.fatPeriodo/1000).toFixed(0)+'k':'—'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">${topProd?'R$ '+topProd.fatPeriodo.toLocaleString('pt-BR'):'—'}</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Consumo total (${dias}d)</div>
@@ -2382,7 +2551,10 @@ function tcRender(){
       </td>
       ${lojaFiltro==='todas'?`<td style="padding:10px 14px"></td>`:''}
       <td style="padding:10px 14px;color:var(--muted);font-size:12px">${p.cat}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;font-size:13px">R$ ${(p.fatPeriodo/1000).toFixed(1)}k</td>
+      <td style="padding:10px 14px;text-align:right">
+          <div style="font-weight:600;font-size:13px">R$ ${p.fatPeriodo.toLocaleString('pt-BR')}</div>
+          ${p.ticket!=null?`<div style="font-size:10px;color:var(--muted);margin-top:2px">~R$ ${p.ticket.toLocaleString('pt-BR')}/un</div>`:''}
+        </td>
       <td style="padding:10px 14px;text-align:right;font-size:13px;color:${p.cPeriodo!=null?'var(--text)':'var(--muted)'}">
         ${p.cPeriodo!=null?p.cPeriodo.toLocaleString('pt-BR')+'<span style=\'font-size:11px;color:var(--muted)\'>  un</span>':'<span style=\'color:var(--muted);font-style:italic\'>s/ dados</span>'}
       </td>
