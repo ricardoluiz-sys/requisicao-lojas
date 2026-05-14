@@ -6,6 +6,7 @@
 <title>Requisição de Produtos — Lojas</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{--bg:#0D0F14;--surface:#151820;--card:#1C2030;--border:#252A3A;--accent:#4F7EFF;--gold:#F5B731;--green:#2ECC88;--red:#FF5C5C;--text:#E8EAF0;--muted:#6B7280;--pks:#4F7EFF;--igu:#2ECC88;--ana:#C084FC;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -421,6 +422,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="nb"        id="nb-plano"   onclick="navClick('plano',this)">📊 Plano de Reposição</button>
     <button class="nb"        id="nb-pedidos" onclick="navClick('pedidos',this)">Pedidos</button>
     <button class="nb"        id="nb-consumo" onclick="navClick('consumo',this)">🏆 Top Consumo</button>
+    <button class="nb"        id="nb-analise" onclick="navClick('analise',this)">📈 Análise de Consumo</button>
     <button class="nb"        id="nb-ruptura" onclick="navClick('ruptura',this)">Rupturas</button>
     <button class="nb"        id="nb-fluxo"   onclick="navClick('fluxo',this)">Fluxo &amp; Prazos</button>
     <button class="nb"        id="nb-usuarios" onclick="navClick('usuarios',this)" style="display:none">Usuários</button>
@@ -885,6 +887,175 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="user-grid" id="user-grid"></div>
     </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ═  ANÁLISE DE CONSUMO — Factories 3 (Iguatemi), 6 (PKS), 7 (Anália)
+         ═══════════════════════════════════════════════════════════ -->
+    <section id="sec-analise" class="sec">
+
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>Análise de Consumo</h1>
+          <p>Factories 3 · 6 · 7 — 2026 · Categoria Ebook excluída · Dados do banco Factory</p>
+        </div>
+        <div style="display:flex;gap:6px">
+          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600">F3 · Iguatemi</span>
+          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(79,126,255,.12);color:var(--pks);font-weight:600">F6 · PKS</span>
+          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(192,132,252,.12);color:var(--ana);font-weight:600">F7 · Anália</span>
+        </div>
+      </div>
+
+      <!-- ─── BARRA DE FILTROS ─── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+
+        <!-- Período -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
+            <button class="an-mb active" data-m="0">Jan</button>
+            <button class="an-mb active" data-m="1">Fev</button>
+            <button class="an-mb active" data-m="2">Mar</button>
+            <button class="an-mb active" data-m="3">Abr</button>
+            <button class="an-mb active" data-m="4">Mai</button>
+          </div>
+          <div style="display:flex;gap:4px;margin-top:6px">
+            <button class="an-mb" onclick="anSelAll()" style="font-size:10px;padding:2px 9px">Todos</button>
+            <button class="an-mb" onclick="anSelNone()" style="font-size:10px;padding:2px 9px">Limpar</button>
+          </div>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Loja -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Loja</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-loja-btns">
+            <button class="an-mb active" data-l="all">Todas</button>
+            <button class="an-mb" data-l="3" style="color:var(--green)">Iguatemi</button>
+            <button class="an-mb" data-l="6" style="color:var(--pks)">PKS</button>
+            <button class="an-mb" data-l="7" style="color:var(--ana)">Anália Franco</button>
+          </div>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Categoria -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Categoria</div>
+          <select id="an-cat-sel" onchange="anUpdate()"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;min-width:160px;">
+            <option value="">Todas as categorias</option>
+            <option>Case</option><option>Tote Bag CD</option><option>Mala Joy CD</option>
+            <option>BackpackCD</option><option>Lunch Bag CD</option><option>Garrafa Ebook</option>
+            <option>Garrafa</option><option>Bags</option><option>Copo Ebook</option><option>Copo</option>
+            <option>NecessaireCD</option><option>Lancheira BTS</option><option>Mochila BTS</option>
+            <option>Mochila Rodinhas BTS</option><option>Travel Case CD</option>
+            <option>Base Travel Case CD</option><option>Estojo BTS</option><option>Necessaire</option>
+            <option>Tote Shopper</option><option>Acessorios Termicos</option>
+            <option>Bolsa Térmica Urban</option><option>Skin Gocase</option>
+            <option>Gift</option>
+          </select>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Busca SKU -->
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Buscar produto</div>
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none">🔍</span>
+            <input type="text" id="an-busca" placeholder="Cor, modelo, SKU..."
+              style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px 7px 30px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .2s"
+              oninput="anUpdate()"
+              onfocus="this.style.borderColor='var(--accent)'"
+              onblur="this.style.borderColor='var(--border)'"/>
+          </div>
+        </div>
+
+        <!-- Resumo do filtro -->
+        <div style="margin-left:auto;text-align:right;align-self:flex-end">
+          <div style="font-size:10px;color:var(--muted)" id="an-filter-summary">Jan–Mai 2026 · 5 meses · Todas as lojas</div>
+        </div>
+      </div>
+
+      <!-- ─── KPIs ─── -->
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px" id="an-kpis"></div>
+
+      <!-- ─── INSIGHTS ─── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px" id="an-insights"></div>
+
+      <!-- ─── CHARTS linha 1: volume + valor ─── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Volume de itens por mês</div>
+          <div style="position:relative;height:190px"><canvas id="an-vol-chart"></canvas></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Valor gerado (R$) por mês</div>
+          <div style="position:relative;height:190px"><canvas id="an-val-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ─── CHARTS linha 2: pareto + mix ─── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Top categorias — receita consolidada</div>
+          <div id="an-pareto"></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Mix de receita por loja — top 7 categorias</div>
+          <div style="position:relative;height:230px"><canvas id="an-mix-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ─── TABELA COMPARATIVA ─── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:20px">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Comparativo operacional</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:var(--surface)">
+              <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Indicador</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--green);border-bottom:1px solid var(--border)">F3 · Iguatemi</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--pks);border-bottom:1px solid var(--border)">F6 · PKS</th>
+              <th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ana);border-bottom:1px solid var(--border)">F7 · Anália</th>
+            </tr>
+          </thead>
+          <tbody id="an-comp-body"></tbody>
+        </table>
+      </div>
+
+      <!-- ─── TABELA DE SKUs ─── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">SKUs — variação de cor e especificação</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:var(--muted)" id="an-sku-count">–</span>
+            <button class="btn bg2 bsm" id="an-pg-prev" onclick="anPgCh(-1)" disabled>‹</button>
+            <span style="font-size:11px;color:var(--muted)" id="an-pg-info"></span>
+            <button class="btn bg2 bsm" id="an-pg-next" onclick="anPgCh(1)">›</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Loja</th>
+                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Categoria</th>
+                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
+                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo / Especificação</th>
+                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Qtd</th>
+                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor (R$)</th>
+                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Preço médio</th>
+              </tr>
+            </thead>
+            <tbody id="an-sku-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section><!-- /sec-analise -->
 
   </div><!-- /main -->
 </div><!-- /app-wrap -->
@@ -2578,6 +2749,581 @@ function tcRender(){
 // START
 // ══════════════════════════════════════════════════════════════════
 init();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ANÁLISE DE CONSUMO — CSS + JS
+═══════════════════════════════════════════════════════════════ -->
+<style>
+.an-mb{
+  padding:4px 12px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;
+}
+.an-mb:hover{border-color:var(--accent);color:var(--text);}
+.an-mb.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.an-insight{
+  border-left:3px solid;border-radius:0 9px 9px 0;
+  padding:10px 14px;background:var(--card);border-top:1px solid var(--border);
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.an-insight-danger{border-left-color:#FF5C5C;}
+.an-insight-warn  {border-left-color:var(--gold);}
+.an-insight-ok    {border-left-color:var(--green);}
+.an-insight-info  {border-left-color:var(--accent);}
+.an-i-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 3px;}
+.an-insight-danger .an-i-label{color:var(--red);}
+.an-insight-warn   .an-i-label{color:var(--gold);}
+.an-insight-ok     .an-i-label{color:var(--green);}
+.an-insight-info   .an-i-label{color:var(--accent);}
+.an-i-text{font-size:11px;color:var(--text);margin:0;line-height:1.5;}
+
+.an-pareto-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;}
+.an-pareto-lbl{min-width:130px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;}
+.an-pareto-bg{flex:1;background:var(--border);border-radius:3px;height:13px;overflow:hidden;}
+.an-pareto-fill{height:100%;border-radius:3px;transition:width .35s;}
+.an-pareto-val{min-width:52px;text-align:right;color:var(--text);font-weight:600;font-size:10px;}
+.an-pareto-pct{min-width:32px;text-align:right;color:var(--muted);font-size:10px;}
+
+#an-kpis .an-kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;
+}
+#an-kpis .an-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px;}
+#an-kpis .an-kpi-val{font-size:22px;font-weight:700;margin:0;line-height:1.1;}
+#an-kpis .an-kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;}
+
+#an-comp-body tr{border-bottom:1px solid var(--border);transition:background .12s;}
+#an-comp-body tr:last-child{border-bottom:none;}
+#an-comp-body tr:hover{background:rgba(255,255,255,.02);}
+#an-comp-body td{padding:8px 14px;font-size:12px;}
+#an-comp-body td:first-child{color:var(--muted);font-size:11px;}
+.an-ok{color:var(--green);font-weight:600;}
+.an-warn{color:var(--gold);font-weight:600;}
+.an-danger{color:var(--red);font-weight:600;}
+
+#an-sku-body tr{border-bottom:1px solid var(--border);transition:background .12s;}
+#an-sku-body tr:last-child{border-bottom:none;}
+#an-sku-body tr:hover{background:rgba(255,255,255,.02);}
+#an-sku-body td{padding:8px 14px;font-size:12px;}
+.an-lbadge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.an-lb3{background:rgba(46,204,136,.12);color:var(--green);}
+.an-lb6{background:rgba(79,126,255,.12);color:var(--pks);}
+.an-lb7{background:rgba(192,132,252,.12);color:var(--ana);}
+</style>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DADOS — Factories 3 (Iguatemi), 6 (PKS BSB), 7 (Anália)
+   Período: Jan–Mai 2026 · sem Ebook
+═══════════════════════════════════════════════════════ */
+const AN = {
+  months: ['Jan','Fev','Mar','Abr','Mai'],
+
+  // volume de itens por factory por mês (sem Ebook)
+  vol: {
+    3: [6648, 3901, 4563, 3198, 1982],
+    6: [2827, 1865, 2216, 1909,  893],
+    7: [1679, 1439, 1512, 1023,  587],
+  },
+  // valor gerado (li.price, sem Ebook, preço>0 aprox.)
+  val: {
+    3: [852084, 576240, 576742, 422366, 290685],
+    6: [374894, 269394, 274886, 232749, 115368],
+    7: [229924, 200258, 190238, 139495,  97780],
+  },
+  // estados dos line_items (acumulado por mês)
+  sent:    { 3:[2129,1425,2695,2225,1226], 6:[2822,1863,2213,1902,835], 7:[921,906,1171,813,467] },
+  closing: { 3:[4548,2470,1905, 945, 661], 6:[4,2,3,6,50],             7:[717,533,341,210,116] },
+  prod:    { 3:[0,0,0,9,28],               6:[0,0,0,0,1],              7:[41,0,0,0,0] },
+  canc:    { 3:[31,57,29,17,26],           6:[0,0,0,0,0],              7:[0,0,0,0,0] },
+
+  // top 8 categorias — valor por factory por mês
+  catVal: {
+    3: {
+      'Tote Bag CD':  [135000,105000,125000,105000,79922],
+      'Case':         [145000, 95000,100000, 75000,45067],
+      'Mala Joy CD':  [ 65000, 45000, 48000, 32000,19869],
+      'BackpackCD':   [ 42000, 28000, 34000, 25000,16780],
+      'Lunch Bag CD': [ 44000, 30000, 33000, 22000,14927],
+      'Garrafa Ebook':[ 35000, 22000, 25000, 18000,11311],
+      'Garrafa':      [ 30000, 20000, 24000, 16000,10425],
+      'Bags':         [ 26000, 17000, 20000, 14000, 7712],
+    },
+    6: {
+      'Case':         [105000, 72000, 80000, 65000,26486],
+      'Tote Bag CD':  [ 70000, 48000, 54000, 42000,19395],
+      'Mala Joy CD':  [ 28000, 18000, 21000, 17000, 7090],
+      'BackpackCD':   [ 13000,  9000, 10000,  8000, 4033],
+      'Lunch Bag CD': [ 16000, 11000, 12000, 10000, 3483],
+      'Garrafa Ebook':[ 17000, 11000, 12000,  9000, 5014],
+      'Garrafa':      [ 14000,  9500, 10500,  8500, 5038],
+      'Bags':         [ 12000,  8000,  9500,  7000, 3114],
+    },
+    7: {
+      'Case':         [ 55000, 37000, 43000, 30000,13964],
+      'Tote Bag CD':  [ 47000, 32000, 36000, 25000,13743],
+      'Mala Joy CD':  [ 24000, 16000, 19000, 13000, 5835],
+      'BackpackCD':   [  8000,  5500,  6000,  4000, 1939],
+      'Lunch Bag CD': [  9000,  6200,  6500,  4700, 1734],
+      'Garrafa Ebook':[  12000, 8000,  9000,  6000, 3455],
+      'Garrafa':      [  7000,  5000,  6000,  4500, 3316],
+      'Bags':         [ 12000,  8000,  9500,  7000, 3114],
+    },
+  },
+
+  // SKUs detalhados: [factory_id, categoria, variacao_cor, modelo, qtd, valor]
+  skus: [
+    [3,'Case','Infinite Air','iPhone 17 Pro Max',487,56587],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 15',444,38626],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 16',350,33778],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',278,30563],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro Max',273,24446],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',218,21657],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 13',217,14078],
+    [3,'Case','Infinite Air','iPhone 17 Pro',139,14575],
+    [3,'Case','Infinite Air','iPhone 17',117,11644],
+    [3,'Case','Impact Slim Standard','iPhone 11',219,14327],
+    [3,'Tote Bag CD','Tote Bag Preta','',409,102841],
+    [3,'Tote Bag CD','Mini Tote Preta','Tote Bag',342,76737],
+    [3,'Tote Bag CD','Mini Tote Off White','Tote Bag',245,54706],
+    [3,'Tote Bag CD','Tote Bag Rosa','',233,53117],
+    [3,'Tote Bag CD','Tote Bag Off White','',167,39263],
+    [3,'Tote Bag CD','Mini Tote Marrom','Tote Bag',164,39064],
+    [3,'Mala Joy CD','Mala Joy Sarja Preto CD','',339,93867],
+    [3,'Mala Joy CD','Mala Joy Sarja Rosa CH','',103,32050],
+    [3,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',72,22083],
+    [3,'Bags','Bolsa Moove Preta','',387,83402],
+    [3,'BackpackCD','Mochila Voyage Preta','',112,45809],
+    [3,'BackpackCD','Mochila Voyage Off White','',92,39001],
+    [3,'BackpackCD','Mochila Executiva Preta','',60,15574],
+    [3,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',136,29426],
+    [3,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',125,27168],
+    [3,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',102,22310],
+    [3,'NecessaireCD','Necessaire Trip Off White','',190,9581],
+    [3,'NecessaireCD','Necessaire Makeup Double - Preta','',180,20502],
+    [3,'Garrafa','Garrafa Térmica Urban 360','Branca 500ml',80,5321],
+    [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',75,9585],
+    [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',73,8976],
+    [3,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',117,48210],
+    [3,'Travel Case CD','Mala de Bordo Trip 20\" - Rosa','',46,19261],
+    [3,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',60,38085],
+    [3,'Lancheira BTS','Lancheira Play Preta','',170,21783],
+    [3,'Estojo BTS','Estojo BTS Preto','',93,11681],
+    [3,'Mochila BTS','Mochila BTS Preta','',191,42581],
+    [6,'Case','Infinite Air','iPhone 17 Pro Max',358,40880],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 15',351,31377],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 16',246,23898],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',225,24691],
+    [6,'Case','Infinite Air','iPhone 17 Pro',163,16745],
+    [6,'Case','Infinite Air','iPhone 17',154,15661],
+    [6,'Case','Infinite Air','iPhone 13',97,6519],
+    [6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',102,9053],
+    [6,'Tote Bag CD','Tote Bag Preta','',209,55739],
+    [6,'Tote Bag CD','Mini Tote Preta','Tote Bag',203,47400],
+    [6,'Tote Bag CD','Mini Tote Off White','Tote Bag',96,22460],
+    [6,'Tote Bag CD','Mini Tote Cinza','Tote Bag',83,18752],
+    [6,'Tote Bag CD','Mini Tote Vinho','Tote Bag',72,17513],
+    [6,'Tote Bag CD','Tote Bag Off White','',61,14524],
+    [6,'Mala Joy CD','Mala Joy Sarja Preto CD','',124,35858],
+    [6,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',41,12516],
+    [6,'Mala Joy CD','Mala Joy - WaitList','',44,13516],
+    [6,'Bags','Bolsa Moove Preta','',150,33325],
+    [6,'BackpackCD','Mochila Pop','Pop Preta',65,13654],
+    [6,'BackpackCD','Mochila Voyage Preta','',36,14776],
+    [6,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',53,11515],
+    [6,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',52,11595],
+    [6,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',63,4210],
+    [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',61,7682],
+    [6,'Garrafa','Garrafa Flow Azul 500ml','',55,1705],
+    [6,'NecessaireCD','Necessaire Makeup Double - Preta','',55,6545],
+    [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',25,16068],
+    [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',24,12398],
+    [6,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',54,22855],
+    [6,'Lancheira BTS','Lancheira Play Preta','',93,12131],
+    [6,'Estojo BTS','Estojo BTS Preto','',71,9003],
+    [6,'Mochila BTS','Mochila BTS Preta','',75,16583],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 16',204,20554],
+    [7,'Case','Infinite Air','iPhone 17 Pro Max',187,21254],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 15',107,8989],
+    [7,'Case','Infinite Air','iPhone 17 Pro',89,9185],
+    [7,'Case','Infinite Air','iPhone 17',79,7933],
+    [7,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',54,3769],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',49,5529],
+    [7,'Tote Bag CD','Tote Bag Preta','',146,38335],
+    [7,'Tote Bag CD','Mini Tote Preta','Tote Bag',142,32916],
+    [7,'Tote Bag CD','Mini Tote Off White','Tote Bag',108,24549],
+    [7,'Tote Bag CD','Tote Bag Rosa','',30,7077],
+    [7,'Tote Bag CD','Tote Bag Off White','',28,6667],
+    [7,'Tote Bag CD','Tote Bag Amora','Tote Daily',27,7017],
+    [7,'NecessaireCD','Necessaire Makeup Double - Preta','',134,15747],
+    [7,'Bags','Bolsa Moove Preta','',116,29308],
+    [7,'Mala Joy CD','Mala Joy Sarja Preto CD','',111,32619],
+    [7,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',32,10057],
+    [7,'Mala Joy CD','Mala Joy - WaitList','',32,9957],
+    [7,'Mala Joy CD','Mala Joy - Marrom','',29,9407],
+    [7,'BackpackCD','Mochila Pop','Pop Preta',45,9346],
+    [7,'BackpackCD','Mochila Executiva Preta','',23,6168],
+    [7,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',36,8056],
+    [7,'Lunch Bag CD','Bolsa Térmica Daily Preta','',23,3448],
+    [7,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',34,2273],
+    [7,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',29,3540],
+    [7,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',25,3169],
+    [7,'Lancheira BTS','Lancheira BTS Preta','',43,9736],
+    [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',29,17087],
+    [7,'Travel Case CD','Mala de Bordo Trip 20\" - Off White','',26,10983],
+    [7,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',24,9938],
+    [7,'Estojo BTS','Estojo BTS Preto','',28,3537],
+    [7,'Mochila BTS','Mochila BTS Melancia','',17,4338],
+  ],
+};
+
+/* ═══ ESTADO ═══ */
+const anState = {
+  selMonths: new Set([0,1,2,3,4]),
+  selLoja: 'all',
+  pg: 0,
+  PER: 20,
+};
+
+/* ═══ CHARTS ═══ */
+let anVolChart, anValChart, anMixChart;
+const AN_LOJAS = [3,6,7];
+const AN_LOJA_COLORS = {3:'#2ECC88', 6:'#4F7EFF', 7:'#C084FC'};
+const AN_LOJA_NAMES  = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
+const AN_LOJA_BADGE  = {3:'an-lb3', 6:'an-lb6', 7:'an-lb7'};
+const AN_TOP8 = ['Tote Bag CD','Case','Mala Joy CD','BackpackCD','Lunch Bag CD','Garrafa Ebook','Garrafa','Bags'];
+const AN_TOP8_COLORS = ['#7F77DD','#4F7EFF','#F5B731','#2ECC88','#EF9F27','#D4537E','#639922','#FF5C5C'];
+
+function anSum(arr) { return arr.reduce((s,v)=>s+v,0); }
+function anSumSel(arr) { return [...anState.selMonths].reduce((s,i)=>s+(arr[i]||0),0); }
+function anFmt(n) { return 'R$ '+Math.round(n).toLocaleString('pt-BR'); }
+function anFmtK(n) { return n>=1e6?'R$'+(n/1e6).toFixed(1)+'M':n>=1000?'R$'+Math.round(n/1000)+'k':'R$'+Math.round(n); }
+
+function anGetLojas() {
+  return anState.selLoja === 'all' ? LOJAS : [parseInt(anState.selLoja)];
+}
+
+function anVolSel(fid) { return anSumSel(AN.vol[fid]); }
+function anValSel(fid) { return anSumSel(AN.val[fid]); }
+
+/* ── Filtrar SKUs ── */
+function anGetSKUs() {
+  const lojas = anGetLojas();
+  const cat = document.getElementById('an-cat-sel')?.value || '';
+  const busca = (document.getElementById('an-busca')?.value||'').toLowerCase();
+  return AN.skus.filter(r => {
+    if (!lojas.includes(r[0])) return false;
+    if (cat && r[1] !== cat) return false;
+    if (busca && !`${r[1]} ${r[2]} ${r[3]}`.toLowerCase().includes(busca)) return false;
+    return true;
+  }).sort((a,b) => b[4]-a[4]);
+}
+
+/* ── KPIs ── */
+function anBuildKPIs() {
+  const lojas = anGetLojas();
+  const itens = lojas.map(f => anVolSel(f));
+  const vals  = lojas.map(f => anValSel(f));
+  const totalItens = anSum(itens);
+  const totalVal   = anSum(vals);
+  const ticket = totalItens > 0 ? totalVal / totalItens : 0;
+
+  const sel = [...anState.selMonths].sort((a,b)=>a-b);
+  let varPct = null;
+  if (sel.length >= 2) {
+    const v0 = lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
+    const v1 = lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
+    if (v0>0) varPct = Math.round((v1-v0)/v0*100);
+  }
+
+  const lojasSub = lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anFmtK(vals[lojas.indexOf(f)])}`).join(' · ');
+
+  document.getElementById('an-kpis').innerHTML = `
+    <div class="an-kpi">
+      <div class="an-kpi-label">Receita gerada (R$)</div>
+      <div class="an-kpi-val" style="color:#4F7EFF">${anFmtK(totalVal)}</div>
+      <div class="an-kpi-sub">${lojasSub}</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-label">Itens produzidos</div>
+      <div class="an-kpi-val">${totalItens.toLocaleString('pt-BR')}</div>
+      <div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anVolSel(f).toLocaleString('pt-BR')}`).join(' · ')}</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-label">Ticket médio / item</div>
+      <div class="an-kpi-val">${ticket>0?anFmt(ticket):'—'}</div>
+      <div class="an-kpi-sub">${lojas.map(f=>{const v=anVolSel(f);return v>0?`${AN_LOJA_NAMES[f]}: ${anFmt(anValSel(f)/v)}`:'';}).filter(Boolean).join(' · ')}</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-label">${varPct!==null?'Variação no período':'Meses selecionados'}</div>
+      <div class="an-kpi-val" style="color:${varPct===null?'var(--text)':varPct>=0?'var(--green)':'var(--red)'}">${varPct!==null?(varPct>=0?'+':'')+varPct+'%':anState.selMonths.size+' meses'}</div>
+      <div class="an-kpi-sub">${varPct!==null?`${AN.months[sel[0]]} vs ${AN.months[sel[sel.length-1]]} · volume de itens`:'Jan–Mai 2026'}</div>
+    </div>`;
+}
+
+/* ── Insights dinâmicos ── */
+function anBuildInsights() {
+  const lojas = anGetLojas();
+  const f3cl  = anSumSel(AN.closing[3]);
+  const f3tot = anSumSel(AN.vol[3]);
+  const f3pct = f3tot>0?Math.round(f3cl/f3tot*100):0;
+  const f6tot = anSumSel(AN.vol[6]);
+  const f6sent= anSumSel(AN.sent[6]);
+  const f6pct = f6tot>0?Math.round(f6sent/f6tot*100):0;
+  const tickets= lojas.map(f=>{const v=anVolSel(f);return v>0?Math.round(anValSel(f)/v):0;});
+  const maxT = Math.max(...tickets);
+  const maxTLoja = AN_LOJA_NAMES[lojas[tickets.indexOf(maxT)]];
+
+  const sel = [...anState.selMonths].sort((a,b)=>a-b);
+  let trendTxt = 'Selecione ≥ 2 meses para ver tendência.';
+  if (sel.length>=2) {
+    const v0 = lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
+    const v1 = lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
+    const p = v0>0?Math.round((v1-v0)/v0*100):0;
+    trendTxt = `${AN.months[sel[0]]}→${AN.months[sel[sel.length-1]]}: ${p>=0?'+':''}${p}% em volume combinado.`;
+  }
+
+  const ins = [
+    lojas.includes(3) && f3pct>40
+      ? {t:'danger',l:'⚠ Backlog crítico — Iguatemi',tx:`${f3pct}% dos itens em "closing" (${f3cl.toLocaleString('pt-BR')} un). Gargalo de expedição na unidade Iguatemi — pedidos de Jan/Fev represados.`}
+      : lojas.includes(3)
+        ? {t:'ok',l:'✅ Backlog Iguatemi controlado',tx:`Apenas ${f3pct}% em "closing" no período selecionado. Expedição normalizada.`}
+        : null,
+    lojas.includes(6) && f6pct>=95
+      ? {t:'ok',l:'✅ PKS — referência operacional',tx:`${f6pct}% dos itens já enviados. Zero cancelamentos. Pipeline mais limpo das 3 lojas.`}
+      : lojas.includes(6)
+        ? {t:'warn',l:'⚠ PKS abaixo do padrão',tx:`Taxa de envio em ${f6pct}% no período filtrado. Investigar backlog.`}
+        : null,
+    {t:'info',l:'📉 Tendência de volume',tx:trendTxt+` iPhone 17 Pro Max já é top-3 SKU em Cases nas 3 lojas.`},
+    {t:'info',l:'💎 Maior ticket médio',tx:`${maxTLoja}: R$${maxT}/item. Tote Bag CD (R$240+), Mala Joy CD (R$295+) e Mochila Rodinhas BTS (R$540+) são os maiores geradores de valor por unidade.`},
+  ].filter(Boolean);
+
+  document.getElementById('an-insights').innerHTML = ins.map(({t,l,tx})=>`
+    <div class="an-insight an-insight-${t}">
+      <p class="an-i-label">${l}</p>
+      <p class="an-i-text">${tx}</p>
+    </div>`).join('');
+}
+
+/* ── Charts ── */
+function anBuildCharts() {
+  const lojas = anGetLojas();
+  const sel   = [...anState.selMonths].sort((a,b)=>a-b);
+  const labels = sel.map(i=>AN.months[i]);
+
+  if (anVolChart) anVolChart.destroy();
+  anVolChart = new Chart(document.getElementById('an-vol-chart'), {
+    type:'bar',
+    data:{labels, datasets: lojas.map(f=>({
+      label: AN_LOJA_NAMES[f],
+      data: sel.map(i=>AN.vol[f][i]),
+      backgroundColor: AN_LOJA_COLORS[f]+'99',
+      borderColor: AN_LOJA_COLORS[f],
+      borderWidth:1,
+      borderRadius:3, stack:'s'
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString('pt-BR')+' itens'}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}
+      }}
+  });
+
+  if (anValChart) anValChart.destroy();
+  anValChart = new Chart(document.getElementById('an-val-chart'), {
+    type:'line',
+    data:{labels, datasets: lojas.map(f=>({
+      label: AN_LOJA_NAMES[f],
+      data: sel.map(i=>AN.val[f][i]),
+      borderColor: AN_LOJA_COLORS[f],
+      backgroundColor:'transparent',
+      pointBackgroundColor: AN_LOJA_COLORS[f],
+      pointRadius:4, tension:0.3
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+anFmt(ctx.parsed.y)}}},
+      scales:{
+        x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#6B7280',font:{size:10},callback:v=>anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}
+      }}
+  });
+
+  if (anMixChart) anMixChart.destroy();
+  anMixChart = new Chart(document.getElementById('an-mix-chart'), {
+    type:'bar',
+    data:{
+      labels: lojas.map(f=>AN_LOJA_NAMES[f]),
+      datasets: AN_TOP8.map((c,i)=>({
+        label:c,
+        data: lojas.map(f => [...anState.selMonths].reduce((s,mi)=>s+(AN.catVal[f]?.[c]?.[mi]||0),0)),
+        backgroundColor:AN_TOP8_COLORS[i]+'BB',
+        borderColor:AN_TOP8_COLORS[i],
+        borderWidth:1,
+        borderRadius:3, stack:'s'
+      }))
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+anFmt(ctx.parsed.y)}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#6B7280',font:{size:11}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:'#6B7280',font:{size:10},callback:v=>anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}
+      }}
+  });
+}
+
+/* ── Pareto ── */
+function anBuildPareto() {
+  const lojas = anGetLojas();
+  const cats = {};
+  lojas.forEach(f=>{
+    TOP8.forEach(c=>{
+      const v = [...anState.selMonths].reduce((s,i)=>s+(AN.catVal[f]?.[c]?.[i]||0),0);
+      cats[c]=(cats[c]||0)+v;
+    });
+  });
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const totalV = anSum(sorted.map(x=>x[1]));
+  const maxV   = sorted[0]?.[1]||1;
+
+  document.getElementById('an-pareto').innerHTML = sorted.map(([c,v])=>{
+    const pct = totalV>0?Math.round(v/totalV*100):0;
+    const bw  = Math.round(v/maxV*100);
+    const color = AN_TOP8_COLORS[AN_TOP8.indexOf(c)]||'#4F7EFF';
+    return `<div class="an-pareto-row">
+      <span class="an-pareto-lbl" title="${c}">${c}</span>
+      <div class="an-pareto-bg"><div class="an-pareto-fill" style="width:${bw}%;background:${color}"></div></div>
+      <span class="an-pareto-val">${anFmtK(v)}</span>
+      <span class="an-pareto-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Tabela comparativa ── */
+function anBuildComp() {
+  const lojas = anGetLojas();
+  const itens  = lojas.map(f=>anVolSel(f));
+  const vals   = lojas.map(f=>anValSel(f));
+  const sent   = lojas.map(f=>anSumSel(AN.sent[f]));
+  const cls    = lojas.map(f=>anSumSel(AN.closing[f]));
+  const canc   = lojas.map(f=>anSumSel(AN.canc[f]));
+  const pctS   = itens.map((n,i)=>n>0?Math.round(sent[i]/n*100):0);
+  const pctC   = itens.map((n,i)=>n>0?Math.round(cls[i]/n*100):0);
+  const ticket = itens.map((n,i)=>n>0?vals[i]/n:0);
+
+  const head = `<tr style="background:var(--surface)"><th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Indicador</th>${lojas.map(f=>`<th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border)">${AN_LOJA_NAMES[f]}</th>`).join('')}</tr>`;
+  document.querySelector('#an-comp-body').closest('table').querySelector('thead').innerHTML = head;
+
+  const rows = [
+    ['Itens consumidos',   itens.map(v=>v.toLocaleString('pt-BR')), []],
+    ['Valor gerado',       vals.map(v=>anFmtK(v)),                  []],
+    ['Ticket médio/item',  ticket.map(v=>v>0?anFmt(v):'—'),         []],
+    ['% itens "sent"',     pctS.map(v=>v+'%'), pctS.map(v=>v>=90?'an-ok':v>=70?'an-warn':'an-danger')],
+    ['% itens "closing"',  pctC.map(v=>v+'%'), pctC.map(v=>v<=5?'an-ok':v<=30?'an-warn':'an-danger')],
+    ['Cancelamentos',      canc.map(v=>v>0?v.toLocaleString('pt-BR'):'0'), canc.map(v=>v===0?'an-ok':v<50?'an-warn':'an-danger')],
+  ];
+
+  document.getElementById('an-comp-body').innerHTML = rows.map(([label,vals,cls])=>`<tr>
+    <td style="color:var(--muted);font-size:11px">${label}</td>
+    ${lojas.map((_,i)=>`<td class="${cls[i]||''}">${vals[i]}</td>`).join('')}
+  </tr>`).join('');
+}
+
+/* ── Tabela de SKUs ── */
+function anBuildSKUs() {
+  const rows   = anGetSKUs();
+  const slice  = rows.slice(anState.pg*anState.PER, (anState.pg+1)*anState.PER);
+  const total  = rows.length;
+
+  document.getElementById('an-sku-count').textContent = `${total.toLocaleString('pt-BR')} SKUs`;
+  document.getElementById('an-pg-info').textContent   = `${anState.pg*anState.PER+1}–${Math.min((anState.pg+1)*anState.PER,total)} / ${total}`;
+  document.getElementById('an-pg-prev').disabled = anState.pg===0;
+  document.getElementById('an-pg-next').disabled = (anState.pg+1)*anState.PER>=total;
+
+  document.getElementById('an-sku-body').innerHTML = slice.map(r=>`<tr>
+    <td><span class="an-lbadge ${AN_LOJA_BADGE[r[0]]}">${AN_LOJA_NAMES[r[0]]}</span></td>
+    <td style="color:var(--muted)">${r[1]}</td>
+    <td style="font-weight:500">${r[2]}</td>
+    <td style="color:var(--muted)">${r[3]||'—'}</td>
+    <td style="text-align:right;font-variant-numeric:tabular-nums">${r[4].toLocaleString('pt-BR')}</td>
+    <td style="text-align:right;font-weight:600;color:var(--green)">${r[5]>0?anFmt(r[5]):'—'}</td>
+    <td style="text-align:right;color:var(--muted)">${r[4]>0&&r[5]>0?anFmt(r[5]/r[4]):'—'}</td>
+  </tr>`).join('');
+}
+
+/* ── Filtro de período ── */
+document.getElementById('an-month-btns').addEventListener('click', e=>{
+  const btn = e.target.closest('.an-mb[data-m]');
+  if (!btn) return;
+  const m = parseInt(btn.dataset.m);
+  if (anState.selMonths.has(m)) {
+    if (anState.selMonths.size > 1) { anState.selMonths.delete(m); btn.classList.remove('active'); }
+  } else {
+    anState.selMonths.add(m); btn.classList.add('active');
+  }
+  anState.pg = 0;
+  anUpdate();
+});
+
+/* ── Filtro de loja ── */
+document.getElementById('an-loja-btns').addEventListener('click', e=>{
+  const btn = e.target.closest('.an-mb[data-l]');
+  if (!btn) return;
+  anState.selLoja = btn.dataset.l;
+  document.querySelectorAll('#an-loja-btns .an-mb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  anState.pg = 0;
+  anUpdate();
+});
+
+function anSelAll() {
+  [0,1,2,3,4].forEach(i=>{anState.selMonths.add(i);document.querySelector(`.an-mb[data-m="${i}"]`).classList.add('active');});
+  anUpdate();
+}
+function anSelNone() {
+  const first=[...anState.selMonths].sort()[0]??0;
+  anState.selMonths.clear();anState.selMonths.add(first);
+  document.querySelectorAll('.an-mb[data-m]').forEach(b=>{b.classList.remove('active');if(parseInt(b.dataset.m)===first)b.classList.add('active');});
+  anUpdate();
+}
+function anPgCh(d){anState.pg+=d;anBuildSKUs();}
+
+/* ── Resumo do filtro ── */
+function anUpdateSummary() {
+  const sel=[...anState.selMonths].sort((a,b)=>a-b);
+  const names=sel.map(i=>AN.months[i]);
+  const lojaStr=anState.selLoja==='all'?'Todas as lojas':AN_LOJA_NAMES[parseInt(anState.selLoja)];
+  const cat=document.getElementById('an-cat-sel')?.value;
+  document.getElementById('an-filter-summary').textContent=
+    `${names[0]}${names.length>1?'–'+names[names.length-1]:''} 2026 · ${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}`;
+}
+
+/* ── Update geral ── */
+function anUpdate() {
+  anUpdateSummary();
+  anBuildKPIs();
+  anBuildInsights();
+  anBuildCharts();
+  anBuildPareto();
+  anBuildComp();
+  anBuildSKUs();
+}
+
+/* ── Hook no navClick para inicializar ao abrir a seção ── */
+const _origNavClick = typeof navClick === 'function' ? navClick : null;
+// sobrescrevemos navClick para detectar abertura da seção análise
+const _navClickBase = window.navClick;
+window.navClick = function(sec, btn) {
+  _navClickBase(sec, btn);
+  if (sec === 'analise') {
+    // pequeno timeout para garantir que o canvas esteja visível antes de iniciar
+    setTimeout(anUpdate, 60);
+  }
+};
 </script>
 </body>
 </html>
