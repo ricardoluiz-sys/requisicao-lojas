@@ -942,7 +942,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <!-- Categoria -->
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Categoria</div>
-          <select id="an-cat-sel" onchange="anUpdate()"
+          <select id="an-cat-sel" onchange="anCatFilter()"
             style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;min-width:160px;">
             <option value="">Todas as categorias</option>
             <option>Case</option><option>Tote Bag CD</option><option>Mala Joy CD</option>
@@ -966,7 +966,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none">🔍</span>
             <input type="text" id="an-busca" placeholder="Cor, modelo, SKU..."
               style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px 7px 30px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .2s"
-              oninput="anUpdate()"
+              oninput="anSkuFilter()"
               onfocus="this.style.borderColor='var(--accent)'"
               onblur="this.style.borderColor='var(--border)'"/>
           </div>
@@ -1029,7 +1029,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <!-- ─── TABELA DE SKUs ─── -->
       <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
         <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">SKUs — variação de cor e especificação</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Produtos</span>
+            <!-- Toggle de visão -->
+            <div style="display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px">
+              <button id="an-view-lista" onclick="anSetView('lista')"
+                style="padding:3px 11px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;transition:all .15s">
+                Lista
+              </button>
+              <button id="an-view-grupo" onclick="anSetView('grupo')"
+                style="padding:3px 11px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s">
+                Por categoria
+              </button>
+            </div>
+          </div>
           <div style="display:flex;gap:6px;align-items:center">
             <span style="font-size:11px;color:var(--muted)" id="an-sku-count">–</span>
             <button class="btn bg2 bsm" id="an-pg-prev" onclick="anPgCh(-1)" disabled>‹</button>
@@ -1038,20 +1051,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
         </div>
         <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
-            <thead>
-              <tr style="background:var(--surface)">
-                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Loja</th>
-                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Categoria</th>
-                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
-                <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo / Especificação</th>
-                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Qtd</th>
-                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor (R$)</th>
-                <th style="padding:9px 14px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Preço médio</th>
-              </tr>
-            </thead>
-            <tbody id="an-sku-body"></tbody>
-          </table>
+          <div id="an-sku-container"></div>
         </div>
       </div>
 
@@ -2802,10 +2802,6 @@ init();
 .an-warn{color:var(--gold);font-weight:600;}
 .an-danger{color:var(--red);font-weight:600;}
 
-#an-sku-body tr{border-bottom:1px solid var(--border);transition:background .12s;}
-#an-sku-body tr:last-child{border-bottom:none;}
-#an-sku-body tr:hover{background:rgba(255,255,255,.02);}
-#an-sku-body td{padding:8px 14px;font-size:12px;}
 .an-lbadge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;}
 .an-lb3{background:rgba(46,204,136,.12);color:var(--green);}
 .an-lb6{background:rgba(79,126,255,.12);color:var(--pks);}
@@ -2982,6 +2978,7 @@ const AN = {
 const anState = {
   selMonths: new Set([0,1,2,3,4]),
   selLoja: 'all',
+  view: 'lista',
   pg: 0,
   PER: 20,
 };
@@ -3001,7 +2998,7 @@ function anFmt(n) { return 'R$ '+Math.round(n).toLocaleString('pt-BR'); }
 function anFmtK(n) { return n>=1e6?'R$'+(n/1e6).toFixed(1)+'M':n>=1000?'R$'+Math.round(n/1000)+'k':'R$'+Math.round(n); }
 
 function anGetLojas() {
-  return anState.selLoja === 'all' ? LOJAS : [parseInt(anState.selLoja)];
+  return anState.selLoja === 'all' ? AN_LOJAS : [parseInt(anState.selLoja)];
 }
 
 function anVolSel(fid) { return anSumSel(AN.vol[fid]); }
@@ -3010,17 +3007,271 @@ function anValSel(fid) { return anSumSel(AN.val[fid]); }
 /* ── Filtrar SKUs ── */
 function anGetSKUs() {
   const lojas = anGetLojas();
-  const cat = document.getElementById('an-cat-sel')?.value || '';
-  const busca = (document.getElementById('an-busca')?.value||'').toLowerCase();
+  const cat   = document.getElementById('an-cat-sel')?.value || '';
+  const busca = (document.getElementById('an-busca')?.value || '').toLowerCase().trim();
   return AN.skus.filter(r => {
     if (!lojas.includes(r[0])) return false;
     if (cat && r[1] !== cat) return false;
-    if (busca && !`${r[1]} ${r[2]} ${r[3]}`.toLowerCase().includes(busca)) return false;
+    if (busca) {
+      const hay = (r[1]+' '+r[2]+' '+r[3]).toLowerCase();
+      // busca com múltiplas palavras: todas precisam estar presentes
+      if (!busca.split(' ').filter(Boolean).every(w => hay.includes(w))) return false;
+    }
     return true;
   }).sort((a,b) => b[4]-a[4]);
 }
 
-/* ── KPIs ── */
+/* ── Busca leve (só reconstrói tabela, não refaz charts) ── */
+function anSkuFilter() {
+  anState.pg = 0;
+  anBuildSKUs();
+  anUpdateSummary();
+}
+
+/* ── Filtro de categoria (reset pg + rebuild tabela) ── */
+function anCatFilter() {
+  anState.pg = 0;
+  anBuildSKUs();
+  anBuildPareto();
+  anUpdateSummary();
+}
+
+/* ── Visão: 'lista' ou 'grupo' ── */
+function anSetView(v) {
+  anState.view = v;
+  anState.pg = 0;
+  document.getElementById('an-view-lista').style.background = v==='lista' ? 'var(--accent)' : 'transparent';
+  document.getElementById('an-view-lista').style.color      = v==='lista' ? '#fff' : 'var(--muted)';
+  document.getElementById('an-view-grupo').style.background = v==='grupo' ? 'var(--accent)' : 'transparent';
+  document.getElementById('an-view-grupo').style.color      = v==='grupo' ? '#fff' : 'var(--muted)';
+  // paginação só faz sentido na lista
+  document.getElementById('an-pg-prev').style.display = v==='lista' ? '' : 'none';
+  document.getElementById('an-pg-next').style.display = v==='lista' ? '' : 'none';
+  document.getElementById('an-pg-info').style.display = v==='lista' ? '' : 'none';
+  anBuildSKUs();
+}
+
+/* ── Tabela LISTA ── */
+function anBuildSKULista(rows) {
+  const lojas = anGetLojas();
+  const total = rows.length;
+  const slice = rows.slice(anState.pg * anState.PER, (anState.pg + 1) * anState.PER);
+
+  document.getElementById('an-sku-count').textContent = total.toLocaleString('pt-BR') + ' SKUs';
+  document.getElementById('an-pg-info').textContent   =
+    total === 0 ? '0' : `${anState.pg*anState.PER+1}–${Math.min((anState.pg+1)*anState.PER,total)} / ${total}`;
+  document.getElementById('an-pg-prev').disabled = anState.pg === 0;
+  document.getElementById('an-pg-next').disabled = (anState.pg+1)*anState.PER >= total;
+
+  const th = s => `<th style="padding:8px 12px;text-align:${s.r?'right':'left'};font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap">${s.l}</th>`;
+  const showLoja = lojas.length > 1;
+
+  const thead = `<tr style="background:var(--surface)">
+    ${showLoja ? th({l:'Loja'}) : ''}
+    ${th({l:'Categoria'})}
+    ${th({l:'Variação / Cor'})}
+    ${th({l:'Modelo / Especificação'})}
+    ${th({l:'Qtd',r:true})}
+    ${th({l:'Valor (R$)',r:true})}
+    ${th({l:'Preço médio',r:true})}
+  </tr>`;
+
+  if (!slice.length) {
+    document.getElementById('an-sku-container').innerHTML =
+      `<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">
+         🔍 Nenhum produto encontrado para os filtros selecionados.
+       </div>`;
+    return;
+  }
+
+  const tbody = slice.map(r => `<tr style="border-bottom:1px solid var(--border);transition:background .12s"
+      onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+    ${showLoja ? `<td style="padding:8px 12px"><span class="an-lbadge ${AN_LOJA_BADGE[r[0]]}">${AN_LOJA_NAMES[r[0]]}</span></td>` : ''}
+    <td style="padding:8px 12px;color:var(--muted);font-size:11px">${r[1]}</td>
+    <td style="padding:8px 12px;font-weight:500">${r[2]}</td>
+    <td style="padding:8px 12px;color:var(--muted)">${r[3]||'—'}</td>
+    <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums">${r[4].toLocaleString('pt-BR')}</td>
+    <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--green)">${r[5]>0?anFmt(r[5]):'—'}</td>
+    <td style="padding:8px 12px;text-align:right;color:var(--muted)">${r[4]>0&&r[5]>0?anFmt(r[5]/r[4]):'—'}</td>
+  </tr>`).join('');
+
+  document.getElementById('an-sku-container').innerHTML =
+    `<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:580px">
+       <thead>${thead}</thead>
+       <tbody>${tbody}</tbody>
+     </table>`;
+}
+
+/* ── Tabela AGRUPADA por categoria com colunas por loja ── */
+function anBuildSKUGrupo(rows) {
+  const lojas = anGetLojas();
+  document.getElementById('an-pg-info').textContent = '';
+
+  if (!rows.length) {
+    document.getElementById('an-sku-count').textContent = '0 SKUs';
+    document.getElementById('an-sku-container').innerHTML =
+      `<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">
+         🔍 Nenhum produto encontrado para os filtros selecionados.
+       </div>`;
+    return;
+  }
+
+  // Agrupar: chave = categoria | variacao_cor | modelo
+  // Para cada grupo, acumular qtd e valor por loja
+  const groupMap = {};
+  rows.forEach(r => {
+    const key = `${r[1]}|||${r[2]}|||${r[3]}`;
+    if (!groupMap[key]) groupMap[key] = {cat:r[1], var:r[2], mod:r[3], qtd:{}, val:{}, total:0, totalVal:0};
+    groupMap[key].qtd[r[0]] = (groupMap[key].qtd[r[0]]||0) + r[4];
+    groupMap[key].val[r[0]] = (groupMap[key].val[r[0]]||0) + r[5];
+    groupMap[key].total    += r[4];
+    groupMap[key].totalVal += r[5];
+  });
+
+  // Agrupar por categoria
+  const catMap = {};
+  Object.values(groupMap).forEach(g => {
+    if (!catMap[g.cat]) catMap[g.cat] = {itens:[], total:0, totalVal:0};
+    catMap[g.cat].itens.push(g);
+    catMap[g.cat].total    += g.total;
+    catMap[g.cat].totalVal += g.totalVal;
+  });
+
+  // Ordenar categorias por valor total desc; itens dentro por qtd total desc
+  const cats = Object.entries(catMap).sort((a,b)=>b[1].totalVal-a[1].totalVal);
+  cats.forEach(([,c]) => c.itens.sort((a,b)=>b.total-a.total));
+
+  document.getElementById('an-sku-count').textContent =
+    `${Object.keys(groupMap).length.toLocaleString('pt-BR')} variações · ${cats.length} categorias`;
+
+  // Cabeçalho dinâmico com colunas por loja
+  const lojaCols = lojas.map(f =>
+    `<th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border);white-space:nowrap">
+      ${AN_LOJA_NAMES[f]}
+    </th>`
+  ).join('');
+
+  const thead = `<tr style="background:var(--surface)">
+    <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
+    <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo</th>
+    ${lojaCols}
+    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap">Total un.</th>
+    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor (R$)</th>
+    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Ticket</th>
+  </tr>`;
+
+  // Linha de categoria (cabeçalho)
+  const catRow = (nome, total, totalVal) => {
+    const colspan = 3 + lojas.length + 2;
+    return `<tr style="background:rgba(255,255,255,.03);cursor:pointer" onclick="anToggleCat(this)">
+      <td colspan="${colspan}" style="padding:10px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:10px;color:var(--muted);transition:transform .2s" class="an-cat-arrow">▶</span>
+            <span style="font-weight:600;font-size:13px">${nome}</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(79,126,255,.12);color:var(--pks)">${total.toLocaleString('pt-BR')} un.</span>
+          </div>
+          <span style="font-weight:600;font-size:12px;color:var(--green)">${anFmtK(totalVal)}</span>
+        </div>
+      </td>
+    </tr>`;
+  };
+
+  // Barra de proporção
+  const maxCatVal = cats[0]?.[1].totalVal || 1;
+
+  const tbody = cats.map(([catNome, catData]) => {
+    const pct = Math.round(catData.totalVal / maxCatVal * 100);
+    const bar = `<div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px">
+      <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px"></div>
+    </div>`;
+
+    const itemRows = catData.itens.map((g,idx) => {
+      // células por loja
+      const lojaCells = lojas.map(f => {
+        const q = g.qtd[f] || 0;
+        return `<td style="padding:7px 10px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:${q>0?AN_LOJA_COLORS[f]:'var(--muted)'}">
+          ${q > 0 ? q.toLocaleString('pt-BR') : '—'}
+        </td>`;
+      }).join('');
+      const ticket = g.total > 0 && g.totalVal > 0 ? anFmt(g.totalVal / g.total) : '—';
+      const rowBg  = idx % 2 === 0 ? '' : 'background:rgba(255,255,255,.01)';
+      return `<tr class="an-cat-row" style="border-bottom:1px solid var(--border);${rowBg}"
+          onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background='${idx%2===0?'':'rgba(255,255,255,.01)'}'">
+        <td style="padding:7px 12px 7px 28px;font-weight:500;font-size:12px">${g.var}</td>
+        <td style="padding:7px 12px;color:var(--muted);font-size:11px">${g.mod||'—'}</td>
+        ${lojaCells}
+        <td style="padding:7px 10px;text-align:right;font-weight:600;font-size:12px;font-variant-numeric:tabular-nums">${g.total.toLocaleString('pt-BR')}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:600;font-size:12px;color:var(--green)">${g.totalVal>0?anFmtK(g.totalVal):'—'}</td>
+        <td style="padding:7px 10px;text-align:right;font-size:11px;color:var(--muted)">${ticket}</td>
+      </tr>`;
+    }).join('');
+
+    // linha de total da categoria
+    const totalLojaCells = lojas.map(f => {
+      const q = catData.itens.reduce((s,g)=>s+(g.qtd[f]||0),0);
+      return `<td style="padding:7px 10px;text-align:right;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:${AN_LOJA_COLORS[f]};border-top:1px solid var(--border)">
+        ${q>0?q.toLocaleString('pt-BR'):'—'}
+      </td>`;
+    }).join('');
+    const totalRow = `<tr class="an-cat-row" style="background:rgba(255,255,255,.04)">
+      <td style="padding:7px 12px 7px 28px;font-size:11px;font-weight:600;color:var(--muted);border-top:1px solid var(--border)">Subtotal ${catNome}</td>
+      <td style="border-top:1px solid var(--border)"></td>
+      ${totalLojaCells}
+      <td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;border-top:1px solid var(--border)">${catData.total.toLocaleString('pt-BR')}</td>
+      <td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;color:var(--green);border-top:1px solid var(--border)">${anFmtK(catData.totalVal)}</td>
+      <td style="border-top:1px solid var(--border)"></td>
+    </tr>`;
+
+    return catRow(catNome, catData.total, catData.totalVal) + itemRows + totalRow;
+  }).join('');
+
+  document.getElementById('an-sku-container').innerHTML =
+    `<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
+       <thead>${thead}</thead>
+       <tbody>${tbody}</tbody>
+     </table>`;
+
+  // Inicializar todas as categorias expandidas
+  anExpandAll();
+}
+
+/* ── Toggle expand/collapse de categoria ── */
+function anToggleCat(row) {
+  const arrow = row.querySelector('.an-cat-arrow');
+  let next = row.nextElementSibling;
+  let expanded = arrow.style.transform !== 'rotate(90deg)';
+  while (next && next.classList.contains('an-cat-row')) {
+    next.style.display = expanded ? 'none' : '';
+    next = next.nextElementSibling;
+  }
+  arrow.style.transform = expanded ? '' : 'rotate(90deg)';
+}
+
+function anExpandAll() {
+  document.querySelectorAll('#an-sku-container .an-cat-arrow').forEach(a => {
+    a.style.transform = 'rotate(90deg)';
+  });
+  document.querySelectorAll('#an-sku-container .an-cat-row').forEach(r => {
+    r.style.display = '';
+  });
+}
+
+/* ── Dispatcher: escolhe qual visão renderizar ── */
+function anBuildSKUs() {
+  const rows = anGetSKUs();
+  if (anState.view === 'grupo') {
+    document.getElementById('an-pg-prev').style.display = 'none';
+    document.getElementById('an-pg-next').style.display = 'none';
+    document.getElementById('an-pg-info').style.display = 'none';
+    anBuildSKUGrupo(rows);
+  } else {
+    document.getElementById('an-pg-prev').style.display = '';
+    document.getElementById('an-pg-next').style.display = '';
+    document.getElementById('an-pg-info').style.display = '';
+    anBuildSKULista(rows);
+  }
+}
 function anBuildKPIs() {
   const lojas = anGetLojas();
   const itens = lojas.map(f => anVolSel(f));
@@ -3181,7 +3432,7 @@ function anBuildPareto() {
   const lojas = anGetLojas();
   const cats = {};
   lojas.forEach(f=>{
-    TOP8.forEach(c=>{
+    AN_TOP8.forEach(c=>{
       const v = [...anState.selMonths].reduce((s,i)=>s+(AN.catVal[f]?.[c]?.[i]||0),0);
       cats[c]=(cats[c]||0)+v;
     });
@@ -3230,28 +3481,6 @@ function anBuildComp() {
   document.getElementById('an-comp-body').innerHTML = rows.map(([label,vals,cls])=>`<tr>
     <td style="color:var(--muted);font-size:11px">${label}</td>
     ${lojas.map((_,i)=>`<td class="${cls[i]||''}">${vals[i]}</td>`).join('')}
-  </tr>`).join('');
-}
-
-/* ── Tabela de SKUs ── */
-function anBuildSKUs() {
-  const rows   = anGetSKUs();
-  const slice  = rows.slice(anState.pg*anState.PER, (anState.pg+1)*anState.PER);
-  const total  = rows.length;
-
-  document.getElementById('an-sku-count').textContent = `${total.toLocaleString('pt-BR')} SKUs`;
-  document.getElementById('an-pg-info').textContent   = `${anState.pg*anState.PER+1}–${Math.min((anState.pg+1)*anState.PER,total)} / ${total}`;
-  document.getElementById('an-pg-prev').disabled = anState.pg===0;
-  document.getElementById('an-pg-next').disabled = (anState.pg+1)*anState.PER>=total;
-
-  document.getElementById('an-sku-body').innerHTML = slice.map(r=>`<tr>
-    <td><span class="an-lbadge ${AN_LOJA_BADGE[r[0]]}">${AN_LOJA_NAMES[r[0]]}</span></td>
-    <td style="color:var(--muted)">${r[1]}</td>
-    <td style="font-weight:500">${r[2]}</td>
-    <td style="color:var(--muted)">${r[3]||'—'}</td>
-    <td style="text-align:right;font-variant-numeric:tabular-nums">${r[4].toLocaleString('pt-BR')}</td>
-    <td style="text-align:right;font-weight:600;color:var(--green)">${r[5]>0?anFmt(r[5]):'—'}</td>
-    <td style="text-align:right;color:var(--muted)">${r[4]>0&&r[5]>0?anFmt(r[5]/r[4]):'—'}</td>
   </tr>`).join('');
 }
 
