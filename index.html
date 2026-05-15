@@ -423,6 +423,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="nb"        id="nb-pedidos" onclick="navClick('pedidos',this)">Pedidos</button>
     <button class="nb"        id="nb-consumo" onclick="navClick('consumo',this)">🏆 Top Consumo</button>
     <button class="nb"        id="nb-analise" onclick="navClick('analise',this)">📈 Análise de Consumo</button>
+    <button class="nb"        id="nb-desempenho" onclick="navClick('desempenho',this)">📊 Desempenho</button>
     <button class="nb"        id="nb-ruptura" onclick="navClick('ruptura',this)">Rupturas</button>
     <button class="nb"        id="nb-fluxo"   onclick="navClick('fluxo',this)">Fluxo &amp; Prazos</button>
     <button class="nb"        id="nb-usuarios" onclick="navClick('usuarios',this)" style="display:none">Usuários</button>
@@ -787,18 +788,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <select id="tc-cat" onchange="tcRender()"
             style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
             <option value="todas">Todas as categorias</option>
-            <option value="Bolsas">Bolsas</option>
-            <option value="Capinhas">Capinhas</option>
-            <option value="Garrafas">Garrafas</option>
-            <option value="Lancheiras">Lancheiras</option>
-            <option value="Malas">Malas</option>
-            <option value="Mochilas">Mochilas</option>
-            <option value="Necessaires">Necessaires</option>
-            <option value="Tote Bags">Tote Bags</option>
-            <option value="Bolsas Térmicas">Bolsas Térmicas</option>
-            <option value="Copos">Copos</option>
-            <option value="Eletrônicos">Eletrônicos</option>
-            <option value="Acessórios">Acessórios</option>
+            <option value="Case">Case</option>
+            <option value="Têxtil">Têxtil</option>
+            <option value="Térmico">Térmico</option>
+            <option value="Mala">Mala</option>
+            <option value="Gift">Gift</option>
+            <option value="Tech">Tech</option>
+            <option value="Pets">Pets</option>
           </select>
           <input type="text" id="tc-busca" placeholder="Buscar produto..."
             style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:190px;"
@@ -888,6 +884,82 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="user-grid" id="user-grid"></div>
     </section>
 
+    <!-- ═ DESEMPENHO DE PRODUÇÃO ═ -->
+    <section id="sec-desempenho" class="sec">
+      <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>Desempenho de Produção</h1>
+          <p>Tempo de produção dos pedidos Totem · Metabase #26340 · Mai 2026</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="dp-periodo" onchange="dpRender()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <option value="7">Últimos 7 dias</option>
+            <option value="14" selected>Últimos 14 dias</option>
+            <option value="30">Todos os dados</option>
+          </select>
+          <select id="dp-loja" onchange="dpRender()"
+            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <option value="todas">Todas as lojas</option>
+            <option value="PKS">PKS Brasília</option>
+            <option value="Iguatemi">Iguatemi</option>
+            <option value="Anália Franco">Anália Franco</option>
+          </select>
+          <div style="font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;background:rgba(29,158,117,.12);color:var(--green)">SLA ≤ 30 min</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px" id="dp-metrics"></div>
+
+      <!-- Charts linha 1: volume + SLA -->
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Pedidos por dia — prontos vs em produção</div>
+          <div style="position:relative;height:200px"><canvas id="dp-vol-chart"></canvas></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">% SLA cumprida (≤ 30 min) por dia</div>
+          <div style="position:relative;height:200px"><canvas id="dp-sla-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts linha 2: tempo + comparativo -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Tempo mediano por dia (min) — excluídos outliers >8h</div>
+          <div style="position:relative;height:180px"><canvas id="dp-tempo-chart"></canvas></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Comparativo por loja — período</div>
+          <div id="dp-loja-table"></div>
+        </div>
+      </div>
+
+      <!-- Tabela detalhada -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border)">
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Detalhe por dia</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:650px">
+            <thead><tr style="background:var(--surface)">
+              <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Data</th>
+              <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Loja</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Pedidos</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Prontos</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Em produção</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">≤15 min</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">≤30 min</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Mediana (min)</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">SLA %</th>
+            </tr></thead>
+            <tbody id="dp-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section><!-- /sec-desempenho -->
+
     <!-- ═══════════════════════════════════════════════════════════
          ═  ANÁLISE DE CONSUMO — Factories 3 (Iguatemi), 6 (PKS), 7 (Anália)
          ═══════════════════════════════════════════════════════════ -->
@@ -896,12 +968,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
           <h1>Análise de Consumo</h1>
-          <p>Factories 3 · 6 · 7 — 2026 · Categoria Ebook excluída · Dados do banco Factory</p>
+          <p>Jan–Mai 2026 · Ebook excluído · Banco Factory (Postgres)</p>
         </div>
-        <div style="display:flex;gap:6px">
-          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600">F3 · Iguatemi</span>
-          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(79,126,255,.12);color:var(--pks);font-weight:600">F6 · PKS</span>
-          <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(192,132,252,.12);color:var(--ana);font-weight:600">F7 · Anália</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <!-- Badge última atualização -->
+          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
+            <span style="font-size:14px">🔄</span>
+            <div>
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">15/05/2026</div>
+            </div>
+          </div>
+          <!-- Badge cobertura -->
+          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
+            <span style="font-size:14px">📅</span>
+            <div>
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01 – 15/05/2026</div>
+            </div>
+          </div>
+          <!-- Lojas -->
+          <div style="display:flex;gap:4px">
+            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600">F3 · Iguatemi</span>
+            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(79,126,255,.12);color:var(--pks);font-weight:600">F6 · PKS</span>
+            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(192,132,252,.12);color:var(--ana);font-weight:600">F7 · Anália</span>
+          </div>
         </div>
       </div>
 
@@ -910,17 +1001,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Período -->
         <div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
-            <button class="an-mb active" data-m="0">Jan</button>
-            <button class="an-mb active" data-m="1">Fev</button>
-            <button class="an-mb active" data-m="2">Mar</button>
-            <button class="an-mb active" data-m="3">Abr</button>
-            <button class="an-mb active" data-m="4">Mai</button>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
+            Período
+            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 15/05/2026</span>
           </div>
-          <div style="display:flex;gap:4px;margin-top:6px">
-            <button class="an-mb" onclick="anSelAll()" style="font-size:10px;padding:2px 9px">Todos</button>
-            <button class="an-mb" onclick="anSelNone()" style="font-size:10px;padding:2px 9px">Limpar</button>
+          <!-- Meses individuais -->
+          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
+            <button class="an-mb active" data-m="0" title="01/01/2026 – 31/01/2026">Jan</button>
+            <button class="an-mb active" data-m="1" title="01/02/2026 – 28/02/2026">Fev</button>
+            <button class="an-mb active" data-m="2" title="01/03/2026 – 31/03/2026">Mar</button>
+            <button class="an-mb active" data-m="3" title="01/04/2026 – 30/04/2026">Abr</button>
+            <button class="an-mb active" data-m="4" title="01/05/2026 – 15/05/2026" style="position:relative">
+              Mai
+              <span style="position:absolute;top:-6px;right:-6px;font-size:7px;background:var(--gold);color:#000;border-radius:4px;padding:1px 3px;font-weight:700;line-height:1.2">1-15</span>
+            </button>
+          </div>
+          <!-- Seleções rápidas -->
+          <div style="margin-top:8px">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Seleção rápida</div>
+            <div style="display:flex;gap:3px;flex-wrap:wrap">
+              <button class="an-mb" onclick="anQuick(4)" style="font-size:10px;padding:2px 8px" title="01/05/2026 – 15/05/2026">Mai atual</button>
+              <button class="an-mb" onclick="anQuick(3,4)" style="font-size:10px;padding:2px 8px" title="01/04/2026 – 15/05/2026">Abr–Mai</button>
+              <button class="an-mb" onclick="anQuick(2,3,4)" style="font-size:10px;padding:2px 8px" title="01/03/2026 – 15/05/2026">Mar–Mai</button>
+              <button class="an-mb" onclick="anQuick(1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/02/2026 – 15/05/2026">Fev–Mai</button>
+              <button class="an-mb" onclick="anQuick(0,1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/01/2026 – 15/05/2026">Todo período</button>
+            </div>
           </div>
         </div>
 
@@ -974,7 +1079,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Resumo do filtro -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:10px;color:var(--muted)" id="an-filter-summary">Jan–Mai 2026 · 5 meses · Todas as lojas</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 15/05/2026</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
 
@@ -1282,6 +1388,7 @@ function showSec(id,el){
   if(id==='pedidos')loadPedidos();
   if(id==='ruptura')loadRuptura();
   if(id==='consumo')tcRender();
+  if(id==='desempenho')dpRender();
   if(id==='plano')planCheckSaldo();
 }
 
@@ -2509,287 +2616,196 @@ function planInit(){
 
 
 // ══════════════════════════════════════════════════════════════════
-// TOP CONSUMO — dados reais Metabase (faturamento 180d + consumo 30d)
+// TOP CONSUMO — derivado de AN.skus (mesma base da Análise de Consumo)
 // ══════════════════════════════════════════════════════════════════
 
-// Base de dados: todos os SKUs das 3 lojas com faturamento e consumo
-const TC_BASE = [
-  // PKS
-  {loja:'PKS',prod:'Tote Bag Preta',cat:'Tote Bags',fat180:109934,c30:54,est:991},
-  {loja:'PKS',prod:'Mini Tote Preta / Tote Bag',cat:'Tote Bags',fat180:72427,c30:61,est:598},
-  {loja:'PKS',prod:'Mala Joy Sarja Preto CD',cat:'Malas',fat180:71653,c30:29,est:501},
-  {loja:'PKS',prod:'Bolsa Moove Preta',cat:'Bolsas',fat180:70625,c30:1,est:213},
-  {loja:'PKS',prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:56695,c30:126,est:500},
-  {loja:'PKS',prod:'Mini Tote Off White / Tote Bag',cat:'Tote Bags',fat180:47896,c30:28,est:257},
-  {loja:'PKS',prod:'Case Anti Impacto Slim Air / iPhone 15',cat:'Capinhas',fat180:47462,c30:53,est:304},
-  {loja:'PKS',prod:'Mochila Pop / Pop Preta',cat:'Mochilas',fat180:45453,c30:22,est:687},
-  {loja:'PKS',prod:'Mala de Bordo Trip 20" - Preta',cat:'Malas',fat180:43629,c30:4,est:27},
-  {loja:'PKS',prod:'Mini Tote Cinza / Tote Bag',cat:'Tote Bags',fat180:41789,c30:9,est:320},
-  {loja:'PKS',prod:'Case Slim Air / iPhone 16 Pro Max',cat:'Capinhas',fat180:37303,c30:63,est:300},
-  {loja:'PKS',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:34542,c30:70,est:364},
-  {loja:'PKS',prod:'Tote Bag Off White',cat:'Tote Bags',fat180:33015,c30:23,est:104},
-  {loja:'PKS',prod:'Mala de Bordo Trip 20" - Off White',cat:'Malas',fat180:30952,c30:9,est:16},
-  {loja:'PKS',prod:'Copo Life Preto / 1180mL',cat:'Copos',fat180:27676,c30:157,est:441},
-  {loja:'PKS',prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',fat180:27535,c30:10,est:112},
-  {loja:'PKS',prod:'Tote Puff Preto / Tote Bag',cat:'Tote Bags',fat180:27430,c30:27,est:340},
-  {loja:'PKS',prod:'Mochila BTS Preta',cat:'Mochilas',fat180:26517,c30:null,est:269},
-  {loja:'PKS',prod:'Lancheira Play Preta',cat:'Lancheiras',fat180:26309,c30:51,est:106},
-  {loja:'PKS',prod:'Mochila Rodinha BTS Preta',cat:'Mochilas',fat180:25835,c30:1,est:80},
-  {loja:'PKS',prod:'Garrafa Térmica Fresh 360 v3 Branca 650ml',cat:'Garrafas',fat180:25185,c30:65,est:574},
-  {loja:'PKS',prod:'Mala Joy - Marrom',cat:'Malas',fat180:25131,c30:19,est:65},
-  {loja:'PKS',prod:'Mochila Voyage Preta',cat:'Mochilas',fat180:24354,c30:1,est:113},
-  {loja:'PKS',prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',fat180:24208,c30:18,est:71},
-  {loja:'PKS',prod:'Garrafa Flow Preto 500ml',cat:'Garrafas',fat180:24148,c30:3,est:240},
-  // IGUATEMI
-  {loja:'Iguatemi',prod:'Tote Bag Preta',cat:'Tote Bags',fat180:215474,c30:60,est:608},
-  {loja:'Iguatemi',prod:'Mala Joy Sarja Preto CD',cat:'Malas',fat180:192248,c30:64,est:334},
-  {loja:'Iguatemi',prod:'Bolsa Moove Preta',cat:'Bolsas',fat180:148355,c30:44,est:15},
-  {loja:'Iguatemi',prod:'Mala de Bordo Trip 20" - Preta',cat:'Malas',fat180:107416,c30:24,est:420},
-  {loja:'Iguatemi',prod:'Mini Tote Preta / Tote Bag',cat:'Tote Bags',fat180:94057,c30:91,est:505},
-  {loja:'Iguatemi',prod:'Tote Bag Rosa',cat:'Tote Bags',fat180:84071,c30:19,est:264},
-  {loja:'Iguatemi',prod:'Mochila BTS Preta',cat:'Mochilas',fat180:83980,c30:9,est:127},
-  {loja:'Iguatemi',prod:'Tote Bag Off White',cat:'Tote Bags',fat180:79133,c30:51,est:76},
-  {loja:'Iguatemi',prod:'Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:76464,c30:56,est:50},
-  {loja:'Iguatemi',prod:'Mini Tote Off White / Tote Bag',cat:'Tote Bags',fat180:73305,c30:50,est:582},
-  {loja:'Iguatemi',prod:'Mala Joy Sarja Rosa CH',cat:'Malas',fat180:67487,c30:11,est:244},
-  {loja:'Iguatemi',prod:'Mochila Voyage Off White',cat:'Mochilas',fat180:61795,c30:49,est:39},
-  {loja:'Iguatemi',prod:'Necessaire Makeup Double - Preta',cat:'Necessaires',fat180:57575,c30:37,est:59},
-  {loja:'Iguatemi',prod:'Bolsa Térmica Mix PRO Preta',cat:'Bolsas Térmicas',fat180:57400,c30:15,est:0},
-  {loja:'Iguatemi',prod:'Case Slim Air / iPhone 16 Pro Max',cat:'Capinhas',fat180:51944,c30:66,est:71},
-  {loja:'Iguatemi',prod:'Tote Puff Marrom / Tote Bag',cat:'Tote Bags',fat180:52482,c30:54,est:467},
-  {loja:'Iguatemi',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:53768,c30:82,est:122},
-  {loja:'Iguatemi',prod:'Lancheira Fruit - Preta PRO',cat:'Lancheiras',fat180:51703,c30:51,est:145},
-  {loja:'Iguatemi',prod:'Mala Joy - WaitList',cat:'Malas',fat180:48342,c30:29,est:181},
-  {loja:'Iguatemi',prod:'Mini Tote Marrom / Tote Bag',cat:'Tote Bags',fat180:41672,c30:14,est:50},
-  {loja:'Iguatemi',prod:'Impact Slim Standard iPhone 11',cat:'Capinhas',fat180:24040,c30:46,est:40},
-  {loja:'Iguatemi',prod:'Infinite Air / iPhone 17 Pro',cat:'Capinhas',fat180:17792,c30:37,est:243},
-  {loja:'Iguatemi',prod:'Base Preta - Mala de Bordo Trip 20"',cat:'Acessórios',fat180:35640,c30:24,est:6},
-  {loja:'Iguatemi',prod:'Case Slim Air iPhone 15 Pro Max',cat:'Capinhas',fat180:34496,c30:64,est:8},
-  {loja:'Iguatemi',prod:'Case Slim Air iPhone 13',cat:'Capinhas',fat180:19743,c30:97,est:4},
-  // ANÁLIA FRANCO
-  {loja:'Anália Franco',prod:'Tote Bag CD Tote Bag Preta',cat:'Tote Bags',fat180:77326,c30:28,est:1063},
-  {loja:'Anália Franco',prod:'Bags Bolsa Moove Preta',cat:'Bolsas',fat180:56756,c30:120,est:134},
-  {loja:'Anália Franco',prod:'Mala Joy CD Sarja Preta',cat:'Malas',fat180:54630,c30:21,est:112},
-  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Off White',cat:'Tote Bags',fat180:50244,c30:32,est:180},
-  {loja:'Anália Franco',prod:'Travel Case CD Trip Preta / Mala Trip 20"',cat:'Malas',fat180:44519,c30:10,est:163},
-  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Preta',cat:'Tote Bags',fat180:43890,c30:21,est:325},
-  {loja:'Anália Franco',prod:'NecessaireCD Preta',cat:'Necessaires',fat180:33948,c30:66,est:134},
-  {loja:'Anália Franco',prod:'Case Infinite Air / iPhone 17 Pro Max',cat:'Capinhas',fat180:33364,c30:38,est:744},
-  {loja:'Anália Franco',prod:'Case Slim Air / iPhone 16',cat:'Capinhas',fat180:31760,c30:45,est:707},
-  {loja:'Anália Franco',prod:'Mala Joy CD Joy Marrom',cat:'Malas',fat180:25171,c30:6,est:141},
-  {loja:'Anália Franco',prod:'Base Travel Case Trip Preta',cat:'Acessórios',fat180:22642,c30:10,est:10},
-  {loja:'Anália Franco',prod:'Mochila Rodinhas BTS Preta',cat:'Mochilas',fat180:21316,c30:1,est:48},
-  {loja:'Anália Franco',prod:'Tote Off White / Tote Bag',cat:'Tote Bags',fat180:19790,c30:6,est:145},
-  {loja:'Anália Franco',prod:'Travel Case Trip Off White',cat:'Malas',fat180:19271,c30:6,est:122},
-  {loja:'Anália Franco',prod:'Case Slim Air / iPhone 15',cat:'Capinhas',fat180:18624,c30:38,est:111},
-  {loja:'Anália Franco',prod:'Tote Bag CD Mini Tote Cinza',cat:'Tote Bags',fat180:17791,c30:7,est:204},
-  {loja:'Anália Franco',prod:'BackpackCD Pop Preta',cat:'Mochilas',fat180:15182,c30:15,est:60},
-  {loja:'Anália Franco',prod:'Mala Joy CD Joy Off White',cat:'Malas',fat180:15095,c30:11,est:84},
-  {loja:'Anália Franco',prod:'Mala Joy CD Sarja Rosa',cat:'Malas',fat180:13725,c30:8,est:79},
-  {loja:'Anália Franco',prod:'Tote Bag CD Tote Bag Rosa',cat:'Tote Bags',fat180:13323,c30:9,est:97},
-  {loja:'Anália Franco',prod:'NecessaireCD Rosa',cat:'Necessaires',fat180:8102,c30:4,est:1},
-  {loja:'Anália Franco',prod:'Tote Bag CD Tote Amora',cat:'Tote Bags',fat180:10905,c30:14,est:5},
-  {loja:'Anália Franco',prod:'Bolsa de Garrafa Preta',cat:'Bolsas',fat180:4557,c30:20,est:17},
-  {loja:'Anália Franco',prod:'Mala Joy CD Joy Azul',cat:'Malas',fat180:11385,c30:7,est:2},
-  {loja:'Anália Franco',prod:'Powerbank Fast Charge Preto 20000mah',cat:'Eletrônicos',fat180:12494,c30:8,est:8},
-];
+const TC_CAT_MAP = {
+  'Case':'Capinhas','Tote Bag CD':'Tote Bags','Tote Shopper':'Tote Bags','Totebag Pop':'Tote Bags',
+  'Mala Joy CD':'Malas','Travel Case CD':'Malas','Mala':'Malas',
+  'BackpackCD':'Mochilas','Mochila Rodinhas BTS':'Mochilas','Mochila BTS':'Mochilas','Estojo BTS':'Mochilas',
+  'Lunch Bag CD':'Lancheiras','Lancheira BTS':'Lancheiras','Lunch Bag':'Lancheiras',
+  'Garrafa':'Garrafas','Garrafa Ebook':'Garrafas','Garrafa Flip Pro Ebook':'Garrafas',
+  'Garrafa Kids Ebook':'Garrafas','Garrafa Térmica Kids':'Garrafas',
+  'Taça Térmica Ebook':'Garrafas','Taça Térmica':'Garrafas',
+  'Copo':'Copos','Copo Ebook':'Copos',
+  'NecessaireCD':'Necessaires','Necessaire':'Necessaires',
+  'Bags':'Bolsas','Bolsa de Garrafa':'Bolsas','Bolsa Térmica Urban':'Bolsas Térmicas',
+  'Ventosa de Silicone':'Acessórios','Skin Gocase':'Acessórios','Acessorios Termicos':'Acessórios',
+  'Base Travel Case CD':'Acessórios','Base Garrafa CD':'Acessórios','Placa Mala':'Acessórios',
+  'Clutch CD':'Acessórios','Tampa CD':'Acessórios','Cordão de Cases':'Acessórios','Acessório CD':'Acessórios',
+  'Frame Case':'Capinhas',
+  'Powerbank Fast Charge':'Eletrônicos','Powerbank Capacity CD':'Eletrônicos','Accessories Tech':'Eletrônicos',
+  'Guia Pet':'Pets','Peitoral Pet':'Pets','Coleira Pet':'Pets',
+};
+const TC_LOJA_MAP = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
 
-// Fator de escalonamento por período selecionado
-function tcEscalonar(fat180, dias){
-  if(dias>=180)return fat180;
-  return Math.round(fat180*(dias/180));
-}
-function tcConsumoPeriodo(c30,dias){
-  if(c30==null)return null;
-  return Math.round(c30*(dias/30));
-}
-
-function tcRender(){
-  const dias=parseInt(document.getElementById('tc-periodo').value)||180;
-  const lojaFiltro=document.getElementById('tc-loja').value;
-  const catFiltro=document.getElementById('tc-cat').value;
-  const busca=(document.getElementById('tc-busca').value||'').toLowerCase().trim();
-
-  // Filtrar
-  let lista=TC_BASE.filter(p=>{
-    if(lojaFiltro!=='todas'&&p.loja!==lojaFiltro)return false;
-    if(catFiltro!=='todas'&&p.cat!==catFiltro)return false;
-    if(busca&&!p.prod.toLowerCase().includes(busca)&&!p.cat.toLowerCase().includes(busca))return false;
-    return true;
-  });
-
-  // Agrupar por produto se "todas as lojas"
-  // fat180 = soma real entre lojas (receita total do produto no período)
-  // c30 = soma de consumo entre lojas (unidades totais/mês)
-  // ticket = fat180 / (c30*6) = preço médio por unidade
-  if(lojaFiltro==='todas'){
-    const map={};
-    for(const p of lista){
-      if(!map[p.prod])map[p.prod]={...p,fat180:0,c30_sum:0,c30_cnt:0,lojas:[]};
-      map[p.prod].fat180+=p.fat180;
-      if(p.c30!=null){map[p.prod].c30_sum+=p.c30;map[p.prod].c30_cnt++;}
-      map[p.prod].lojas.push(p.loja);
+function tcGetData() {
+  const dias       = parseInt(document.getElementById('tc-periodo')?.value)||180;
+  const lojaFiltro = document.getElementById('tc-loja')?.value||'todas';
+  const catFiltro  = document.getElementById('tc-cat')?.value||'todas';
+  const busca      = (document.getElementById('tc-busca')?.value||'').toLowerCase().trim();
+  const words      = busca ? busca.split(/\s+/).filter(Boolean) : [];
+  const scale      = dias / 150;
+  return AN.skus.filter(r => {
+    const lojaName = TC_LOJA_MAP[r[0]];
+    if (!lojaName) return false;
+    if (lojaFiltro !== 'todas' && lojaName !== lojaFiltro) return false;
+    const cat = TC_CAT_MAP[r[1]] || r[1];
+    if (catFiltro !== 'todas' && cat !== catFiltro) return false;
+    if (words.length) {
+      const hay = (r[1]+' '+r[2]+' '+r[3]).toLowerCase();
+      if (!words.every(w => hay.includes(w))) return false;
     }
-    lista=Object.values(map).map(p=>{
-      const c30=p.c30_cnt>0?Math.round(p.c30_sum):null;
-      // Ticket médio = faturamento 180d / unidades vendidas 180d
-      const unid180=c30!=null?c30*6:null;
-      const ticket=unid180?Math.round(p.fat180/unid180):null;
-      return{...p,c30,ticket};
-    });
-  } else {
-    lista=lista.map(p=>{
-      const unid180=p.c30!=null?p.c30*6:null;
-      const ticket=unid180?Math.round(p.fat180/unid180):null;
-      return{...p,ticket};
-    });
-  }
+    return r[4] > 0;
+  }).map(r => ({
+    loja:       TC_LOJA_MAP[r[0]],
+    prod:       r[2] + (r[3] ? ' / '+r[3] : ''),
+    cat:        TC_CAT_MAP[r[1]] || r[1],
+    fatPeriodo: Math.round(r[5] * scale),
+    cPeriodo:   Math.round(r[4] * scale),
+  })).sort((a,b) => b.fatPeriodo - a.fatPeriodo);
+}
 
-  // Calcular valor do período e ordenar
-  lista=lista.map(p=>({...p,
-    fatPeriodo:tcEscalonar(p.fat180,dias),
-    cPeriodo:tcConsumoPeriodo(p.c30,dias),
-  })).sort((a,b)=>b.fatPeriodo-a.fatPeriodo);
-
-  const top=lista.slice(0,30);
-
-  // Métricas
-  const totalFat=top.reduce((s,p)=>s+p.fatPeriodo,0);
-  const totalCons=top.filter(p=>p.cPeriodo!=null).reduce((s,p)=>s+(p.cPeriodo||0),0);
-  const topProd=top[0];
-  const nLojas=lojaFiltro==='todas'?3:1;
-  document.getElementById('tc-metrics').innerHTML=`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Produtos no ranking</div>
-      <div style="font-size:24px;font-weight:700">${top.length}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">de ${lista.length} filtrados</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Faturamento top 30</div>
-      <div style="font-size:20px;font-weight:700">R$ ${totalFat.toLocaleString('pt-BR')}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">últimos ${dias} dias</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px"># 1 produto</div>
-      <div style="font-size:14px;font-weight:700;line-height:1.3">${topProd?topProd.prod.substring(0,30)+'…':'—'}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">${topProd?'R$ '+topProd.fatPeriodo.toLocaleString('pt-BR'):'—'}</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">Consumo total (${dias}d)</div>
-      <div style="font-size:24px;font-weight:700">${totalCons.toLocaleString('pt-BR')}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">unidades vendidas</div>
-    </div>`;
-
-  if(!top.length){
-    document.getElementById('tc-content').innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum produto encontrado para os filtros selecionados.</p></div>`;
+function tcRender() {
+  const rows = tcGetData();
+  const dias = parseInt(document.getElementById('tc-periodo')?.value)||180;
+  const totalFat  = rows.reduce((s,r) => s+r.fatPeriodo, 0);
+  const totalCons = rows.reduce((s,r) => s+r.cPeriodo, 0);
+  const topProd   = rows[0];
+  const nLojas    = [...new Set(rows.map(r=>r.loja))].length;
+  document.getElementById('tc-metrics').innerHTML = [
+    {l:'Faturamento ('+dias+'d)',v:'R\u00a0'+totalFat.toLocaleString('pt-BR'),s:rows.length+' SKUs \u00b7 '+nLojas+' '+( nLojas===1?'loja':'lojas')},
+    {l:'#1 produto',v:topProd?(topProd.prod.length>28?topProd.prod.substring(0,28)+'\u2026':topProd.prod):'\u2014',s:topProd?'R\u00a0'+topProd.fatPeriodo.toLocaleString('pt-BR'):'\u2014'},
+    {l:'Consumo total ('+dias+'d)',v:totalCons.toLocaleString('pt-BR'),s:'unidades vendidas'},
+    {l:'Ticket médio',v:totalCons>0?'R\u00a0'+Math.round(totalFat/totalCons).toLocaleString('pt-BR'):'\u2014',s:'por unidade'},
+  ].map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">${m.l}</div>
+    <div style="font-size:20px;font-weight:700">${m.v}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:3px">${m.s}</div>
+  </div>`).join('');
+  if (!rows.length) {
+    document.getElementById('tc-content').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Nenhum produto encontrado.</p></div>';
     return;
   }
-
-  // Valor máximo para barra proporcional
-  const maxFat=top[0].fatPeriodo||1;
-  const lojaColor={PKS:'var(--pks)',Iguatemi:'var(--igu)','Anália Franco':'var(--ana)'};
-
-  let html=`<div style="background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden">
-    <table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="background:var(--surface);border-bottom:1px solid var(--border)">
-          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);width:32px">#</th>
-          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Produto</th>
-          ${lojaFiltro==='todas'?'<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Lojas</th>':''}
-          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Categoria</th>
-          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Faturamento (${dias}d)</th>
-          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Consumo (${dias}d)</th>
-          <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Estoque atual</th>
-          <th style="padding:10px 8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);width:140px">Participação</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-  top.forEach((p,i)=>{
-    const pct=Math.round(p.fatPeriodo/maxFat*100);
-    const podium=i===0?'🥇':i===1?'🥈':i===2?'🥉':null;
-    const numStyle=i<3?'font-weight:700;font-size:14px':'color:var(--muted);font-size:13px';
-    const lojaTag=lojaFiltro!=='todas'?'':`
-      <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
-        ${(p.lojas||[]).map(l=>`<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${lojaColor[l]||'var(--muted)'}">${l==='Anália Franco'?'AF':l}</span>`).join('')}
-      </div>`;
-    const estCorColor=(p.est||0)===0?'var(--red)':(p.est||0)<20?'var(--gold)':'var(--text)';
-    html+=`<tr style="border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
-      <td style="padding:10px 14px;${numStyle}">${podium||('#'+(i+1))}</td>
-      <td style="padding:10px 14px">
-        <div style="font-weight:500;font-size:13px;line-height:1.3">${p.prod}</div>
-        ${lojaTag}
-      </td>
-      ${lojaFiltro==='todas'?`<td style="padding:10px 14px"></td>`:''}
-      <td style="padding:10px 14px;color:var(--muted);font-size:12px">${p.cat}</td>
-      <td style="padding:10px 14px;text-align:right">
-          <div style="font-weight:600;font-size:13px">R$ ${p.fatPeriodo.toLocaleString('pt-BR')}</div>
-          ${p.ticket!=null?`<div style="font-size:10px;color:var(--muted);margin-top:2px">~R$ ${p.ticket.toLocaleString('pt-BR')}/un</div>`:''}
-        </td>
-      <td style="padding:10px 14px;text-align:right;font-size:13px;color:${p.cPeriodo!=null?'var(--text)':'var(--muted)'}">
-        ${p.cPeriodo!=null?p.cPeriodo.toLocaleString('pt-BR')+'<span style=\'font-size:11px;color:var(--muted)\'>  un</span>':'<span style=\'color:var(--muted);font-style:italic\'>s/ dados</span>'}
-      </td>
-      <td style="padding:10px 14px;text-align:center;font-weight:600;color:${estCorColor}">${p.est!=null?(p.est||0).toLocaleString('pt-BR'):'—'}</td>
-      <td style="padding:10px 8px">
-        <div style="display:flex;align-items:center;gap:7px">
-          <div style="flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:${i===0?'var(--accent)':i<3?'var(--green)':'var(--muted)'};border-radius:99px;transition:width .4s ease"></div>
-          </div>
-          <span style="font-size:11px;color:var(--muted);min-width:30px;text-align:right">${pct}%</span>
-        </div>
-      </td>
-    </tr>`;
-  });
-
-  html+=`</tbody></table></div>`;
-  document.getElementById('tc-content').innerHTML=html;
+  const maxFat = rows[0].fatPeriodo||1;
+  const LC = {'Iguatemi':'var(--igu)','PKS':'var(--pks)','Anália Franco':'var(--ana)'};
+  document.getElementById('tc-content').innerHTML = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:560px"><thead><tr style="background:var(--surface)">'
+    +['#','Loja','Produto','Categoria','Qtd','Faturamento','Volume'].map(h=>`<th style="padding:10px 12px;text-align:${'Qtd,Faturamento'.includes(h)?'right':'left'};font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">${h}</th>`).join('')
+    +'</tr></thead><tbody>'
+    +rows.slice(0,150).map((r,i)=>`<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+      <td style="padding:9px 12px;color:var(--muted);width:36px">${i+1}</td>
+      <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.06);color:${LC[r.loja]||'var(--text)'};font-weight:600">${r.loja}</span></td>
+      <td style="padding:9px 12px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.prod}">${r.prod}</td>
+      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${r.cat}</td>
+      <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums">${r.cPeriodo.toLocaleString('pt-BR')}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--green)">R\u00a0${r.fatPeriodo.toLocaleString('pt-BR')}</td>
+      <td style="padding:9px 12px;min-width:80px"><div style="height:7px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.round(r.fatPeriodo/maxFat*100)}%;background:var(--accent);border-radius:3px"></div></div></td>
+    </tr>`).join('')+'</tbody></table></div>';
 }
 
-// ══════════════════════════════════════════════════════════════════
-// START
-// ══════════════════════════════════════════════════════════════════
-init();
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     ANÁLISE DE CONSUMO — CSS + JS
-═══════════════════════════════════════════════════════════════ -->
-<style>
-.an-mb{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;}
-.an-mb:hover{border-color:var(--accent);color:var(--text);}
-.an-mb.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-.an-insight{border-left:3px solid;border-radius:0 9px 9px 0;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-.an-insight-danger{border-left-color:#FF5C5C;}.an-insight-warn{border-left-color:var(--gold);}.an-insight-ok{border-left-color:var(--green);}.an-insight-info{border-left-color:var(--accent);}
-.an-i-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 3px;}
-.an-insight-danger .an-i-label{color:var(--red);}.an-insight-warn .an-i-label{color:var(--gold);}.an-insight-ok .an-i-label{color:var(--green);}.an-insight-info .an-i-label{color:var(--accent);}
-.an-i-text{font-size:11px;color:var(--text);margin:0;line-height:1.5;}
-.an-pareto-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.an-pareto-lbl{min-width:140px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;}
-.an-pareto-bg{flex:1;background:var(--border);border-radius:3px;height:13px;overflow:hidden;}
-.an-pareto-fill{height:100%;border-radius:3px;transition:width .35s;}
-.an-pareto-val{min-width:52px;text-align:right;color:var(--text);font-weight:600;font-size:10px;}
-.an-pareto-pct{min-width:32px;text-align:right;color:var(--muted);font-size:10px;}
-#an-kpis .an-kpi{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;}
-#an-kpis .an-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px;}
-#an-kpis .an-kpi-val{font-size:22px;font-weight:700;margin:0;line-height:1.1;}
-#an-kpis .an-kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;}
-#an-comp-body tr{border-bottom:1px solid var(--border);transition:background .12s;}
-#an-comp-body tr:last-child{border-bottom:none;}
-#an-comp-body tr:hover{background:rgba(255,255,255,.02);}
-#an-comp-body td{padding:8px 14px;font-size:12px;}
-#an-comp-body td:first-child{color:var(--muted);font-size:11px;}
-.an-ok{color:var(--green);font-weight:600;}.an-warn{color:var(--gold);font-weight:600;}.an-danger{color:var(--red);font-weight:600;}
-.an-lbadge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;}
-.an-lb3{background:rgba(46,204,136,.12);color:var(--green);}
-.an-lb6{background:rgba(79,126,255,.12);color:var(--pks);}
-.an-lb7{background:rgba(192,132,252,.12);color:var(--ana);}
-</style>
-
-<script>
 /* ═══════════════════════════════════════════════════════
    ANÁLISE DE CONSUMO  —  Fábricas 3 / 6 / 7  —  2026
    Ebook excluído · source: banco Factory (Postgres)
 ═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   DESEMPENHO DE PRODUÇÃO — Metabase #26340 — Mai 2026
+═══════════════════════════════════════════════════════════════ */
+const DP_RAW=[
+{dia:'2026-05-01',loja:'Anália Franco',pedidos:26,prontos:26,em_producao:0,cancelados:0,media_min:55.8,mediana_min:57.7,dentro_15min:4,dentro_30min:6,acima_30min:8},
+{dia:'2026-05-01',loja:'PKS',pedidos:34,prontos:34,em_producao:0,cancelados:0,media_min:82.2,mediana_min:11.7,dentro_15min:9,dentro_30min:10,acima_30min:4},
+{dia:'2026-05-01',loja:'Iguatemi',pedidos:3,prontos:2,em_producao:1,cancelados:0,media_min:0.4,mediana_min:null,dentro_15min:1,dentro_30min:1,acima_30min:1},
+{dia:'2026-05-02',loja:'Anália Franco',pedidos:28,prontos:28,em_producao:0,cancelados:0,media_min:56.1,mediana_min:29.1,dentro_15min:2,dentro_30min:4,acima_30min:4},
+{dia:'2026-05-02',loja:'PKS',pedidos:50,prontos:50,em_producao:0,cancelados:0,media_min:18.3,mediana_min:0.6,dentro_15min:22,dentro_30min:22,acima_30min:7},
+{dia:'2026-05-02',loja:'Iguatemi',pedidos:126,prontos:107,em_producao:18,cancelados:1,media_min:29.6,mediana_min:6,dentro_15min:28,dentro_30min:30,acima_30min:23},
+{dia:'2026-05-03',loja:'Anália Franco',pedidos:25,prontos:23,em_producao:2,cancelados:0,media_min:22.6,mediana_min:32.2,dentro_15min:2,dentro_30min:3,acima_30min:3},
+{dia:'2026-05-03',loja:'PKS',pedidos:67,prontos:67,em_producao:0,cancelados:0,media_min:10.4,mediana_min:0.5,dentro_15min:40,dentro_30min:41,acima_30min:7},
+{dia:'2026-05-03',loja:'Iguatemi',pedidos:90,prontos:80,em_producao:9,cancelados:1,media_min:12,mediana_min:1,dentro_15min:37,dentro_30min:40,acima_30min:10},
+{dia:'2026-05-04',loja:'Anália Franco',pedidos:14,prontos:14,em_producao:0,cancelados:0,media_min:15.2,mediana_min:0.2,dentro_15min:7,dentro_30min:7,acima_30min:1},
+{dia:'2026-05-04',loja:'PKS',pedidos:34,prontos:34,em_producao:0,cancelados:0,media_min:25.7,mediana_min:1.8,dentro_15min:15,dentro_30min:16,acima_30min:8},
+{dia:'2026-05-04',loja:'Iguatemi',pedidos:70,prontos:55,em_producao:15,cancelados:0,media_min:11.8,mediana_min:1.7,dentro_15min:19,dentro_30min:19,acima_30min:12},
+{dia:'2026-05-05',loja:'Anália Franco',pedidos:15,prontos:14,em_producao:1,cancelados:0,media_min:146.1,mediana_min:215,dentro_15min:1,dentro_30min:2,acima_30min:2},
+{dia:'2026-05-05',loja:'PKS',pedidos:51,prontos:51,em_producao:0,cancelados:0,media_min:7.7,mediana_min:1.2,dentro_15min:29,dentro_30min:32,acima_30min:3},
+{dia:'2026-05-05',loja:'Iguatemi',pedidos:78,prontos:63,em_producao:15,cancelados:0,media_min:30.1,mediana_min:1.6,dentro_15min:19,dentro_30min:20,acima_30min:6},
+{dia:'2026-05-06',loja:'Anália Franco',pedidos:18,prontos:13,em_producao:5,cancelados:0,media_min:52.9,mediana_min:77,dentro_15min:2,dentro_30min:2,acima_30min:6},
+{dia:'2026-05-06',loja:'PKS',pedidos:31,prontos:31,em_producao:0,cancelados:0,media_min:15.9,mediana_min:77,dentro_15min:10,dentro_30min:10,acima_30min:10},
+{dia:'2026-05-06',loja:'Iguatemi',pedidos:98,prontos:72,em_producao:25,cancelados:1,media_min:35.1,mediana_min:2.4,dentro_15min:21,dentro_30min:23,acima_30min:16},
+{dia:'2026-05-07',loja:'Anália Franco',pedidos:28,prontos:22,em_producao:6,cancelados:0,media_min:57.7,mediana_min:194.7,dentro_15min:1,dentro_30min:3,acima_30min:6},
+{dia:'2026-05-07',loja:'PKS',pedidos:47,prontos:45,em_producao:2,cancelados:0,media_min:134.7,mediana_min:157.9,dentro_15min:7,dentro_30min:8,acima_30min:13},
+{dia:'2026-05-07',loja:'Iguatemi',pedidos:99,prontos:71,em_producao:27,cancelados:1,media_min:24.7,mediana_min:1.5,dentro_15min:23,dentro_30min:24,acima_30min:11},
+{dia:'2026-05-08',loja:'Anália Franco',pedidos:25,prontos:19,em_producao:6,cancelados:0,media_min:63.5,mediana_min:32.6,dentro_15min:0,dentro_30min:3,acima_30min:3},
+{dia:'2026-05-08',loja:'PKS',pedidos:67,prontos:65,em_producao:2,cancelados:0,media_min:3.3,mediana_min:13.9,dentro_15min:19,dentro_30min:19,acima_30min:18},
+{dia:'2026-05-08',loja:'Iguatemi',pedidos:139,prontos:108,em_producao:31,cancelados:0,media_min:47.9,mediana_min:1.4,dentro_15min:29,dentro_30min:30,acima_30min:21},
+{dia:'2026-05-09',loja:'Anália Franco',pedidos:63,prontos:59,em_producao:4,cancelados:0,media_min:43.8,mediana_min:23,dentro_15min:12,dentro_30min:17,acima_30min:13},
+{dia:'2026-05-09',loja:'PKS',pedidos:164,prontos:162,em_producao:2,cancelados:0,media_min:9.3,mediana_min:0.2,dentro_15min:104,dentro_30min:108,acima_30min:19},
+{dia:'2026-05-09',loja:'Iguatemi',pedidos:188,prontos:122,em_producao:66,cancelados:0,media_min:29.2,mediana_min:1.5,dentro_15min:34,dentro_30min:37,acima_30min:24},
+{dia:'2026-05-10',loja:'Anália Franco',pedidos:12,prontos:9,em_producao:3,cancelados:0,media_min:40.3,mediana_min:29.3,dentro_15min:1,dentro_30min:2,acima_30min:2},
+{dia:'2026-05-10',loja:'PKS',pedidos:35,prontos:35,em_producao:0,cancelados:0,media_min:7.8,mediana_min:2.2,dentro_15min:21,dentro_30min:24,acima_30min:3},
+{dia:'2026-05-10',loja:'Iguatemi',pedidos:67,prontos:39,em_producao:27,cancelados:1,media_min:10.3,mediana_min:1.5,dentro_15min:13,dentro_30min:16,acima_30min:3},
+{dia:'2026-05-11',loja:'Anália Franco',pedidos:18,prontos:18,em_producao:0,cancelados:0,media_min:null,mediana_min:null,dentro_15min:0,dentro_30min:0,acima_30min:1},
+{dia:'2026-05-11',loja:'PKS',pedidos:17,prontos:16,em_producao:1,cancelados:0,media_min:9.5,mediana_min:18,dentro_15min:4,dentro_30min:6,acima_30min:3},
+{dia:'2026-05-11',loja:'Iguatemi',pedidos:55,prontos:40,em_producao:15,cancelados:0,media_min:31.7,mediana_min:0.6,dentro_15min:12,dentro_30min:12,acima_30min:7},
+{dia:'2026-05-12',loja:'Anália Franco',pedidos:14,prontos:13,em_producao:1,cancelados:0,media_min:34.1,mediana_min:42,dentro_15min:1,dentro_30min:3,acima_30min:3},
+{dia:'2026-05-12',loja:'PKS',pedidos:87,prontos:86,em_producao:1,cancelados:0,media_min:8.2,mediana_min:0.9,dentro_15min:76,dentro_30min:77,acima_30min:5},
+{dia:'2026-05-12',loja:'Iguatemi',pedidos:67,prontos:52,em_producao:14,cancelados:1,media_min:67.1,mediana_min:2.6,dentro_15min:16,dentro_30min:16,acima_30min:9},
+{dia:'2026-05-13',loja:'Anália Franco',pedidos:15,prontos:11,em_producao:4,cancelados:0,media_min:28.7,mediana_min:31.4,dentro_15min:3,dentro_30min:4,acima_30min:4},
+{dia:'2026-05-13',loja:'PKS',pedidos:35,prontos:32,em_producao:3,cancelados:0,media_min:15.3,mediana_min:7.9,dentro_15min:14,dentro_30min:14,acima_30min:6},
+{dia:'2026-05-13',loja:'Iguatemi',pedidos:49,prontos:32,em_producao:17,cancelados:0,media_min:47.6,mediana_min:28.1,dentro_15min:9,dentro_30min:10,acima_30min:9},
+{dia:'2026-05-14',loja:'Anália Franco',pedidos:11,prontos:5,em_producao:6,cancelados:0,media_min:105.2,mediana_min:46.9,dentro_15min:0,dentro_30min:0,acima_30min:3},
+{dia:'2026-05-14',loja:'PKS',pedidos:22,prontos:20,em_producao:2,cancelados:0,media_min:168.6,mediana_min:168.6,dentro_15min:0,dentro_30min:0,acima_30min:10},
+{dia:'2026-05-14',loja:'Iguatemi',pedidos:63,prontos:44,em_producao:19,cancelados:0,media_min:44.3,mediana_min:2.5,dentro_15min:8,dentro_30min:8,acima_30min:6},
+];
+const DP_LC={'PKS':{b:'#4F7EFF',bg:'rgba(79,126,255,.15)'},'Iguatemi':{b:'#2ECC88',bg:'rgba(46,204,136,.15)'},'Anália Franco':{b:'#C084FC',bg:'rgba(192,132,252,.15)'}};
+let dpVC,dpSC,dpTC;
+function dpGetFiltered(){const dias=parseInt(document.getElementById('dp-periodo')?.value)||14;const loja=document.getElementById('dp-loja')?.value||'todas';const allDates=[...new Set(DP_RAW.map(r=>r.dia))].sort();const cut=new Set(allDates.slice(-dias));return DP_RAW.filter(r=>cut.has(r.dia)&&(loja==='todas'||r.loja===loja));}
+function dpRender(){
+  const rows=dpGetFiltered();if(!rows.length)return;
+  const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
+  const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('dentro_30min'),d15=s('dentro_15min'),ac=s('acima_30min');
+  const pctSla=d30+ac>0?Math.round(d30/(d30+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
+  const meds=rows.filter(r=>r.mediana_min!==null&&r.mediana_min<480).map(r=>r.mediana_min).sort((a,b)=>a-b);
+  const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
+  document.getElementById('dp-metrics').innerHTML=[
+    {l:'Total pedidos',v:tot.toLocaleString('pt-BR'),s:'no período'},
+    {l:'Prontos',v:pctP+'%',s:pron.toLocaleString('pt-BR')+' pedidos',c:pctP>=80?'var(--green)':pctP>=60?'var(--gold)':'var(--red)'},
+    {l:'Em produção',v:em.toLocaleString('pt-BR'),s:'pendentes',c:em>50?'var(--gold)':'var(--text)'},
+    {l:'SLA ≤ 30 min',v:pctSla+'%',s:d30+' de '+(d30+ac)+' a tempo',c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
+    {l:'Mediana produção',v:medG!==null?medG.toFixed(1)+' min':'—',s:'excl. outliers >8h'},
+  ].map(m=>'<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">'+m.l+'</div><div style="font-size:22px;font-weight:700;color:'+(m.c||'var(--text)')+'">'+m.v+'</div><div style="font-size:10px;color:var(--muted);margin-top:4px">'+m.s+'</div></div>').join('');
+  const dates=[...new Set(rows.map(r=>r.dia))].sort(),lbl=dates.map(d=>d.substring(5));
+  const lojas=['PKS','Iguatemi','Anália Franco'],lf=document.getElementById('dp-loja')?.value||'todas',ll=lf==='todas'?lojas:[lf];
+  const gr=(l,d,k)=>(rows.find(r=>r.loja===l&&r.dia===d)||{})[k]||0;
+  if(dpVC)dpVC.destroy();
+  dpVC=new Chart(document.getElementById('dp-vol-chart'),{type:'bar',data:{labels:lbl,datasets:ll.flatMap(l=>[{label:l+' prontos',data:dates.map(d=>gr(l,d,'prontos')),backgroundColor:DP_LC[l]?.bg,borderColor:DP_LC[l]?.b,borderWidth:1,borderRadius:2,stack:l},{label:l+' em prod.',data:dates.map(d=>gr(l,d,'em_producao')),backgroundColor:'rgba(255,92,92,.25)',borderColor:'#FF5C5C',borderWidth:1,borderRadius:2,stack:l}])},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:ll.length<=1,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}}},scales:{x:{stacked:true,ticks:{color:'#6B7280',font:{size:9}},grid:{display:false}},y:{stacked:true,ticks:{color:'#6B7280',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+  if(dpSC)dpSC.destroy();
+  dpSC=new Chart(document.getElementById('dp-sla-chart'),{type:'line',data:{labels:lbl,datasets:ll.map(l=>({label:l,data:dates.map(d=>{const r=rows.find(x=>x.dia===d&&x.loja===l);if(!r)return null;const t=r.dentro_30min+r.acima_30min;return t>0?Math.round(r.dentro_30min/t*100):null;}),borderColor:DP_LC[l]?.b,backgroundColor:'transparent',pointBackgroundColor:DP_LC[l]?.b,pointRadius:3,tension:0.3,spanGaps:true})).concat([{label:'Meta 80%',data:dates.map(()=>80),borderColor:'rgba(245,183,49,.5)',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}])},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}}},scales:{x:{ticks:{color:'#6B7280',font:{size:9}},grid:{display:false}},y:{min:0,max:100,ticks:{color:'#6B7280',font:{size:9},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.04)'}}}}});
+  if(dpTC)dpTC.destroy();
+  dpTC=new Chart(document.getElementById('dp-tempo-chart'),{type:'line',data:{labels:lbl,datasets:ll.map(l=>({label:l,data:dates.map(d=>{const r=rows.find(x=>x.dia===d&&x.loja===l);return r&&r.mediana_min!==null&&r.mediana_min<480?r.mediana_min:null;}),borderColor:DP_LC[l]?.b,backgroundColor:'transparent',pointBackgroundColor:DP_LC[l]?.b,pointRadius:3,tension:0.3,spanGaps:true})).concat([{label:'SLA 30min',data:dates.map(()=>30),borderColor:'rgba(255,92,92,.45)',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}])},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}}},scales:{x:{ticks:{color:'#6B7280',font:{size:9}},grid:{display:false}},y:{min:0,ticks:{color:'#6B7280',font:{size:9},callback:v=>v+' min'},grid:{color:'rgba(255,255,255,.04)'}}}}});
+  const ls=lojas.map(l=>{const lr=rows.filter(r=>r.loja===l);if(!lr.length)return null;const p=lr.reduce((a,r)=>a+r.pedidos,0),pr=lr.reduce((a,r)=>a+r.prontos,0),em=lr.reduce((a,r)=>a+r.em_producao,0),d3=lr.reduce((a,r)=>a+r.dentro_30min,0),d1=lr.reduce((a,r)=>a+r.dentro_15min,0),ac=lr.reduce((a,r)=>a+r.acima_30min,0),sl=d3+ac>0?Math.round(d3/(d3+ac)*100):0,ms=lr.filter(r=>r.mediana_min!==null&&r.mediana_min<480).map(r=>r.mediana_min).sort((a,b)=>a-b),md=ms.length?ms[Math.floor(ms.length/2)]:null;return{loja:l,p,pr,em,sl,d1,d3,md};}).filter(Boolean);
+  document.getElementById('dp-loja-table').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--surface)">'+['Loja','Ped.','Pron.','Em pr.','≤15','≤30','SLA%','Med.'].map(h=>'<th style="padding:6px 8px;text-align:'+(h==='Loja'?'left':'right')+';font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">'+h+'</th>').join('')+'</tr></thead><tbody>'+ls.map(s=>'<tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600;color:'+(DP_LC[s.loja]?.b||'var(--text)')+';font-size:11px">'+s.loja+'</td><td style="padding:7px 8px;text-align:right">'+s.p+'</td><td style="padding:7px 8px;text-align:right;color:var(--green)">'+s.pr+'</td><td style="padding:7px 8px;text-align:right;color:'+(s.em>10?'var(--gold)':'var(--muted)')+'">'+s.em+'</td><td style="padding:7px 8px;text-align:right">'+s.d1+'</td><td style="padding:7px 8px;text-align:right">'+s.d3+'</td><td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(s.sl>=80?'var(--green)':s.sl>=60?'var(--gold)':'var(--red)')+'">'+s.sl+'%</td><td style="padding:7px 8px;text-align:right;color:var(--muted)">'+(s.md!==null?s.md.toFixed(1)+'m':'—')+'</td></tr>').join('')+'</tbody></table>';
+  const sr=[...rows].sort((a,b)=>b.dia.localeCompare(a.dia)||a.loja.localeCompare(b.loja));
+  document.getElementById('dp-table-body').innerHTML=sr.map(r=>{
+    const tt=r.dentro_30min+r.acima_30min;
+    const sl=tt>0?Math.round(r.dentro_30min/tt*100):null;
+    const slColor=sl!==null?(sl>=80?'var(--green)':sl>=60?'var(--gold)':'var(--red)'):'var(--muted)';
+    const emColor=r.em_producao>10?'var(--gold)':'var(--muted)';
+    const lc=DP_LC[r.loja]?.b||'var(--text)';
+    const medStr=r.mediana_min!==null?r.mediana_min.toFixed(1):'—';
+    const slStr=sl!==null?sl+'%':'—';
+    return `<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+      <td style="padding:8px 12px;color:var(--muted)">${r.dia.substring(5)}</td>
+      <td style="padding:8px 12px"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.06);color:${lc};font-weight:600">${r.loja}</span></td>
+      <td style="padding:8px 12px;text-align:right">${r.pedidos}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--green)">${r.prontos}</td>
+      <td style="padding:8px 12px;text-align:right;color:${emColor}">${r.em_producao}</td>
+      <td style="padding:8px 12px;text-align:right">${r.dentro_15min}</td>
+      <td style="padding:8px 12px;text-align:right">${r.dentro_30min}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--muted)">${medStr}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:${slColor}">${slStr}</td>
+    </tr>`;
+  }).join('');
+}
+
 const AN = {
   months: ['Jan','Fev','Mar','Abr','Mai'],
 
@@ -3835,7 +3851,11 @@ function anBuildSKULista(rows) {
   document.getElementById('an-pg-next').disabled=(anState.pg+1)*anState.PER>=total;
   const showLoja=lojas.length>1;
   if(!slice.length){document.getElementById('an-sku-container').innerHTML=`<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">🔍 Nenhum produto encontrado.</div>`;return;}
-  const mLabel=([...anState.selMonths].size===5)?'Jan–Mai':[...anState.selMonths].sort((a,b)=>a-b).map(i=>AN.months[i]).join('+');
+  const sel=[...anState.selMonths].sort((a,b)=>a-b);
+  const mLabel=sel.length===5?'Jan 01–Mai 15':(()=>{
+    const AN_DATE_RANGES=['Jan (1/1–31/1)','Fev (1/2–28/2)','Mar (1/3–31/3)','Abr (1/4–30/4)','Mai (1/5–15/5)'];
+    return sel.length===1?AN_DATE_RANGES[sel[0]]:AN.months[sel[0]]+'–'+AN.months[sel[sel.length-1]];
+  })();
   document.getElementById('an-sku-container').innerHTML=`
     <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:580px">
       <thead><tr style="background:var(--surface)">
@@ -3880,7 +3900,11 @@ function anBuildSKUGrupo(rows) {
   const cats=Object.entries(catMap).sort((a,b)=>b[1].totalVal-a[1].totalVal);
   cats.forEach(([,c])=>c.itens.sort((a,b)=>b.total-a.total));
   document.getElementById('an-sku-count').textContent=`${Object.keys(groupMap).length.toLocaleString('pt-BR')} variações · ${cats.length} categorias`;
-  const mLabel=([...anState.selMonths].size===5)?'Jan–Mai':[...anState.selMonths].sort((a,b)=>a-b).map(i=>AN.months[i]).join('+');
+  const sel=[...anState.selMonths].sort((a,b)=>a-b);
+  const mLabel=sel.length===5?'Jan 01–Mai 15':(()=>{
+    const AN_DATE_RANGES=['Jan (1/1–31/1)','Fev (1/2–28/2)','Mar (1/3–31/3)','Abr (1/4–30/4)','Mai (1/5–15/5)'];
+    return sel.length===1?AN_DATE_RANGES[sel[0]]:AN.months[sel[0]]+'–'+AN.months[sel[sel.length-1]];
+  })();
   const lojaCols=lojas.map(f=>`<th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border);white-space:nowrap">${AN_LOJA_NAMES[f]}</th>`).join('');
   const maxCatVal=cats[0]?.[1].totalVal||1;
   const tbody=cats.map(([catNome,catData])=>{
@@ -3973,15 +3997,51 @@ document.getElementById('an-loja-btns').addEventListener('click',e=>{
 });
 
 function anSelAll(){[0,1,2,3,4].forEach(i=>{anState.selMonths.add(i);document.querySelector(`.an-mb[data-m="${i}"]`).classList.add('active');});anUpdate();}
+function anQuick(...months){
+  anState.selMonths.clear();
+  document.querySelectorAll('.an-mb[data-m]').forEach(b=>b.classList.remove('active'));
+  months.forEach(i=>{
+    anState.selMonths.add(i);
+    const btn=document.querySelector(`.an-mb[data-m="${i}"]`);
+    if(btn) btn.classList.add('active');
+  });
+  anUpdate();
+}
 function anSelNone(){const first=[...anState.selMonths].sort()[0]??0;anState.selMonths.clear();anState.selMonths.add(first);document.querySelectorAll('.an-mb[data-m]').forEach(b=>{b.classList.remove('active');if(parseInt(b.dataset.m)===first)b.classList.add('active');});anUpdate();}
 function anPgCh(d){anState.pg+=d;anBuildSKUs();}
 
+/* Datas exatas por mês (último dia = data real de dados) */
+const AN_MONTH_DATES = [
+  {start:'01/01', end:'31/01'},
+  {start:'01/02', end:'28/02'},
+  {start:'01/03', end:'31/03'},
+  {start:'01/04', end:'30/04'},
+  {start:'01/05', end:'15/05'}, /* ← dados até 15/05 */
+];
+
 function anUpdateSummary(){
   const sel=[...anState.selMonths].sort((a,b)=>a-b);
+  if(!sel.length) return;
   const names=sel.map(i=>AN.months[i]);
   const lojaStr=anState.selLoja==='all'?'Todas as lojas':AN_LOJA_NAMES[parseInt(anState.selLoja)];
   const cat=(document.getElementById('an-cat-sel')?.value||'').trim();
-  document.getElementById('an-filter-summary').textContent=`${names[0]}${names.length>1?'–'+names[names.length-1]:''} 2026 · ${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}`;
+
+  /* Range de datas exatas */
+  const first = AN_MONTH_DATES[sel[0]];
+  const last  = AN_MONTH_DATES[sel[sel.length-1]];
+  const rangeStr = `${first.start}/2026 – ${last.end}/2026`;
+  const hasMai = sel.includes(4);
+
+  const rangeEl = document.getElementById('an-filter-summary-range');
+  const summEl  = document.getElementById('an-filter-summary');
+
+  if(rangeEl) {
+    rangeEl.textContent = rangeStr;
+    rangeEl.title = hasMai ? 'Mai: dados até 15/05 — última extração do banco' : '';
+  }
+  if(summEl) {
+    summEl.textContent = `${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}${hasMai ? ' · ⚠ Mai parcial (até dia 15)' : ''}`;
+  }
 }
 
 function anUpdate(){
@@ -3991,7 +4051,7 @@ function anUpdate(){
 
 /* ═════ Hook navClick ═════ */
 const _navClickBase=window.navClick;
-window.navClick=function(sec,btn){_navClickBase(sec,btn);if(sec==='analise')setTimeout(anUpdate,80);};
+window.navClick=function(sec,btn){_navClickBase(sec,btn);if(sec==='analise')setTimeout(anUpdate,80);if(sec==='desempenho')setTimeout(dpRender,80);};
 </script>
 </body>
 </html>
