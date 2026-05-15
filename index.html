@@ -891,25 +891,61 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <h1>Desempenho de Produção</h1>
           <p>Tempo de produção dos pedidos Totem · Metabase #26340 · Mai 2026</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="dp-periodo" onchange="dpRender()"
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-            <option value="7">Últimos 7 dias</option>
-            <option value="14" selected>Últimos 14 dias</option>
-            <option value="30">Todos os dados</option>
-          </select>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
+            <span style="font-size:14px">🔄</span>
+            <div>
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Dados disponíveis</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/05 – 14/05/2026</div>
+            </div>
+          </div>
+          <div style="font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;background:rgba(29,158,117,.12);color:var(--green)">SLA ≤ 30 min</div>
+        </div>
+      </div>
+
+      <!-- ─── BARRA DE FILTROS ─── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">
+
+        <!-- Período: datas específicas -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-14"
+              onchange="dpRender()"
+              style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
+            <span style="color:var(--muted);font-size:12px">até</span>
+            <input type="date" id="dp-data-fim" value="2026-05-14" min="2026-05-01" max="2026-05-14"
+              onchange="dpRender()"
+              style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
+          </div>
+          <!-- Presets rápidos -->
+          <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap">
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-07')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
+            <button onclick="dpSetPeriod('2026-05-08','2026-05-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
+          </div>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Loja -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Loja</div>
           <select id="dp-loja" onchange="dpRender()"
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
             <option value="todas">Todas as lojas</option>
             <option value="PKS">PKS Brasília</option>
             <option value="Iguatemi">Iguatemi</option>
             <option value="Anália Franco">Anália Franco</option>
           </select>
-          <div style="font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;background:rgba(29,158,117,.12);color:var(--green)">SLA ≤ 30 min</div>
+        </div>
+
+        <!-- Resumo -->
+        <div style="margin-left:auto;text-align:right;align-self:flex-end">
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 14/05/2026</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px" id="dp-filter-sub">Todas as lojas</div>
         </div>
       </div>
-
-      <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px" id="dp-metrics"></div>
 
       <!-- Charts linha 1: volume + SLA -->
@@ -958,6 +994,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </table>
         </div>
       </div>
+
+      <!-- ─── OPERADORES ─── -->
+      <div style="margin-top:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:16px">👤</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Desempenho por Operador</div>
+            <div style="font-size:11px;color:var(--muted)">Quem iniciou a produção de cada pedido · filtra pelo período e loja selecionados acima</div>
+          </div>
+        </div>
+        <div id="dp-operadores"></div>
+      </div>
+
     </section><!-- /sec-desempenho -->
 
     <!-- ═══════════════════════════════════════════════════════════
@@ -1201,6 +1250,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 <div class="toast" id="toast"></div>
 <button class="fab" id="btn-env-float" onclick="enviar()">✓ Enviar Requisição</button>
+
+<!-- ═══════════════════════════════════════════════════
+     Análise de Consumo — CSS
+═══════════════════════════════════════════════════ -->
+<style>
+/* ── Botões de filtro (mês / loja) ── */
+.an-mb{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;}
+.an-mb:hover{border-color:var(--accent);color:var(--text);}
+.an-mb.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── Cards de insight ── */
+.an-insight{border-left:3px solid;border-radius:0 9px 9px 0;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+
+/* ── Pareto (Top Categorias) ── */
+.an-pareto-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.an-pareto-row:last-child{border-bottom:none;}
+.an-pareto-lbl{font-size:12px;font-weight:500;color:var(--text);width:130px;min-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.an-pareto-bg{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.an-pareto-fill{height:100%;border-radius:4px;transition:width .3s;}
+.an-pareto-val{font-size:12px;font-weight:600;color:var(--text);text-align:right;min-width:58px;}
+.an-pareto-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* ── Tabela SKU ── */
+#an-sku-container table{width:100%;border-collapse:collapse;font-size:12px;}
+#an-sku-container thead th{padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;}
+#an-sku-container thead th:not(:first-child){text-align:right;}
+#an-sku-container td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+#an-sku-container td:not(:first-child){text-align:right;}
+.an-cat-row td{font-size:11px;cursor:pointer;}
+.an-cat-row td:first-child{font-weight:600;color:var(--text);}
+
+/* ── Tabela Comparativo por loja ── */
+#an-comp-body td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);}
+#an-comp-body td.hi{color:var(--green);font-weight:600;}
+#an-comp-body td.lo{color:var(--red);}
+</style>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -2757,9 +2842,31 @@ const DP_RAW=[
 ];
 const DP_LC={'PKS':{b:'#4F7EFF',bg:'rgba(79,126,255,.15)'},'Iguatemi':{b:'#2ECC88',bg:'rgba(46,204,136,.15)'},'Anália Franco':{b:'#C084FC',bg:'rgba(192,132,252,.15)'}};
 let dpVC,dpSC,dpTC;
-function dpGetFiltered(){const dias=parseInt(document.getElementById('dp-periodo')?.value)||14;const loja=document.getElementById('dp-loja')?.value||'todas';const allDates=[...new Set(DP_RAW.map(r=>r.dia))].sort();const cut=new Set(allDates.slice(-dias));return DP_RAW.filter(r=>cut.has(r.dia)&&(loja==='todas'||r.loja===loja));}
+function dpSetPeriod(ini, fim) {
+  const elIni = document.getElementById('dp-data-ini');
+  const elFim = document.getElementById('dp-data-fim');
+  if (elIni) elIni.value = ini;
+  if (elFim) elFim.value = fim;
+  dpRender();
+}
+
+function dpGetFiltered(){
+  const ini = document.getElementById('dp-data-ini')?.value || '2026-05-01';
+  const fim = document.getElementById('dp-data-fim')?.value || '2026-05-14';
+  const loja = document.getElementById('dp-loja')?.value || 'todas';
+  return DP_RAW.filter(r => r.dia >= ini && r.dia <= fim && (loja==='todas' || r.loja===loja));
+}
 function dpRender(){
   const rows=dpGetFiltered();if(!rows.length)return;
+  // Atualizar labels de filtro
+  const ini = document.getElementById('dp-data-ini')?.value||'2026-05-01';
+  const fim = document.getElementById('dp-data-fim')?.value||'2026-05-14';
+  const loja = document.getElementById('dp-loja')?.value||'todas';
+  const fmtDate = d => d.substring(5).split('-').reverse().join('/');
+  const labelEl = document.getElementById('dp-filter-label');
+  const subEl   = document.getElementById('dp-filter-sub');
+  if(labelEl) labelEl.textContent = `${fmtDate(ini)} – ${fmtDate(fim)}/2026`;
+  if(subEl)   subEl.textContent   = loja==='todas'?'Todas as lojas':loja;
   const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
   const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('dentro_30min'),d15=s('dentro_15min'),ac=s('acima_30min');
   const pctSla=d30+ac>0?Math.round(d30/(d30+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
@@ -2804,7 +2911,304 @@ function dpRender(){
       <td style="padding:8px 12px;text-align:right;font-weight:700;color:${slColor}">${slStr}</td>
     </tr>`;
   }).join('');
+  dpRenderOperadores();
 }
+
+const DP_OPR = [
+  {loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:385,prontos:309,em:70,d15:254,d30:261,ac:45,sla_pct:85,dias_ativos:14},
+  {loja:'PKS',uid:0,nome:'Sistema',pedidos:385,prontos:385,em:0,d15:301,d30:305,ac:80,sla_pct:79,dias_ativos:14},
+  {loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:360,prontos:258,em:102,d15:6,d30:12,ac:52,sla_pct:19,dias_ativos:11},
+  {loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:297,prontos:208,em:89,d15:5,d30:7,ac:39,sla_pct:15,dias_ativos:12},
+  {loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:181,prontos:175,em:6,d15:0,d30:1,ac:56,sla_pct:2,dias_ativos:14},
+  {loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:175,prontos:171,em:4,d15:3,d30:4,ac:58,sla_pct:6,dias_ativos:14},
+  {loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:150,prontos:117,em:33,d15:3,d30:4,ac:26,sla_pct:13,dias_ativos:11},
+  {loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:146,prontos:122,em:24,d15:2,d30:8,ac:18,sla_pct:31,dias_ativos:12},
+  {loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:93,prontos:83,em:10,d15:1,d30:3,ac:15,sla_pct:17,dias_ativos:6},
+  {loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:73,prontos:71,em:2,d15:30,d30:42,ac:29,sla_pct:59,dias_ativos:13}
+];
+
+const DP_OPR_DAILY = [
+  {dia:'2026-05-01',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:2,prontos:1,em_producao:1,d15:0,d30:0,acima30:1,mediana:null},
+  {dia:'2026-05-01',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d15:1,d30:1,acima30:0,mediana:0.4},
+  {dia:'2026-05-02',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:69,prontos:56,em_producao:13,d15:1,d30:1,acima30:9,mediana:118.6},
+  {dia:'2026-05-02',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:42,prontos:38,em_producao:3,d15:27,d30:29,acima30:9,mediana:0.4},
+  {dia:'2026-05-02',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:15,prontos:13,em_producao:2,d15:0,d30:0,acima30:5,mediana:null},
+  {dia:'2026-05-03',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:43,prontos:39,em_producao:4,d15:3,d30:3,acima30:8,mediana:54.2},
+  {dia:'2026-05-03',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:40,prontos:38,em_producao:1,d15:34,d30:36,acima30:2,mediana:0.6},
+  {dia:'2026-05-03',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:7,prontos:3,em_producao:4,d15:0,d30:0,acima30:1,mediana:null},
+  {dia:'2026-05-04',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:27,prontos:21,em_producao:6,d15:18,d30:18,acima30:2,mediana:0.3},
+  {dia:'2026-05-04',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:22,prontos:18,em_producao:4,d15:0,d30:0,acima30:6,mediana:null},
+  {dia:'2026-05-04',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:18,prontos:14,em_producao:4,d15:1,d30:1,acima30:4,mediana:null},
+  {dia:'2026-05-04',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:3,prontos:2,em_producao:1,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-05',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:34,prontos:22,em_producao:12,d15:0,d30:0,acima30:3,mediana:74.2},
+  {dia:'2026-05-05',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:23,prontos:21,em_producao:2,d15:19,d30:20,acima30:0,mediana:0.8},
+  {dia:'2026-05-05',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:21,prontos:20,em_producao:1,d15:0,d30:0,acima30:3,mediana:309.1},
+  {dia:'2026-05-06',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:38,prontos:28,em_producao:10,d15:0,d30:1,acima30:12,mediana:113.9},
+  {dia:'2026-05-06',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:29,prontos:20,em_producao:9,d15:0,d30:1,acima30:3,mediana:188.8},
+  {dia:'2026-05-06',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:29,prontos:22,em_producao:6,d15:21,d30:21,acima30:1,mediana:0.4},
+  {dia:'2026-05-06',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-07',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:36,prontos:24,em_producao:12,d15:0,d30:1,acima30:6,mediana:105.9},
+  {dia:'2026-05-07',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:34,prontos:23,em_producao:11,d15:1,d30:1,acima30:4,mediana:81.9},
+  {dia:'2026-05-07',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:27,prontos:22,em_producao:4,d15:21,d30:21,acima30:1,mediana:0.2},
+  {dia:'2026-05-07',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:1,mediana:525.0},
+  {dia:'2026-05-08',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:68,prontos:49,em_producao:19,d15:0,d30:0,acima30:10,mediana:404.5},
+  {dia:'2026-05-08',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:39,prontos:33,em_producao:6,d15:28,d30:28,acima30:5,mediana:0.3},
+  {dia:'2026-05-08',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:29,prontos:25,em_producao:4,d15:1,d30:2,acima30:6,mediana:142.1},
+  {dia:'2026-05-08',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:3,prontos:1,em_producao:2,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-09',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:68,prontos:41,em_producao:27,d15:30,d30:31,acima30:10,mediana:0.3},
+  {dia:'2026-05-09',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:62,prontos:43,em_producao:19,d15:3,d30:4,acima30:7,mediana:77.6},
+  {dia:'2026-05-09',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:51,prontos:36,em_producao:15,d15:1,d30:2,acima30:6,mediana:47.3},
+  {dia:'2026-05-09',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:7,prontos:2,em_producao:5,d15:0,d30:0,acima30:1,mediana:552.7},
+  {dia:'2026-05-10',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:40,prontos:21,em_producao:19,d15:0,d30:3,acima30:1,mediana:28.0},
+  {dia:'2026-05-10',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:22,prontos:15,em_producao:6,d15:13,d30:13,acima30:2,mediana:0.5},
+  {dia:'2026-05-10',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:5,prontos:3,em_producao:2,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-11',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:24,prontos:15,em_producao:9,d15:0,d30:0,acima30:2,mediana:725.1},
+  {dia:'2026-05-11',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:16,prontos:13,em_producao:3,d15:11,d30:11,acima30:2,mediana:0.3},
+  {dia:'2026-05-11',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:15,prontos:12,em_producao:3,d15:1,d30:1,acima30:3,mediana:43.9},
+  {dia:'2026-05-12',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:33,prontos:25,em_producao:8,d15:2,d30:2,acima30:2,mediana:51.0},
+  {dia:'2026-05-12',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:21,prontos:19,em_producao:1,d15:14,d30:14,acima30:5,mediana:0.4},
+  {dia:'2026-05-12',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:13,prontos:8,em_producao:5,d15:0,d30:0,acima30:2,mediana:311.7},
+  {dia:'2026-05-13',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:19,prontos:14,em_producao:5,d15:9,d30:10,acima30:3,mediana:0.5},
+  {dia:'2026-05-13',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:18,prontos:10,em_producao:8,d15:0,d30:0,acima30:4,mediana:167.8},
+  {dia:'2026-05-13',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:10,prontos:6,em_producao:4,d15:0,d30:0,acima30:2,mediana:468.5},
+  {dia:'2026-05-13',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-14',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:30,prontos:22,em_producao:8,d15:0,d30:0,acima30:2,mediana:681.2},
+  {dia:'2026-05-14',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva',pedidos:17,prontos:12,em_producao:5,d15:0,d30:0,acima30:2,mediana:715.1},
+  {dia:'2026-05-14',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:11,prontos:11,em_producao:0,d15:8,d30:8,acima30:3,mediana:0.4},
+  {dia:'2026-05-14',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:5,prontos:4,em_producao:1,d15:0,d30:0,acima30:1,mediana:100.4},
+  {dia:'2026-05-01',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:16,prontos:16,em_producao:0,d15:0,d30:0,acima30:4,mediana:452.9},
+  {dia:'2026-05-01',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:10,prontos:10,em_producao:0,d15:1,d30:1,acima30:1,mediana:193.8},
+  {dia:'2026-05-01',loja:'PKS',uid:0,nome:'Sistema',pedidos:8,prontos:8,em_producao:0,d15:2,d30:2,acima30:6,mediana:93.0},
+  {dia:'2026-05-02',loja:'PKS',uid:0,nome:'Sistema',pedidos:21,prontos:21,em_producao:0,d15:19,d30:19,acima30:2,mediana:0.6},
+  {dia:'2026-05-02',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:19,prontos:19,em_producao:0,d15:0,d30:0,acima30:5,mediana:122.5},
+  {dia:'2026-05-02',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:10,prontos:10,em_producao:0,d15:0,d30:0,acima30:3,mediana:1156.2},
+  {dia:'2026-05-03',loja:'PKS',uid:0,nome:'Sistema',pedidos:39,prontos:39,em_producao:0,d15:35,d30:35,acima30:4,mediana:0.5},
+  {dia:'2026-05-03',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:19,prontos:19,em_producao:0,d15:0,d30:0,acima30:5,mediana:79.1},
+  {dia:'2026-05-03',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:9,prontos:9,em_producao:0,d15:0,d30:0,acima30:4,mediana:49.2},
+  {dia:'2026-05-04',loja:'PKS',uid:0,nome:'Sistema',pedidos:15,prontos:15,em_producao:0,d15:13,d30:14,acima30:1,mediana:0.5},
+  {dia:'2026-05-04',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:14,prontos:14,em_producao:0,d15:0,d30:0,acima30:6,mediana:5843.5},
+  {dia:'2026-05-04',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:5,prontos:5,em_producao:0,d15:0,d30:0,acima30:3,mediana:1530.9},
+  {dia:'2026-05-05',loja:'PKS',uid:0,nome:'Sistema',pedidos:30,prontos:30,em_producao:0,d15:23,d30:24,acima30:6,mediana:1.2},
+  {dia:'2026-05-05',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:13,prontos:13,em_producao:0,d15:0,d30:1,acima30:4,mediana:123.4},
+  {dia:'2026-05-05',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:8,prontos:8,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-06',loja:'PKS',uid:0,nome:'Sistema',pedidos:12,prontos:12,em_producao:0,d15:6,d30:6,acima30:6,mediana:28.1},
+  {dia:'2026-05-06',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:10,prontos:10,em_producao:0,d15:0,d30:0,acima30:5,mediana:10400.7},
+  {dia:'2026-05-06',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:9,prontos:9,em_producao:0,d15:0,d30:0,acima30:3,mediana:10190.1},
+  {dia:'2026-05-07',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:20,prontos:18,em_producao:2,d15:0,d30:0,acima30:6,mediana:4284.2},
+  {dia:'2026-05-07',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:16,prontos:16,em_producao:0,d15:0,d30:0,acima30:4,mediana:3828.6},
+  {dia:'2026-05-07',loja:'PKS',uid:0,nome:'Sistema',pedidos:11,prontos:11,em_producao:0,d15:4,d30:4,acima30:7,mediana:256.2},
+  {dia:'2026-05-08',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:32,prontos:32,em_producao:0,d15:0,d30:0,acima30:13,mediana:6243.6},
+  {dia:'2026-05-08',loja:'PKS',uid:0,nome:'Sistema',pedidos:19,prontos:19,em_producao:0,d15:11,d30:11,acima30:8,mediana:0.4},
+  {dia:'2026-05-08',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:16,prontos:14,em_producao:2,d15:0,d30:0,acima30:5,mediana:6021.0},
+  {dia:'2026-05-09',loja:'PKS',uid:0,nome:'Sistema',pedidos:106,prontos:106,em_producao:0,d15:94,d30:95,acima30:11,mediana:0.2},
+  {dia:'2026-05-09',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:29,prontos:28,em_producao:1,d15:1,d30:1,acima30:11,mediana:4393.8},
+  {dia:'2026-05-09',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:29,prontos:28,em_producao:1,d15:0,d30:0,acima30:9,mediana:4677.9},
+  {dia:'2026-05-10',loja:'PKS',uid:0,nome:'Sistema',pedidos:25,prontos:25,em_producao:0,d15:16,d30:17,acima30:8,mediana:0.6},
+  {dia:'2026-05-10',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:8,prontos:8,em_producao:0,d15:0,d30:0,acima30:2,mediana:1615.7},
+  {dia:'2026-05-10',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-11',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:8,prontos:7,em_producao:1,d15:0,d30:1,acima30:2,mediana:1566.3},
+  {dia:'2026-05-11',loja:'PKS',uid:0,nome:'Sistema',pedidos:5,prontos:5,em_producao:0,d15:2,d30:2,acima30:3,mediana:1664.2},
+  {dia:'2026-05-11',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:4,prontos:4,em_producao:0,d15:0,d30:0,acima30:1,mediana:1479.0},
+  {dia:'2026-05-12',loja:'PKS',uid:0,nome:'Sistema',pedidos:79,prontos:79,em_producao:0,d15:71,d30:71,acima30:8,mediana:0.9},
+  {dia:'2026-05-12',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:6,prontos:5,em_producao:1,d15:1,d30:1,acima30:1,mediana:131.5},
+  {dia:'2026-05-12',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:1,mediana:78.7},
+  {dia:'2026-05-13',loja:'PKS',uid:0,nome:'Sistema',pedidos:13,prontos:13,em_producao:0,d15:5,d30:5,acima30:8,mediana:1282.1},
+  {dia:'2026-05-13',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:12,prontos:11,em_producao:1,d15:0,d30:0,acima30:4,mediana:709.0},
+  {dia:'2026-05-13',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:10,prontos:10,em_producao:0,d15:0,d30:0,acima30:3,mediana:1142.7},
+  {dia:'2026-05-14',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz',pedidos:13,prontos:12,em_producao:1,d15:0,d30:0,acima30:6,mediana:215.2},
+  {dia:'2026-05-14',loja:'PKS',uid:1820,nome:'Matheus Bonfim',pedidos:7,prontos:7,em_producao:0,d15:0,d30:0,acima30:3,mediana:215.6},
+  {dia:'2026-05-14',loja:'PKS',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:2,mediana:585.8},
+  {dia:'2026-05-01',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:17,prontos:17,em_producao:0,d15:0,d30:0,acima30:5,mediana:1173.8},
+  {dia:'2026-05-01',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:9,prontos:9,em_producao:0,d15:4,d30:6,acima30:3,mediana:18.7},
+  {dia:'2026-05-02',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:22,prontos:22,em_producao:0,d15:0,d30:1,acima30:3,mediana:93.5},
+  {dia:'2026-05-02',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:4,prontos:4,em_producao:0,d15:2,d30:3,acima30:1,mediana:16.2},
+  {dia:'2026-05-02',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-03',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:20,prontos:18,em_producao:2,d15:0,d30:1,acima30:0,mediana:21.7},
+  {dia:'2026-05-03',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:5,prontos:5,em_producao:0,d15:2,d30:2,acima30:3,mediana:42.8},
+  {dia:'2026-05-04',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:8,prontos:8,em_producao:0,d15:0,d30:1,acima30:1,mediana:33.1},
+  {dia:'2026-05-04',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:6,prontos:6,em_producao:0,d15:5,d30:5,acima30:1,mediana:0.2},
+  {dia:'2026-05-05',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:13,prontos:12,em_producao:1,d15:0,d30:0,acima30:2,mediana:3872.9},
+  {dia:'2026-05-05',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d15:1,d30:2,acima30:0,mediana:18.1},
+  {dia:'2026-05-06',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:16,prontos:11,em_producao:5,d15:0,d30:0,acima30:6,mediana:671.4},
+  {dia:'2026-05-06',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d15:2,d30:2,acima30:0,mediana:6.8},
+  {dia:'2026-05-07',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:23,prontos:17,em_producao:6,d15:0,d30:0,acima30:4,mediana:1394.0},
+  {dia:'2026-05-07',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:5,prontos:5,em_producao:0,d15:1,d30:3,acima30:2,mediana:29.9},
+  {dia:'2026-05-08',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:22,prontos:16,em_producao:6,d15:0,d30:1,acima30:2,mediana:39.0},
+  {dia:'2026-05-08',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:3,prontos:3,em_producao:0,d15:0,d30:2,acima30:1,mediana:28.0},
+  {dia:'2026-05-09',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:39,prontos:35,em_producao:4,d15:1,d30:2,acima30:5,mediana:58.2},
+  {dia:'2026-05-09',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:22,prontos:22,em_producao:0,d15:10,d30:13,acima30:9,mediana:16.7},
+  {dia:'2026-05-09',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:2,prontos:2,em_producao:0,d15:0,d30:0,acima30:1,mediana:187.1},
+  {dia:'2026-05-10',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:12,prontos:9,em_producao:3,d15:1,d30:2,acima30:2,mediana:29.3},
+  {dia:'2026-05-11',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:16,prontos:16,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-11',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d15:0,d30:0,acima30:1,mediana:null},
+  {dia:'2026-05-11',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:1,prontos:1,em_producao:0,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-12',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:11,prontos:11,em_producao:0,d15:1,d30:3,acima30:0,mediana:18.4},
+  {dia:'2026-05-12',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:3,prontos:3,em_producao:0,d15:0,d30:0,acima30:3,mediana:62.5},
+  {dia:'2026-05-13',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:9,prontos:8,em_producao:1,d15:3,d30:4,acima30:4,mediana:31.4},
+  {dia:'2026-05-13',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:6,prontos:4,em_producao:2,d15:0,d30:0,acima30:0,mediana:null},
+  {dia:'2026-05-14',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:8,prontos:4,em_producao:4,d15:0,d30:0,acima30:2,mediana:134.4},
+  {dia:'2026-05-14',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:1,em_producao:1,d15:0,d30:0,acima30:1,mediana:46.9},
+  {dia:'2026-05-14',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Jr.',pedidos:1,prontos:0,em_producao:1,d15:0,d30:0,acima30:0,mediana:null}
+];
+
+/* Cores únicas por operador */
+const DP_OPR_COLORS = [
+  '#4F7EFF','#2ECC88','#C084FC','#F5B731','#FF5C5C','#38BDF8','#FB923C'
+];
+
+let dpOprChart;
+
+function dpGetOprFiltered() {
+  const ini  = document.getElementById('dp-data-ini')?.value || '2026-05-01';
+  const fim  = document.getElementById('dp-data-fim')?.value || '2026-05-14';
+  const loja = document.getElementById('dp-loja')?.value    || 'todas';
+
+  const daily = DP_OPR_DAILY.filter(r => r.dia >= ini && r.dia <= fim && (loja==='todas'||r.loja===loja));
+
+  const map = {};
+  daily.forEach(r => {
+    const key = r.uid + '|' + r.loja;
+    if (!map[key]) map[key] = {uid:r.uid, nome:r.nome||'Sistema', loja:r.loja,
+      pedidos:0, prontos:0, em:0, d15:0, d30:0, ac:0, dias:new Set()};
+    map[key].pedidos += r.pedidos;
+    map[key].prontos += r.prontos;
+    map[key].em      += (r.em_producao||0);
+    map[key].d15     += (r.d15||0);
+    map[key].d30     += (r.d30||0);
+    map[key].ac      += (r.acima30||0);
+    map[key].dias.add(r.dia);
+  });
+
+  return Object.values(map)
+    .filter(o => o.pedidos > 0)
+    .map(o => ({
+      ...o,
+      dias_ativos: o.dias.size,
+      sla_pct: (o.d30+o.ac)>0 ? Math.round(o.d30/(o.d30+o.ac)*100) : null,
+      pct_prontos: o.pedidos>0 ? Math.round(o.prontos/o.pedidos*100) : 0,
+    }))
+    .sort((a,b) => b.pedidos - a.pedidos);
+}
+
+function dpGetOprDailyFiltered() {
+  const ini  = document.getElementById('dp-data-ini')?.value || '2026-05-01';
+  const fim  = document.getElementById('dp-data-fim')?.value || '2026-05-14';
+  const loja = document.getElementById('dp-loja')?.value    || 'todas';
+  return DP_OPR_DAILY.filter(r => r.dia >= ini && r.dia <= fim && (loja==='todas'||r.loja===loja));
+}
+
+function dpRenderOperadores() {
+  const oprs = dpGetOprFiltered();
+  const el   = document.getElementById('dp-operadores');
+  if (!el) return;
+  if (!oprs.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">👤</div><p>Nenhum dado de operador no período.</p></div>'; return; }
+
+  const LC = {'Iguatemi':'var(--igu)','PKS':'var(--pks)','Anália Franco':'var(--ana)'};
+  const ini = document.getElementById('dp-data-ini')?.value || '2026-05-01';
+  const fim = document.getElementById('dp-data-fim')?.value || '2026-05-14';
+  const loja = document.getElementById('dp-loja')?.value || 'todas';
+
+  /* ── Tabela ranking ─────────────────────────────────────── */
+  const tbl = `<div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
+      <thead><tr style="background:var(--surface)">
+        ${['#','Operador','Loja','Pedidos','Prontos','Em prod.','% Prontos','≤15min','≤30min','Fora SLA','% SLA','Dias ativos'].map(h=>`<th style="padding:9px 10px;text-align:${h==='Operador'||h==='Loja'||h==='#'?'left':'right'};font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>${oprs.filter(o=>o.uid!==0).map((o,i)=>{
+        const slaCl = o.sla_pct===null?'var(--muted)':o.sla_pct>=80?'var(--green)':o.sla_pct>=60?'var(--gold)':'var(--red)';
+        const pCl   = o.pct_prontos>=80?'var(--green)':o.pct_prontos>=60?'var(--gold)':'var(--red)';
+        const dot   = DP_OPR_COLORS[i % DP_OPR_COLORS.length];
+        return `<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+          <td style="padding:9px 10px;color:var(--muted);width:28px">${i+1}</td>
+          <td style="padding:9px 10px;font-weight:600;white-space:nowrap">
+            <span style="display:inline-flex;align-items:center;gap:8px">
+              <span style="width:10px;height:10px;border-radius:50%;background:${dot};flex-shrink:0;display:inline-block"></span>
+              ${o.nome}
+            </span>
+          </td>
+          <td style="padding:9px 10px"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.06);color:${LC[o.loja]||'var(--text)'};font-weight:600">${o.loja}</span></td>
+          <td style="padding:9px 10px;text-align:right;font-weight:600">${o.pedidos}</td>
+          <td style="padding:9px 10px;text-align:right;color:var(--green)">${o.prontos}</td>
+          <td style="padding:9px 10px;text-align:right;color:${o.em>10?'var(--gold)':'var(--muted)'}">${o.em}</td>
+          <td style="padding:9px 10px;text-align:right;font-weight:600;color:${pCl}">${o.pct_prontos}%</td>
+          <td style="padding:9px 10px;text-align:right">${o.d15}</td>
+          <td style="padding:9px 10px;text-align:right">${o.d30}</td>
+          <td style="padding:9px 10px;text-align:right;color:var(--muted)">${o.ac}</td>
+          <td style="padding:9px 10px;text-align:right;font-weight:700;color:${slaCl}">${o.sla_pct!==null?o.sla_pct+'%':'—'}</td>
+          <td style="padding:9px 10px;text-align:right;color:var(--muted)">${o.dias_ativos}d</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+
+  /* ── Gráfico de pedidos por dia por operador ────────────── */
+  const dates = [...new Set(DP_OPR_DAILY.filter(r=>r.dia>=ini&&r.dia<=fim).map(r=>r.dia))].sort();
+  const lbl   = dates.map(d => d.substring(5));
+  const named = oprs.filter(o => o.uid !== 0); // excluir Sistema do gráfico
+
+  const datasets = named.map((o, i) => ({
+    label: o.nome,
+    data: dates.map(d => {
+      const r = DP_OPR_DAILY.find(x => x.dia===d && x.uid===o.uid && x.loja===o.loja);
+      return r ? r.pedidos : null;
+    }),
+    borderColor: DP_OPR_COLORS[i % DP_OPR_COLORS.length],
+    backgroundColor: 'transparent',
+    pointBackgroundColor: DP_OPR_COLORS[i % DP_OPR_COLORS.length],
+    pointRadius: 3, tension: 0.3, spanGaps: true,
+  }));
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:16px">
+      <!-- Gráfico pedidos por dia -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px">Pedidos por dia por operador</div>
+        <div style="position:relative;height:180px"><canvas id="dp-opr-chart"></canvas></div>
+      </div>
+      <!-- SLA cards por operador -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px">% SLA ≤30 min por operador</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${named.map((o, i) => {
+            const sla = o.sla_pct;
+            const bar = sla !== null ? Math.round(sla) : 0;
+            const col = sla===null?'var(--muted)':sla>=80?'var(--green)':sla>=60?'var(--gold)':'var(--red)';
+            const dot = DP_OPR_COLORS[i % DP_OPR_COLORS.length];
+            return `<div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px">
+                  <span style="width:8px;height:8px;border-radius:50%;background:${dot};display:inline-block"></span>
+                  ${o.nome}
+                  <span style="font-size:10px;color:var(--muted);background:rgba(255,255,255,.06);padding:1px 7px;border-radius:10px">${o.loja}</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:${col}">${sla!==null?sla+'%':'—'}</span>
+              </div>
+              <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${bar}%;background:${col};border-radius:3px;transition:width .4s"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+    <!-- Tabela -->
+    ${tbl}`;
+
+  /* Render chart */
+  if (window.dpOprChart) window.dpOprChart.destroy();
+  window.dpOprChart = new Chart(document.getElementById('dp-opr-chart'), {
+    type: 'line',
+    data: { labels: lbl, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { color: '#6B7280', font: { size: 10 }, boxWidth: 10, padding: 8 }}},
+      scales: {
+        x: { ticks: { color: '#6B7280', font: { size: 9 }}, grid: { display: false }},
+        y: { min: 0, ticks: { color: '#6B7280', font: { size: 9 }}, grid: { color: 'rgba(255,255,255,.04)'}},
+      }
+    }
+  });
+}
+
 
 const AN = {
   months: ['Jan','Fev','Mar','Abr','Mai'],
