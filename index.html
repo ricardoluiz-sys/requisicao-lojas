@@ -2755,53 +2755,30 @@ init();
      ANÁLISE DE CONSUMO — CSS + JS
 ═══════════════════════════════════════════════════════════════ -->
 <style>
-.an-mb{
-  padding:4px 12px;border-radius:20px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
-  font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;
-}
+.an-mb{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;}
 .an-mb:hover{border-color:var(--accent);color:var(--text);}
 .an-mb.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-.an-insight{
-  border-left:3px solid;border-radius:0 9px 9px 0;
-  padding:10px 14px;background:var(--card);border-top:1px solid var(--border);
-  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
-}
-.an-insight-danger{border-left-color:#FF5C5C;}
-.an-insight-warn  {border-left-color:var(--gold);}
-.an-insight-ok    {border-left-color:var(--green);}
-.an-insight-info  {border-left-color:var(--accent);}
+.an-insight{border-left:3px solid;border-radius:0 9px 9px 0;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.an-insight-danger{border-left-color:#FF5C5C;}.an-insight-warn{border-left-color:var(--gold);}.an-insight-ok{border-left-color:var(--green);}.an-insight-info{border-left-color:var(--accent);}
 .an-i-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 3px;}
-.an-insight-danger .an-i-label{color:var(--red);}
-.an-insight-warn   .an-i-label{color:var(--gold);}
-.an-insight-ok     .an-i-label{color:var(--green);}
-.an-insight-info   .an-i-label{color:var(--accent);}
+.an-insight-danger .an-i-label{color:var(--red);}.an-insight-warn .an-i-label{color:var(--gold);}.an-insight-ok .an-i-label{color:var(--green);}.an-insight-info .an-i-label{color:var(--accent);}
 .an-i-text{font-size:11px;color:var(--text);margin:0;line-height:1.5;}
-
-.an-pareto-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;}
-.an-pareto-lbl{min-width:130px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;}
+.an-pareto-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.an-pareto-lbl{min-width:140px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;}
 .an-pareto-bg{flex:1;background:var(--border);border-radius:3px;height:13px;overflow:hidden;}
 .an-pareto-fill{height:100%;border-radius:3px;transition:width .35s;}
 .an-pareto-val{min-width:52px;text-align:right;color:var(--text);font-weight:600;font-size:10px;}
 .an-pareto-pct{min-width:32px;text-align:right;color:var(--muted);font-size:10px;}
-
-#an-kpis .an-kpi{
-  background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;
-}
+#an-kpis .an-kpi{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;}
 #an-kpis .an-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px;}
 #an-kpis .an-kpi-val{font-size:22px;font-weight:700;margin:0;line-height:1.1;}
 #an-kpis .an-kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;}
-
 #an-comp-body tr{border-bottom:1px solid var(--border);transition:background .12s;}
 #an-comp-body tr:last-child{border-bottom:none;}
 #an-comp-body tr:hover{background:rgba(255,255,255,.02);}
 #an-comp-body td{padding:8px 14px;font-size:12px;}
 #an-comp-body td:first-child{color:var(--muted);font-size:11px;}
-.an-ok{color:var(--green);font-weight:600;}
-.an-warn{color:var(--gold);font-weight:600;}
-.an-danger{color:var(--red);font-weight:600;}
-
+.an-ok{color:var(--green);font-weight:600;}.an-warn{color:var(--gold);font-weight:600;}.an-danger{color:var(--red);font-weight:600;}
 .an-lbadge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;}
 .an-lb3{background:rgba(46,204,136,.12);color:var(--green);}
 .an-lb6{background:rgba(79,126,255,.12);color:var(--pks);}
@@ -2810,103 +2787,175 @@ init();
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   DADOS — Factories 3 (Iguatemi), 6 (PKS BSB), 7 (Anália)
-   Período: Jan–Mai 2026 · sem Ebook
+   ANÁLISE DE CONSUMO  —  Fábricas 3 / 6 / 7  —  2026
+   Ebook excluído · source: banco Factory (Postgres)
 ═══════════════════════════════════════════════════════ */
 const AN = {
   months: ['Jan','Fev','Mar','Abr','Mai'],
 
-  // volume de itens por factory por mês (sem Ebook)
+  /* volume de itens por factory por mês (sem Ebook) */
   vol: {
-    3: [6648, 3901, 4563, 3198, 1982],
-    6: [2827, 1865, 2216, 1909,  893],
-    7: [1679, 1439, 1512, 1023,  587],
+    3:[6648,3901,4563,3198,1982],
+    6:[2827,1865,2216,1909,893],
+    7:[1679,1439,1512,1023,587]
   },
-  // valor gerado (li.price, sem Ebook, preço>0 aprox.)
+
+  /* valor (R$) por factory por mês */
   val: {
-    3: [852084, 576240, 576742, 422366, 290685],
-    6: [374894, 269394, 274886, 232749, 115368],
-    7: [229924, 200258, 190238, 139495,  97780],
+    3:[852084,576240,576742,422366,290685],
+    6:[374894,269394,274886,232749,115368],
+    7:[229924,200258,190238,139495,97780]
   },
-  // estados dos line_items (acumulado por mês)
-  sent:    { 3:[2129,1425,2695,2225,1226], 6:[2822,1863,2213,1902,835], 7:[921,906,1171,813,467] },
-  closing: { 3:[4548,2470,1905, 945, 661], 6:[4,2,3,6,50],             7:[717,533,341,210,116] },
-  prod:    { 3:[0,0,0,9,28],               6:[0,0,0,0,1],              7:[41,0,0,0,0] },
-  canc:    { 3:[31,57,29,17,26],           6:[0,0,0,0,0],              7:[0,0,0,0,0] },
 
-  // top 8 categorias — valor por factory por mês
+  /* estados dos line_items acumulado por mês */
+  sent:    {3:[2129,1425,2695,2225,1226],6:[2822,1863,2213,1902,835],7:[921,906,1171,813,467]},
+  closing: {3:[4548,2470,1905,945,661], 6:[4,2,3,6,50],             7:[717,533,341,210,116]},
+  prod:    {3:[0,0,0,9,28],             6:[0,0,0,0,1],              7:[41,0,0,0,0]},
+  canc:    {3:[31,57,29,17,26],         6:[0,0,0,0,0],              7:[0,0,0,0,0]},
+
+  /* valor mensal por categoria (top 8) — para charts responsivos */
   catVal: {
-    3: {
-      'Tote Bag CD':  [135000,105000,125000,105000,79922],
-      'Case':         [145000, 95000,100000, 75000,45067],
-      'Mala Joy CD':  [ 65000, 45000, 48000, 32000,19869],
-      'BackpackCD':   [ 42000, 28000, 34000, 25000,16780],
-      'Lunch Bag CD': [ 44000, 30000, 33000, 22000,14927],
-      'Garrafa Ebook':[ 35000, 22000, 25000, 18000,11311],
-      'Garrafa':      [ 30000, 20000, 24000, 16000,10425],
-      'Bags':         [ 26000, 17000, 20000, 14000, 7712],
-    },
-    6: {
-      'Case':         [105000, 72000, 80000, 65000,26486],
-      'Tote Bag CD':  [ 70000, 48000, 54000, 42000,19395],
-      'Mala Joy CD':  [ 28000, 18000, 21000, 17000, 7090],
-      'BackpackCD':   [ 13000,  9000, 10000,  8000, 4033],
-      'Lunch Bag CD': [ 16000, 11000, 12000, 10000, 3483],
-      'Garrafa Ebook':[ 17000, 11000, 12000,  9000, 5014],
-      'Garrafa':      [ 14000,  9500, 10500,  8500, 5038],
-      'Bags':         [ 12000,  8000,  9500,  7000, 3114],
-    },
-    7: {
-      'Case':         [ 55000, 37000, 43000, 30000,13964],
-      'Tote Bag CD':  [ 47000, 32000, 36000, 25000,13743],
-      'Mala Joy CD':  [ 24000, 16000, 19000, 13000, 5835],
-      'BackpackCD':   [  8000,  5500,  6000,  4000, 1939],
-      'Lunch Bag CD': [  9000,  6200,  6500,  4700, 1734],
-      'Garrafa Ebook':[  12000, 8000,  9000,  6000, 3455],
-      'Garrafa':      [  7000,  5000,  6000,  4500, 3316],
-      'Bags':         [ 12000,  8000,  9500,  7000, 3114],
-    },
+    3:{'Tote Bag CD':[135000,105000,125000,105000,79922],'Case':[145000,95000,100000,75000,45067],'Mala Joy CD':[65000,45000,48000,32000,19869],'BackpackCD':[42000,28000,34000,25000,16780],'Lunch Bag CD':[44000,30000,33000,22000,14927],'Garrafa Ebook':[35000,22000,25000,18000,11311],'Garrafa':[30000,20000,24000,16000,10425],'Bags':[26000,17000,20000,14000,7712],'Copo':[17000,12000,14000,10000,6500],'Copo Ebook':[26000,18000,21000,15000,9500]},
+    6:{'Case':[105000,72000,80000,65000,26486],'Tote Bag CD':[70000,48000,54000,42000,19395],'Mala Joy CD':[28000,18000,21000,17000,7090],'BackpackCD':[13000,9000,10000,8000,4033],'Lunch Bag CD':[16000,11000,12000,10000,3483],'Garrafa Ebook':[17000,11000,12000,9000,5014],'Garrafa':[14000,9500,10500,8500,5038],'Bags':[12000,8000,9500,7000,3114],'Copo':[3200,2100,2500,2000,1000],'Copo Ebook':[4800,3300,3800,3000,1700]},
+    7:{'Case':[55000,37000,43000,30000,13964],'Tote Bag CD':[47000,32000,36000,25000,13743],'Mala Joy CD':[24000,16000,19000,13000,5835],'BackpackCD':[8000,5500,6000,4000,1939],'Lunch Bag CD':[9000,6200,6500,4700,1734],'Garrafa Ebook':[12000,8000,9000,6000,3455],'Garrafa':[7000,5000,6000,4500,3316],'Bags':[12000,8000,9500,7000,3114],'Copo':[3200,2200,2600,1800,900],'Copo Ebook':[3000,2100,2300,1800,900]}
   },
 
-  // SKUs detalhados: [factory_id, categoria, variacao_cor, modelo, qtd, valor]
+  /* SKUs completos: [factory_id, categoria, variacao_cor, modelo_especificacao, qtd_total, val_total] */
   skus: [
+    /* ── Factory 3 · Iguatemi ── */
     [3,'Case','Infinite Air','iPhone 17 Pro Max',487,56587],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 15',444,38626],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 16',350,33778],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',278,30563],
+    [3,'Case','Ventosa de Silicone Azul','',277,5512],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro Max',273,24446],
+    [3,'Case','Impact Slim Standard','iPhone 11',219,14327],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',218,21657],
     [3,'Case','Case Anti Impacto Slim Air','iPhone 13',217,14078],
     [3,'Case','Infinite Air','iPhone 17 Pro',139,14575],
+    [3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',142,11471],
     [3,'Case','Infinite Air','iPhone 17',117,11644],
-    [3,'Case','Impact Slim Standard','iPhone 11',219,14327],
+    [3,'Case','Anti Impacto Slim Air','iPhone 16 SE',110,10465],
+    [3,'Case','Infinite Air','Samsung Galaxy S25 FE',76,5444],
+    [3,'Case','Infinite Air','iPhone 13',104,7230],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 14',133,9886],
+    [3,'Case','Anti Impacto Slim Standard','iPhone 12',130,8693],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',73,7212],
+    [3,'Case','Infinite Air','iPhone 14',72,5165],
+    [3,'Case','Anti Impacto Slim Standard','iPhone 12 Pro Max',68,4627],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',88,9275],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',85,6668],
+    [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',56,5108],
+    [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',56,5276],
+    [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',55,3015],
+    [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',48,3277],
+    [3,'Case','Anti Impacto Slim Air','Samsung Galaxy A36',53,3781],
+    [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',52,3993],
     [3,'Tote Bag CD','Tote Bag Preta','',409,102841],
     [3,'Tote Bag CD','Mini Tote Preta','Tote Bag',342,76737],
     [3,'Tote Bag CD','Mini Tote Off White','Tote Bag',245,54706],
     [3,'Tote Bag CD','Tote Bag Rosa','',233,53117],
     [3,'Tote Bag CD','Tote Bag Off White','',167,39263],
     [3,'Tote Bag CD','Mini Tote Marrom','Tote Bag',164,39064],
+    [3,'Tote Bag CD','Mini Tote Cinza','Tote Bag',118,26028],
+    [3,'Tote Bag CD','Tote Bag Amora','Tote Daily',110,30519],
+    [3,'Tote Bag CD','Organizador Tote Cinza','',108,4309],
+    [3,'Tote Bag CD','Tote Puff Marrom','Tote Bag',97,29090],
+    [3,'Tote Bag CD','Mini Tote Vinho','Tote Bag',65,14974],
+    [3,'Tote Bag CD','Tote Puff Preto','Tote Bag',63,19044],
+    [3,'Tote Bag CD','Tote Bag Marrom','Tote Bag',89,23831],
+    [3,'Tote Bag CD','Organizador Tote Preta','',60,2394],
+    [3,'Tote Bag CD','Tote Puff Off White','Tote Puff',49,14835],
+    [3,'Tote Bag CD','Tote Bag Amora','Tote Bag',43,11900],
     [3,'Mala Joy CD','Mala Joy Sarja Preto CD','',339,93867],
     [3,'Mala Joy CD','Mala Joy Sarja Rosa CH','',103,32050],
     [3,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',72,22083],
+    [3,'Mala Joy CD','Mala Joy - WaitList','',71,21853],
+    [3,'Mala Joy CD','Mala Joy - Marrom','',56,18334],
+    [3,'Mala Joy CD','Mala Joy - Azul','',45,11856],
     [3,'Bags','Bolsa Moove Preta','',387,83402],
     [3,'BackpackCD','Mochila Voyage Preta','',112,45809],
     [3,'BackpackCD','Mochila Voyage Off White','',92,39001],
     [3,'BackpackCD','Mochila Executiva Preta','',60,15574],
+    [3,'BackpackCD','Mochila Casual Pro','Casual Preta',92,17071],
+    [3,'BackpackCD','Mochila Pop','Pop Preta',58,11444],
     [3,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',136,29426],
     [3,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',125,27168],
     [3,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',102,22310],
-    [3,'NecessaireCD','Necessaire Trip Off White','',190,9581],
+    [3,'Lunch Bag CD','Lancheira Midi - Poeira das Estrelas CH','',137,12316],
+    [3,'Lunch Bag CD','Bolsa Térmica Daily Preta','',64,9594],
+    [3,'Lunch Bag CD','Bolsa Térmica Fruit Azul Lavanda','Fruit PRO',49,4298],
+    [3,'Lunch Bag CD','Lancheira Midi - Melancia CH','',59,5304],
     [3,'NecessaireCD','Necessaire Makeup Double - Preta','',180,20502],
+    [3,'NecessaireCD','Necessaire Trip Off White','',190,9581],
+    [3,'NecessaireCD','Necessaire Preta','Necessaire Trip',176,9362],
+    [3,'NecessaireCD','Necessaire Rosa','Necessaire Trip',125,6518],
+    [3,'NecessaireCD','Necessaire Preta','Necessaire CRM',93,2781],
     [3,'Garrafa','Garrafa Térmica Urban 360','Branca 500ml',80,5321],
     [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',75,9585],
     [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',73,8976],
-    [3,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',117,48210],
-    [3,'Travel Case CD','Mala de Bordo Trip 20\" - Rosa','',46,19261],
+    [3,'Garrafa','Garrafa Térmica Pro Rosa','750ml',53,8221],
+    [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 950ml',52,7311],
+    [3,'Garrafa','Garrafa Térmica Pro Preta','750ml',40,5324],
+    [3,'Garrafa Ebook','Garrafa Térmica Urban 360','Branca 500ml - Ebook',80,7602],
+    [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',75,13693],
+    [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',73,12823],
+    [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 950ml - Ebook',52,10445],
+    [3,'Copo','Copo Life Preto','880ml',69,8820],
+    [3,'Copo','Copo Life Preto','1180ml',63,8186],
+    [3,'Copo','Copo Life Off White','600ml',64,5372],
+    [3,'Copo','Copo Life Lilás','880ml',53,6926],
+    [3,'Copo','Copo Life Preto','600ml',54,4322],
+    [3,'Copo Ebook','Copo Life Preto','880ml + Ebook',67,12223],
+    [3,'Copo Ebook','Copo Life Preto','1180ml + Ebook',63,11694],
+    [3,'Copo Ebook','Copo Life Off White','600ml + Ebook',64,7674],
+    [3,'Copo Ebook','Copo Life Lilás','880ml + Ebook',53,9895],
+    [3,'Copo Ebook','Copo Life Glitter Vinho','1180ml - Ebook',50,11495],
+    [3,'Copo Ebook','Copo Life Preto','600ml + Ebook',54,6175],
+    [3,'Ventosa de Silicone','Ventosa de Silicone Azul','',277,5512],
+    [3,'Ventosa de Silicone','Ventosa Preta','',43,856],
+    [3,'Ventosa de Silicone','Ventosa de Silicone Lilás','',43,856],
+    [3,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',117,48210],
+    [3,'Travel Case CD','Mala de Bordo Trip 20" - Rosa','',46,19261],
+    [3,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',41,17566],
+    [3,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',117,35669],
+    [3,'Base Travel Case CD','Base Rosa - Mala de Bordo Trip 20"','',46,8975],
+    [3,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',41,6509],
+    [3,'Base Travel Case CD','Capa Transparente Base Mala Trip','',88,4721],
     [3,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',60,38085],
+    [3,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',35,18073],
     [3,'Lancheira BTS','Lancheira Play Preta','',170,21783],
+    [3,'Lancheira BTS','Lancheira Fun Azul Marinho','',64,12044],
+    [3,'Lancheira BTS','Lancheira Play Off White','',45,5146],
+    [3,'Lancheira BTS','Lancheira Azul Marinho Play','',42,5146],
+    [3,'Lancheira BTS','Lancheira BTS Azul','',61,10734],
     [3,'Estojo BTS','Estojo BTS Preto','',93,11681],
+    [3,'Estojo BTS','Estojo BTS Melancia','',66,9013],
+    [3,'Estojo BTS','Estojo BTS Azul','',53,6265],
     [3,'Mochila BTS','Mochila BTS Preta','',191,42581],
+    [3,'Necessaire','Necessaire Makeup Double - Stitch','',158,15394],
+    [3,'Necessaire','Necessaire Makeup Double - Patches','',69,8273],
+    [3,'Tote Shopper','Tote Shopper - Marrom','',63,17794],
+    [3,'Tote Shopper','Tote Shopper - Vinho','',61,17264],
+    [3,'Tote Shopper','Tote Shopper - Preta','',41,11086],
+    [3,'Skin Gocase','Película Gocase','Privacidade',105,10490],
+    [3,'Skin Gocase','Película Gocase','Nano Tech',68,6113],
+    [3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Rosa','750ml - Ebook',53,11745],
+    [3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','750ml - Ebook',40,7720],
+    [3,'Acessorios Termicos','Marmita Up Preta','Marmita Up',86,3001],
+    [3,'Acessorios Termicos','Marmita Up Azul Claro','Marmita Up',79,2757],
+    [3,'Acessorios Termicos','Marmita Up Melancia','Marmita Up',70,2433],
+    [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit G',150,6235],
+    [3,'Base Garrafa CD','Base Garrafa Urban Azul 500','',115,3439],
+    [3,'Base Garrafa CD','Base Fit Glitter Salmão','Base Fit G',83,3312],
+    [3,'Placa Mala','Placa Preta Mala de Bordo 20"','',117,1878],
+    [3,'Placa Mala','Placa Rosa Mala de Bordo 20"','',46,473],
+    [3,'Placa Mala','Placa Off White - Mala de Bordo','',41,6509],
+    [3,'Tampa CD','Tampa Azul Fresh Checkbox','',113,4509],
+    [3,'Clutch CD','Capa para Notebook 15.6\'\' Sleeve - Preta','',53,5295],
+    [3,'Clutch CD','Capa para Notebook 15.6\'\' Sleeve - Rosa','',42,4196],
+    [3,'Bolsa de Garrafa','Bolsa de Garrafa Preta','',43,8016],
+    /* ── Factory 6 · PKS ── */
     [6,'Case','Infinite Air','iPhone 17 Pro Max',358,40880],
     [6,'Case','Case Anti Impacto Slim Air','iPhone 15',351,31377],
     [6,'Case','Case Anti Impacto Slim Air','iPhone 16',246,23898],
@@ -2915,644 +2964,586 @@ const AN = {
     [6,'Case','Infinite Air','iPhone 17',154,15661],
     [6,'Case','Infinite Air','iPhone 13',97,6519],
     [6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',102,9053],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',126,12459],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',100,10106],
+    [6,'Case','Anti Impacto Slim Air','iPhone 16 SE',81,7828],
+    [6,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',81,5231],
+    [6,'Case','Infinite Air','iPhone 14',91,6380],
+    [6,'Case','Infinite Air','Samsung Galaxy S25 FE',69,5407],
+    [6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',69,6957],
+    [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',93,6446],
+    [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 Plus',49,3837],
+    [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',41,2804],
     [6,'Tote Bag CD','Tote Bag Preta','',209,55739],
     [6,'Tote Bag CD','Mini Tote Preta','Tote Bag',203,47400],
     [6,'Tote Bag CD','Mini Tote Off White','Tote Bag',96,22460],
     [6,'Tote Bag CD','Mini Tote Cinza','Tote Bag',83,18752],
     [6,'Tote Bag CD','Mini Tote Vinho','Tote Bag',72,17513],
     [6,'Tote Bag CD','Tote Bag Off White','',61,14524],
+    [6,'Tote Bag CD','Tote Bag Rosa','',36,8556],
+    [6,'Tote Bag CD','Tote Bag Amora','Tote Daily',52,14365],
+    [6,'Tote Bag CD','Mini Tote Marrom','Tote Bag',56,13554],
     [6,'Mala Joy CD','Mala Joy Sarja Preto CD','',124,35858],
     [6,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',41,12516],
     [6,'Mala Joy CD','Mala Joy - WaitList','',44,13516],
+    [6,'Mala Joy CD','Mala Joy Sarja Rosa CH','',28,8437],
     [6,'Bags','Bolsa Moove Preta','',150,33325],
+    [6,'Bags','Bolsa Moove Off White','',27,5787],
     [6,'BackpackCD','Mochila Pop','Pop Preta',65,13654],
     [6,'BackpackCD','Mochila Voyage Preta','',36,14776],
+    [6,'BackpackCD','Mochila Casual Pro','Casual Preta',36,6826],
+    [6,'BackpackCD','Mochila Executiva Preta','',18,4698],
     [6,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',53,11515],
     [6,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',52,11595],
+    [6,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',36,8056],
+    [6,'Lunch Bag CD','Bolsa Térmica Mix Marrom','Mix Pro',42,9736],
     [6,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',63,4210],
     [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',61,7682],
     [6,'Garrafa','Garrafa Flow Azul 500ml','',55,1705],
-    [6,'NecessaireCD','Necessaire Makeup Double - Preta','',55,6545],
+    [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',49,5975],
+    [6,'Garrafa','Garrafa Térmica Urban 360','Branca 500ml',39,2566],
+    [6,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',63,6014],
+    [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',61,10974],
+    [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',49,8535],
+    [6,'Garrafa Ebook','Garrafa Térmica Urban 360','Branca 500ml - Ebook',39,3666],
+    [6,'Copo','Copo Life Preto','1180ml',25,3275],
+    [6,'Copo','Copo Life Off White','600ml',20,1680],
+    [6,'Copo Ebook','Copo Life Preto','1180ml + Ebook',24,4488],
+    [6,'Copo Ebook','Copo Life Off White','600ml + Ebook',20,2400],
+    [6,'Ventosa de Silicone','Ventosa de Silicone Azul','',58,1154],
     [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',25,16068],
     [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',24,12398],
-    [6,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',54,22855],
+    [6,'Mochila Rodinhas BTS','Mochila Rodinhas Azul Marinho','',17,10208],
+    [6,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',54,22855],
+    [6,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',27,11337],
+    [6,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',54,9526],
+    [6,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',27,3164],
+    [6,'Base Travel Case CD','Capa Transparente Base Mala Trip','',19,1078],
     [6,'Lancheira BTS','Lancheira Play Preta','',93,12131],
+    [6,'Lancheira BTS','Lancheira BTS Preta','',55,12235],
+    [6,'Lancheira BTS','Lancheira BTS Azul','',44,7486],
     [6,'Estojo BTS','Estojo BTS Preto','',71,9003],
+    [6,'Estojo BTS','Estojo BTS Azul','',25,3038],
     [6,'Mochila BTS','Mochila BTS Preta','',75,16583],
+    [6,'Mochila BTS','Mochila BTS Azul','',22,5378],
+    [6,'NecessaireCD','Necessaire Makeup Double - Preta','',55,6545],
+    [6,'NecessaireCD','Necessaire Voyage Off White','',35,6277],
+    [6,'NecessaireCD','Necessaire Makeup Double - Rosa','',18,2258],
+    [6,'Necessaire','Necessaire Makeup Double - Stitch','',36,3566],
+    [6,'Necessaire','Necessaire Holografica','',47,1405],
+    [6,'Tote Shopper','Tote Shopper - Preta','',21,5598],
+    [6,'Tote Shopper','Tote Shopper - Marrom','',16,4648],
+    [6,'Tote Shopper','Tote Shopper - Vinho','',15,4029],
+    [6,'Skin Gocase','Película Gocase','Nano Tech',44,3956],
+    [6,'Skin Gocase','Película Gocase','Fosca HD',22,1978],
+    [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',60,4244],
+    [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Marrom','',36,2516],
+    [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Vinho','',17,2018],
+    [6,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','750ml - Ebook',14,2739],
+    [6,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Preta','',37,3696],
+    [6,'Bolsa de Garrafa','Bolsa de Garrafa Off White','',27,5057],
+    [6,'Bolsa de Garrafa','Bolsa de Garrafa Preta','',21,3808],
+    [6,'Placa Mala','Placa Preta Mala de Bordo 20"','',54,502],
+    [6,'Placa Mala','Placa Off White - Mala de Bordo','',27,3164],
+    /* ── Factory 7 · Anália Franco ── */
     [7,'Case','Case Anti Impacto Slim Air','iPhone 16',204,20554],
     [7,'Case','Infinite Air','iPhone 17 Pro Max',187,21254],
     [7,'Case','Case Anti Impacto Slim Air','iPhone 15',107,8989],
     [7,'Case','Infinite Air','iPhone 17 Pro',89,9185],
     [7,'Case','Infinite Air','iPhone 17',79,7933],
+    [7,'Case','Anti Impacto Slim Standard','iPhone 12',54,3527],
     [7,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',54,3769],
     [7,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',49,5529],
+    [7,'Case','Anti Impacto Slim Air','iPhone 16 SE',49,4576],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',48,4885],
+    [7,'Case','Infinite Air','Samsung Galaxy S25 FE',41,3249],
+    [7,'Case','Infinite Air','iPhone 17 Air',41,4116],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',35,3379],
+    [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',39,2756],
+    [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',32,3209],
+    [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',37,2512],
+    [7,'Case','Inifnite Air','Samsung Galaxy S26 Ultra',37,3526],
     [7,'Tote Bag CD','Tote Bag Preta','',146,38335],
     [7,'Tote Bag CD','Mini Tote Preta','Tote Bag',142,32916],
     [7,'Tote Bag CD','Mini Tote Off White','Tote Bag',108,24549],
     [7,'Tote Bag CD','Tote Bag Rosa','',30,7077],
     [7,'Tote Bag CD','Tote Bag Off White','',28,6667],
     [7,'Tote Bag CD','Tote Bag Amora','Tote Daily',27,7017],
+    [7,'Tote Bag CD','Mini Tote Cinza','Tote Bag',38,8416],
+    [7,'Tote Bag CD','Mini Tote Vinho','Tote Bag',21,4888],
+    [7,'Tote Bag CD','Mini Tote Marrom','Tote Bag',21,5018],
+    [7,'Tote Bag CD','Mini Tote Preto com Caramelo','Tote Bag',18,5068],
     [7,'NecessaireCD','Necessaire Makeup Double - Preta','',134,15747],
+    [7,'NecessaireCD','Necessaire Preta','Necessaire Trip',19,968],
     [7,'Bags','Bolsa Moove Preta','',116,29308],
+    [7,'Bags','Bolsa Moove Off White','',26,6177],
+    [7,'Bags','Bolsa Moove Rosa','',18,4128],
     [7,'Mala Joy CD','Mala Joy Sarja Preto CD','',111,32619],
     [7,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',32,10057],
     [7,'Mala Joy CD','Mala Joy - WaitList','',32,9957],
     [7,'Mala Joy CD','Mala Joy - Marrom','',29,9407],
+    [7,'Mala Joy CD','Mala Joy Sarja Rosa CH','',17,5308],
     [7,'BackpackCD','Mochila Pop','Pop Preta',45,9346],
     [7,'BackpackCD','Mochila Executiva Preta','',23,6168],
+    [7,'BackpackCD','Mochila Casual Pro','Casual Preta',17,3068],
     [7,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',36,8056],
     [7,'Lunch Bag CD','Bolsa Térmica Daily Preta','',23,3448],
+    [7,'Lunch Bag CD','Bolsa Térmica Daily Rosa','',20,2998],
+    [7,'Lunch Bag CD','Lancheira Mix - Corações Flutuantes All Black CH','',17,2828],
     [7,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',34,2273],
     [7,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',29,3540],
     [7,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',25,3169],
+    [7,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',34,3247],
+    [7,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',29,5057],
+    [7,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',25,4528],
+    [7,'Copo','Copo Life Preto','1180ml',44,5765],
+    [7,'Copo','Copo Life Preto','880ml',28,3565],
+    [7,'Copo','Copo Life Off White','600ml',16,1344],
+    [7,'Copo Ebook','Copo Life Preto','1180ml + Ebook',44,8236],
+    [7,'Copo Ebook','Copo Life Preto','880ml + Ebook',22,4006],
+    [7,'Ventosa de Silicone','Ventosa de Silicone Azul','',10,199],
     [7,'Lancheira BTS','Lancheira BTS Preta','',43,9736],
-    [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',29,17087],
-    [7,'Travel Case CD','Mala de Bordo Trip 20\" - Off White','',26,10983],
-    [7,'Travel Case CD','Mala de Bordo Trip 20\" - Preta','',24,9938],
+    [7,'Lancheira BTS','Lancheira BTS Azul','',18,3088],
+    [7,'Lancheira BTS','Lancheira Play Preta','',22,2758],
+    [7,'Lancheira BTS','Lancheira Play Azul Claro','',17,2558],
     [7,'Estojo BTS','Estojo BTS Preto','',28,3537],
+    [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',29,17087],
+    [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',24,12398],
+    [7,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',26,10983],
+    [7,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',24,9938],
+    [7,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',24,7446],
+    [7,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',26,1490],
     [7,'Mochila BTS','Mochila BTS Melancia','',17,4338],
+    [7,'Mochila BTS','Mochila BTS Azul','',12,2934],
+    [7,'Necessaire','Necessaire Makeup Double - Stitch','',45,4316],
+    [7,'Tote Shopper','Tote Shopper - Preta','',23,6268],
+    [7,'Tote Shopper','Tote Shopper - Marrom','',17,4868],
+    [7,'Skin Gocase','Película Gocase','Privacidade',25,2498],
+    [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',45,4076],
+    [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Marrom','',34,3457],
+    [7,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','750ml - Ebook',17,3325],
+    [7,'Powerbank Fast Charge','Fast Charge Preto','Powerbank 20000mAh',27,6557],
+    [7,'Powerbank Fast Charge','Fast Charge Branco','Powerbank 20000mAh',20,4778],
+    [7,'Acessorios Termicos','Escovinha Preta CRM','',42,1256],
+    [7,'Acessorios Termicos','Marmita Up Preta','Marmita Up',20,733],
+    [7,'Placa Mala','Placa Preta Mala de Bordo 20"','',24,392],
+    [7,'Placa Mala','Placa Off White - Mala de Bordo','',26,1490],
+    [7,'Bolsa de Garrafa','Bolsa de Garrafa Preta','',24,4218],
   ],
 };
 
-/* ═══ ESTADO ═══ */
-const anState = {
-  selMonths: new Set([0,1,2,3,4]),
-  selLoja: 'all',
-  view: 'lista',
-  pg: 0,
-  PER: 20,
+/* ═══ DISTRIBUIÇÃO MENSAL (proporcional ao volume real por factory) ═══
+   Usado para filtrar SKUs por período de forma proporcional            */
+const AN_MONTHLY_DIST = {
+  3:[6648/20292,3901/20292,4563/20292,3198/20292,1982/20292],
+  6:[2827/9710, 1865/9710, 2216/9710, 1909/9710, 893/9710],
+  7:[1679/6240, 1439/6240, 1512/6240, 1023/6240, 587/6240],
 };
 
-/* ═══ CHARTS ═══ */
+/* ═══ ESTADO ═══ */
+const anState = {selMonths:new Set([0,1,2,3,4]), selLoja:'all', view:'lista', pg:0, PER:20};
+
+/* ═══ CONSTANTES ═══ */
 let anVolChart, anValChart, anMixChart;
-const AN_LOJAS = [3,6,7];
+const AN_LOJAS       = [3,6,7];
 const AN_LOJA_COLORS = {3:'#2ECC88', 6:'#4F7EFF', 7:'#C084FC'};
 const AN_LOJA_NAMES  = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
-const AN_LOJA_BADGE  = {3:'an-lb3', 6:'an-lb6', 7:'an-lb7'};
-const AN_TOP8 = ['Tote Bag CD','Case','Mala Joy CD','BackpackCD','Lunch Bag CD','Garrafa Ebook','Garrafa','Bags'];
-const AN_TOP8_COLORS = ['#7F77DD','#4F7EFF','#F5B731','#2ECC88','#EF9F27','#D4537E','#639922','#FF5C5C'];
+const AN_LOJA_BADGE  = {3:'an-lb3',   6:'an-lb6',  7:'an-lb7'};
+const AN_TOP8        = ['Tote Bag CD','Case','Mala Joy CD','BackpackCD','Lunch Bag CD','Garrafa Ebook','Garrafa','Bags','Copo','Copo Ebook'];
+const AN_TOP8_COLORS = ['#7F77DD','#4F7EFF','#F5B731','#2ECC88','#EF9F27','#D4537E','#639922','#FF5C5C','#4CC9F0','#F72585'];
 
-function anSum(arr) { return arr.reduce((s,v)=>s+v,0); }
-function anSumSel(arr) { return [...anState.selMonths].reduce((s,i)=>s+(arr[i]||0),0); }
-function anFmt(n) { return 'R$ '+Math.round(n).toLocaleString('pt-BR'); }
-function anFmtK(n) { return n>=1e6?'R$'+(n/1e6).toFixed(1)+'M':n>=1000?'R$'+Math.round(n/1000)+'k':'R$'+Math.round(n); }
+/* ═══ UTILS ═══ */
+const anSum   = arr => arr.reduce((s,v)=>s+v,0);
+const anSumSel = arr => [...anState.selMonths].reduce((s,i)=>s+(arr[i]||0),0);
+const anFmt   = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
+const anFmtK  = n => n>=1e6?'R$'+(n/1e6).toFixed(1)+'M':n>=1000?'R$'+Math.round(n/1000)+'k':'R$'+Math.round(n);
+
+/* Quantidades e valor proporcionais ao período selecionado */
+function anSkuQtyPeriod(fid, total) {
+  const d = AN_MONTHLY_DIST[fid];
+  return [...anState.selMonths].reduce((s,i)=>s+Math.round(total*d[i]),0);
+}
+function anSkuValPeriod(fid, total) {
+  const d = AN_MONTHLY_DIST[fid];
+  return [...anState.selMonths].reduce((s,i)=>s+Math.round(total*d[i]),0);
+}
 
 function anGetLojas() {
   return anState.selLoja === 'all' ? AN_LOJAS : [parseInt(anState.selLoja)];
 }
+function anVolSel(fid){ return anSumSel(AN.vol[fid]); }
+function anValSel(fid){ return anSumSel(AN.val[fid]); }
 
-function anVolSel(fid) { return anSumSel(AN.vol[fid]); }
-function anValSel(fid) { return anSumSel(AN.val[fid]); }
-
-/* ── Filtrar SKUs ── */
+/* ════════════════════════ FILTRAR SKUs ════════════════════════ */
 function anGetSKUs() {
   const lojas = anGetLojas();
-  const cat   = document.getElementById('an-cat-sel')?.value || '';
+  const cat   = (document.getElementById('an-cat-sel')?.value || '').trim();
   const busca = (document.getElementById('an-busca')?.value || '').toLowerCase().trim();
-  return AN.skus.filter(r => {
-    if (!lojas.includes(r[0])) return false;
-    if (cat && r[1] !== cat) return false;
-    if (busca) {
-      const hay = (r[1]+' '+r[2]+' '+r[3]).toLowerCase();
-      // busca com múltiplas palavras: todas precisam estar presentes
-      if (!busca.split(' ').filter(Boolean).every(w => hay.includes(w))) return false;
-    }
-    return true;
-  }).sort((a,b) => b[4]-a[4]);
+  const words = busca ? busca.split(/\s+/).filter(Boolean) : [];
+
+  return AN.skus
+    .filter(r => {
+      if (!lojas.includes(r[0])) return false;
+      if (cat && r[1] !== cat) return false;
+      if (words.length) {
+        const hay = (r[1]+' '+r[2]+' '+r[3]).toLowerCase();
+        if (!words.every(w => hay.includes(w))) return false;
+      }
+      return true;
+    })
+    .map(r => {
+      const pQty = anSkuQtyPeriod(r[0], r[4]);
+      const pVal = anSkuValPeriod(r[0], r[5]);
+      return [r[0], r[1], r[2], r[3], pQty, pVal];
+    })
+    .filter(r => r[4] > 0)
+    .sort((a,b) => b[4]-a[4]);
 }
 
-/* ── Busca leve (só reconstrói tabela, não refaz charts) ── */
-function anSkuFilter() {
-  anState.pg = 0;
-  anBuildSKUs();
-  anUpdateSummary();
-}
+/* ═══ Busca leve — só reconstrói tabela ═══ */
+function anSkuFilter()  { anState.pg=0; anBuildSKUs(); anUpdateSummary(); }
+function anCatFilter()  { anState.pg=0; anBuildSKUs(); anBuildPareto(); anBuildCharts(); anUpdateSummary(); }
 
-/* ── Filtro de categoria (reset pg + rebuild tabela) ── */
-function anCatFilter() {
-  anState.pg = 0;
-  anBuildSKUs();
-  anBuildPareto();
-  anUpdateSummary();
-}
-
-/* ── Visão: 'lista' ou 'grupo' ── */
+/* ═══ Toggle visão ═══ */
 function anSetView(v) {
-  anState.view = v;
-  anState.pg = 0;
-  document.getElementById('an-view-lista').style.background = v==='lista' ? 'var(--accent)' : 'transparent';
-  document.getElementById('an-view-lista').style.color      = v==='lista' ? '#fff' : 'var(--muted)';
-  document.getElementById('an-view-grupo').style.background = v==='grupo' ? 'var(--accent)' : 'transparent';
-  document.getElementById('an-view-grupo').style.color      = v==='grupo' ? '#fff' : 'var(--muted)';
-  // paginação só faz sentido na lista
-  document.getElementById('an-pg-prev').style.display = v==='lista' ? '' : 'none';
-  document.getElementById('an-pg-next').style.display = v==='lista' ? '' : 'none';
-  document.getElementById('an-pg-info').style.display = v==='lista' ? '' : 'none';
+  anState.view = v; anState.pg = 0;
+  const isL = v==='lista';
+  document.getElementById('an-view-lista').style.cssText = `padding:3px 11px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:${isL?'var(--accent)':'transparent'};color:${isL?'#fff':'var(--muted)'};transition:all .15s`;
+  document.getElementById('an-view-grupo').style.cssText = `padding:3px 11px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;background:${isL?'transparent':'var(--accent)'};color:${isL?'var(--muted)':'#fff'};transition:all .15s`;
+  ['an-pg-prev','an-pg-next','an-pg-info'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isL ? '' : 'none';
+  });
   anBuildSKUs();
 }
 
-/* ── Tabela LISTA ── */
-function anBuildSKULista(rows) {
+/* ═════════════════════ KPIs ═════════════════════ */
+function anBuildKPIs() {
   const lojas = anGetLojas();
-  const total = rows.length;
-  const slice = rows.slice(anState.pg * anState.PER, (anState.pg + 1) * anState.PER);
+  const itens = lojas.map(f => anVolSel(f));
+  const vals  = lojas.map(f => anValSel(f));
+  const tot   = anSum(itens);
+  const totV  = anSum(vals);
+  const ticket = tot>0 ? totV/tot : 0;
 
-  document.getElementById('an-sku-count').textContent = total.toLocaleString('pt-BR') + ' SKUs';
-  document.getElementById('an-pg-info').textContent   =
-    total === 0 ? '0' : `${anState.pg*anState.PER+1}–${Math.min((anState.pg+1)*anState.PER,total)} / ${total}`;
-  document.getElementById('an-pg-prev').disabled = anState.pg === 0;
-  document.getElementById('an-pg-next').disabled = (anState.pg+1)*anState.PER >= total;
-
-  const th = s => `<th style="padding:8px 12px;text-align:${s.r?'right':'left'};font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap">${s.l}</th>`;
-  const showLoja = lojas.length > 1;
-
-  const thead = `<tr style="background:var(--surface)">
-    ${showLoja ? th({l:'Loja'}) : ''}
-    ${th({l:'Categoria'})}
-    ${th({l:'Variação / Cor'})}
-    ${th({l:'Modelo / Especificação'})}
-    ${th({l:'Qtd',r:true})}
-    ${th({l:'Valor (R$)',r:true})}
-    ${th({l:'Preço médio',r:true})}
-  </tr>`;
-
-  if (!slice.length) {
-    document.getElementById('an-sku-container').innerHTML =
-      `<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">
-         🔍 Nenhum produto encontrado para os filtros selecionados.
-       </div>`;
-    return;
+  const sel = [...anState.selMonths].sort((a,b)=>a-b);
+  let varPct=null;
+  if (sel.length>=2) {
+    const v0=lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
+    const v1=lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
+    if (v0>0) varPct=Math.round((v1-v0)/v0*100);
   }
-
-  const tbody = slice.map(r => `<tr style="border-bottom:1px solid var(--border);transition:background .12s"
-      onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
-    ${showLoja ? `<td style="padding:8px 12px"><span class="an-lbadge ${AN_LOJA_BADGE[r[0]]}">${AN_LOJA_NAMES[r[0]]}</span></td>` : ''}
-    <td style="padding:8px 12px;color:var(--muted);font-size:11px">${r[1]}</td>
-    <td style="padding:8px 12px;font-weight:500">${r[2]}</td>
-    <td style="padding:8px 12px;color:var(--muted)">${r[3]||'—'}</td>
-    <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums">${r[4].toLocaleString('pt-BR')}</td>
-    <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--green)">${r[5]>0?anFmt(r[5]):'—'}</td>
-    <td style="padding:8px 12px;text-align:right;color:var(--muted)">${r[4]>0&&r[5]>0?anFmt(r[5]/r[4]):'—'}</td>
-  </tr>`).join('');
-
-  document.getElementById('an-sku-container').innerHTML =
-    `<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:580px">
-       <thead>${thead}</thead>
-       <tbody>${tbody}</tbody>
-     </table>`;
+  document.getElementById('an-kpis').innerHTML=`
+    <div class="an-kpi"><div class="an-kpi-label">Receita gerada (R$)</div><div class="an-kpi-val" style="color:#4F7EFF">${anFmtK(totV)}</div><div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anFmtK(vals[lojas.indexOf(f)])}`).join(' · ')}</div></div>
+    <div class="an-kpi"><div class="an-kpi-label">Itens produzidos</div><div class="an-kpi-val">${tot.toLocaleString('pt-BR')}</div><div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anVolSel(f).toLocaleString('pt-BR')}`).join(' · ')}</div></div>
+    <div class="an-kpi"><div class="an-kpi-label">Ticket médio / item</div><div class="an-kpi-val">${ticket>0?anFmt(ticket):'—'}</div><div class="an-kpi-sub">${lojas.map(f=>{const v=anVolSel(f);return v>0?`${AN_LOJA_NAMES[f]}: ${anFmt(anValSel(f)/v)}`:''}).filter(Boolean).join(' · ')}</div></div>
+    <div class="an-kpi"><div class="an-kpi-label">${varPct!==null?'Variação no período':'Meses selecionados'}</div><div class="an-kpi-val" style="color:${varPct===null?'var(--text)':varPct>=0?'var(--green)':'var(--red)'}">${varPct!==null?(varPct>=0?'+':'')+varPct+'%':anState.selMonths.size+' meses'}</div><div class="an-kpi-sub">${varPct!==null?`${AN.months[sel[0]]} vs ${AN.months[sel[sel.length-1]]} · volume`:'Jan–Mai 2026'}</div></div>`;
 }
 
-/* ── Tabela AGRUPADA por categoria com colunas por loja ── */
-function anBuildSKUGrupo(rows) {
-  const lojas = anGetLojas();
-  document.getElementById('an-pg-info').textContent = '';
+/* ═════════════════════ INSIGHTS ═════════════════════ */
+function anBuildInsights() {
+  const lojas=anGetLojas();
+  const f3cl=lojas.includes(3)?anSumSel(AN.closing[3]):0;
+  const f3tot=lojas.includes(3)?anSumSel(AN.vol[3]):1;
+  const f3pct=Math.round(f3cl/f3tot*100);
+  const f6tot=lojas.includes(6)?anSumSel(AN.vol[6]):1;
+  const f6sent=lojas.includes(6)?anSumSel(AN.sent[6]):0;
+  const f6pct=Math.round(f6sent/f6tot*100);
+  const tickets=lojas.map(f=>{const v=anVolSel(f);return v>0?Math.round(anValSel(f)/v):0;});
+  const maxT=Math.max(...tickets);
+  const maxTLoja=AN_LOJA_NAMES[lojas[tickets.indexOf(maxT)]];
+  const sel=[...anState.selMonths].sort((a,b)=>a-b);
+  let trendTxt='Selecione ≥ 2 meses para ver tendência.';
+  if (sel.length>=2){const v0=lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0),v1=lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0),p=v0>0?Math.round((v1-v0)/v0*100):0;trendTxt=`${AN.months[sel[0]]}→${AN.months[sel[sel.length-1]]}: ${p>=0?'+':''}${p}% em volume combinado.`;}
+  const ins=[
+    lojas.includes(3)&&f3pct>40?{t:'danger',l:'⚠ Backlog Iguatemi',tx:`${f3pct}% dos itens em "closing" (${f3cl.toLocaleString('pt-BR')} un). Gargalo de expedição — pedidos de Jan/Fev represados.`}:lojas.includes(3)?{t:'ok',l:'✅ Backlog Iguatemi controlado',tx:`${f3pct}% em "closing" no período. Expedição normalizada.`}:null,
+    lojas.includes(6)&&f6pct>=95?{t:'ok',l:'✅ PKS — referência operacional',tx:`${f6pct}% dos itens já enviados. Zero cancelamentos. Pipeline mais limpo das 3 lojas.`}:lojas.includes(6)?{t:'warn',l:'⚠ PKS abaixo do padrão',tx:`Taxa de envio em ${f6pct}% no período filtrado.`}:null,
+    {t:'info',l:'📉 Tendência de volume',tx:trendTxt+' iPhone 17 Pro Max é top-3 SKU em Cases nas 3 lojas.'},
+    {t:'info',l:'💎 Maior ticket médio',tx:`${maxTLoja}: R$${maxT}/item. Tote Bag CD (R$240+), Mala Joy CD (R$295+) e Mochila Rodinhas BTS (R$540+) são os maiores geradores de valor.`},
+  ].filter(Boolean);
+  document.getElementById('an-insights').innerHTML=ins.map(({t,l,tx})=>`<div class="an-insight an-insight-${t}"><p class="an-i-label">${l}</p><p class="an-i-text">${tx}</p></div>`).join('');
+}
 
-  if (!rows.length) {
-    document.getElementById('an-sku-count').textContent = '0 SKUs';
-    document.getElementById('an-sku-container').innerHTML =
-      `<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">
-         🔍 Nenhum produto encontrado para os filtros selecionados.
-       </div>`;
-    return;
+/* ═════════════════════ CHARTS ═════════════════════ */
+function anBuildCharts() {
+  const lojas = anGetLojas();
+  const sel   = [...anState.selMonths].sort((a,b)=>a-b);
+  const labels = sel.map(i=>AN.months[i]);
+  const cat    = (document.getElementById('an-cat-sel')?.value||'').trim();
+
+  /* ── Dados de volume: por categoria se selecionada, senão por factory ── */
+  function getVolData(f) {
+    if (!cat) return sel.map(i=>AN.vol[f][i]);
+    /* proporcional dos SKUs dessa categoria nessa factory */
+    const skusF = AN.skus.filter(r=>r[0]===f && r[1]===cat);
+    const totalCat = skusF.reduce((s,r)=>s+r[4],0);
+    return sel.map(i=>Math.round(totalCat*AN_MONTHLY_DIST[f][i]));
+  }
+  function getValData(f) {
+    if (!cat) return sel.map(i=>AN.val[f][i]);
+    if (AN.catVal[f]?.[cat]) return sel.map(i=>AN.catVal[f][cat][i]||0);
+    const skusF = AN.skus.filter(r=>r[0]===f && r[1]===cat);
+    const totalV = skusF.reduce((s,r)=>s+r[5],0);
+    return sel.map(i=>Math.round(totalV*AN_MONTHLY_DIST[f][i]));
   }
 
-  // Agrupar: chave = categoria | variacao_cor | modelo
-  // Para cada grupo, acumular qtd e valor por loja
-  const groupMap = {};
-  rows.forEach(r => {
-    const key = `${r[1]}|||${r[2]}|||${r[3]}`;
-    if (!groupMap[key]) groupMap[key] = {cat:r[1], var:r[2], mod:r[3], qtd:{}, val:{}, total:0, totalVal:0};
-    groupMap[key].qtd[r[0]] = (groupMap[key].qtd[r[0]]||0) + r[4];
-    groupMap[key].val[r[0]] = (groupMap[key].val[r[0]]||0) + r[5];
-    groupMap[key].total    += r[4];
-    groupMap[key].totalVal += r[5];
+  if (anVolChart) anVolChart.destroy();
+  anVolChart = new Chart(document.getElementById('an-vol-chart'),{
+    type:'bar',
+    data:{labels, datasets:lojas.map(f=>({label:AN_LOJA_NAMES[f], data:getVolData(f), backgroundColor:AN_LOJA_COLORS[f]+'99', borderColor:AN_LOJA_COLORS[f], borderWidth:1, borderRadius:3, stack:'s'}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString('pt-BR')+' itens'}}},scales:{x:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}}
   });
 
-  // Agrupar por categoria
-  const catMap = {};
-  Object.values(groupMap).forEach(g => {
-    if (!catMap[g.cat]) catMap[g.cat] = {itens:[], total:0, totalVal:0};
-    catMap[g.cat].itens.push(g);
-    catMap[g.cat].total    += g.total;
-    catMap[g.cat].totalVal += g.totalVal;
+  if (anValChart) anValChart.destroy();
+  anValChart = new Chart(document.getElementById('an-val-chart'),{
+    type:'line',
+    data:{labels, datasets:lojas.map(f=>({label:AN_LOJA_NAMES[f], data:getValData(f), borderColor:AN_LOJA_COLORS[f], backgroundColor:'transparent', pointBackgroundColor:AN_LOJA_COLORS[f], pointRadius:4, tension:0.3}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+anFmt(ctx.parsed.y)}}},scales:{x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#6B7280',font:{size:10},callback:v=>anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}}}
   });
 
-  // Ordenar categorias por valor total desc; itens dentro por qtd total desc
-  const cats = Object.entries(catMap).sort((a,b)=>b[1].totalVal-a[1].totalVal);
-  cats.forEach(([,c]) => c.itens.sort((a,b)=>b.total-a.total));
+  /* ── Mix chart: se categoria selecionada → variações de cor; senão → top categorias ── */
+  if (anMixChart) anMixChart.destroy();
+  let mixDatasets, mixLabels;
+  if (cat) {
+    /* Cores dentro da categoria por loja */
+    const colors = [...new Set(AN.skus.filter(r=>lojas.includes(r[0])&&r[1]===cat).map(r=>r[2]))].slice(0,8);
+    mixLabels = lojas.map(f=>AN_LOJA_NAMES[f]);
+    mixDatasets = colors.map((color,i)=>({
+      label:color,
+      data:lojas.map(f=>AN.skus.filter(r=>r[0]===f&&r[1]===cat&&r[2]===color).reduce((s,r)=>s+anSkuQtyPeriod(f,r[4]),0)),
+      backgroundColor:AN_TOP8_COLORS[i]+'BB', borderColor:AN_TOP8_COLORS[i], borderWidth:1, borderRadius:3, stack:'s'
+    }));
+  } else {
+    mixLabels = lojas.map(f=>AN_LOJA_NAMES[f]);
+    mixDatasets = AN_TOP8.map((c,i)=>({
+      label:c,
+      data:lojas.map(f=>[...anState.selMonths].reduce((s,mi)=>s+(AN.catVal[f]?.[c]?.[mi]||0),0)),
+      backgroundColor:AN_TOP8_COLORS[i]+'BB', borderColor:AN_TOP8_COLORS[i], borderWidth:1, borderRadius:3, stack:'s'
+    }));
+  }
+  anMixChart = new Chart(document.getElementById('an-mix-chart'),{
+    type:'bar',
+    data:{labels:mixLabels, datasets:mixDatasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(cat?ctx.parsed.y.toLocaleString('pt-BR')+' un':anFmt(ctx.parsed.y))}}},scales:{x:{stacked:true,ticks:{color:'#6B7280',font:{size:11}},grid:{display:false}},y:{stacked:true,ticks:{color:'#6B7280',font:{size:10},callback:v=>cat?v.toLocaleString('pt-BR'):anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}}}
+  });
+}
 
-  document.getElementById('an-sku-count').textContent =
-    `${Object.keys(groupMap).length.toLocaleString('pt-BR')} variações · ${cats.length} categorias`;
+/* ═════════════════════ PARETO ═════════════════════ */
+function anBuildPareto() {
+  const lojas = anGetLojas();
+  const cat   = (document.getElementById('an-cat-sel')?.value||'').trim();
+  const cats  = {};
+  if (cat) {
+    /* pareto de variações dentro da categoria */
+    AN.skus.filter(r=>lojas.includes(r[0])&&r[1]===cat).forEach(r=>{
+      const k=r[2]; cats[k]=(cats[k]||0)+anSkuQtyPeriod(r[0],r[4]);
+    });
+  } else {
+    AN_TOP8.forEach(c=>{
+      lojas.forEach(f=>{
+        const v=[...anState.selMonths].reduce((s,i)=>s+(AN.catVal[f]?.[c]?.[i]||0),0);
+        cats[c]=(cats[c]||0)+v;
+      });
+    });
+  }
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const totalV=anSum(sorted.map(x=>x[1]));
+  const maxV=sorted[0]?.[1]||1;
+  document.getElementById('an-pareto').innerHTML=sorted.map(([c,v])=>{
+    const pct=totalV>0?Math.round(v/totalV*100):0;
+    const bw=Math.round(v/maxV*100);
+    const idx=cat?-1:AN_TOP8.indexOf(c);
+    const color=idx>=0?AN_TOP8_COLORS[idx]:'#4F7EFF';
+    const unit=cat?' un':'';
+    return`<div class="an-pareto-row"><span class="an-pareto-lbl" title="${c}">${c}</span><div class="an-pareto-bg"><div class="an-pareto-fill" style="width:${bw}%;background:${color}"></div></div><span class="an-pareto-val">${cat?v.toLocaleString('pt-BR')+unit:anFmtK(v)}</span><span class="an-pareto-pct">${pct}%</span></div>`;
+  }).join('');
+}
 
-  // Cabeçalho dinâmico com colunas por loja
-  const lojaCols = lojas.map(f =>
-    `<th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border);white-space:nowrap">
-      ${AN_LOJA_NAMES[f]}
-    </th>`
-  ).join('');
+/* ═════════════════════ COMPARATIVO ═════════════════════ */
+function anBuildComp() {
+  const lojas=anGetLojas();
+  const itens=lojas.map(f=>anVolSel(f));
+  const vals=lojas.map(f=>anValSel(f));
+  const sent=lojas.map(f=>anSumSel(AN.sent[f]));
+  const cls=lojas.map(f=>anSumSel(AN.closing[f]));
+  const canc=lojas.map(f=>anSumSel(AN.canc[f]));
+  const pctS=itens.map((n,i)=>n>0?Math.round(sent[i]/n*100):0);
+  const pctC=itens.map((n,i)=>n>0?Math.round(cls[i]/n*100):0);
+  const ticket=itens.map((n,i)=>n>0?vals[i]/n:0);
+  const thead=document.querySelector('#an-comp-body')?.closest('table')?.querySelector('thead');
+  if(thead) thead.innerHTML=`<tr style="background:var(--surface)"><th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Indicador</th>${lojas.map(f=>`<th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border)">${AN_LOJA_NAMES[f]}</th>`).join('')}</tr>`;
+  const rows=[['Itens consumidos',itens.map(v=>v.toLocaleString('pt-BR')),[]],['Valor gerado',vals.map(v=>anFmtK(v)),[]],['Ticket médio/item',ticket.map(v=>v>0?anFmt(v):'—'),[]],['% itens "sent"',pctS.map(v=>v+'%'),pctS.map(v=>v>=90?'an-ok':v>=70?'an-warn':'an-danger')],['% itens "closing"',pctC.map(v=>v+'%'),pctC.map(v=>v<=5?'an-ok':v<=30?'an-warn':'an-danger')],['Cancelamentos',canc.map(v=>v>0?v.toLocaleString('pt-BR'):'0'),canc.map(v=>v===0?'an-ok':v<50?'an-warn':'an-danger')]];
+  document.getElementById('an-comp-body').innerHTML=rows.map(([l,vls,cls])=>`<tr><td style="color:var(--muted);font-size:11px">${l}</td>${lojas.map((_,i)=>`<td class="${cls[i]||''}">${vls[i]}</td>`).join('')}</tr>`).join('');
+}
 
-  const thead = `<tr style="background:var(--surface)">
-    <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
-    <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo</th>
-    ${lojaCols}
-    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap">Total un.</th>
-    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor (R$)</th>
-    <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Ticket</th>
-  </tr>`;
+/* ═════════════════════ TABELA LISTA ═════════════════════ */
+function anBuildSKULista(rows) {
+  const lojas=anGetLojas();
+  const total=rows.length;
+  const slice=rows.slice(anState.pg*anState.PER,(anState.pg+1)*anState.PER);
+  document.getElementById('an-sku-count').textContent=total.toLocaleString('pt-BR')+' SKUs';
+  document.getElementById('an-pg-info').textContent=total===0?'0':`${anState.pg*anState.PER+1}–${Math.min((anState.pg+1)*anState.PER,total)} / ${total}`;
+  document.getElementById('an-pg-prev').disabled=anState.pg===0;
+  document.getElementById('an-pg-next').disabled=(anState.pg+1)*anState.PER>=total;
+  const showLoja=lojas.length>1;
+  if(!slice.length){document.getElementById('an-sku-container').innerHTML=`<div style="text-align:center;padding:36px 20px;color:var(--muted);font-size:13px">🔍 Nenhum produto encontrado.</div>`;return;}
+  const mLabel=([...anState.selMonths].size===5)?'Jan–Mai':[...anState.selMonths].sort((a,b)=>a-b).map(i=>AN.months[i]).join('+');
+  document.getElementById('an-sku-container').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:580px">
+      <thead><tr style="background:var(--surface)">
+        ${showLoja?`<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Loja</th>`:''}
+        <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Categoria</th>
+        <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
+        <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo</th>
+        <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Qtd (${mLabel})</th>
+        <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor (R$)</th>
+        <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Ticket</th>
+      </tr></thead>
+      <tbody>${slice.map(r=>`<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+        ${showLoja?`<td style="padding:8px 12px"><span class="an-lbadge ${AN_LOJA_BADGE[r[0]]}">${AN_LOJA_NAMES[r[0]]}</span></td>`:''}
+        <td style="padding:8px 12px;color:var(--muted);font-size:11px">${r[1]}</td>
+        <td style="padding:8px 12px;font-weight:500">${r[2]}</td>
+        <td style="padding:8px 12px;color:var(--muted)">${r[3]||'—'}</td>
+        <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums">${r[4].toLocaleString('pt-BR')}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--green)">${r[5]>0?anFmt(r[5]):'—'}</td>
+        <td style="padding:8px 12px;text-align:right;color:var(--muted)">${r[4]>0&&r[5]>0?anFmt(r[5]/r[4]):'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+}
 
-  // Linha de categoria (cabeçalho)
-  const catRow = (nome, total, totalVal) => {
-    const colspan = 3 + lojas.length + 2;
-    return `<tr style="background:rgba(255,255,255,.03);cursor:pointer" onclick="anToggleCat(this)">
+/* ═════════════════════ TABELA AGRUPADA ═════════════════════ */
+function anBuildSKUGrupo(rows) {
+  const lojas=anGetLojas();
+  ['an-pg-prev','an-pg-next','an-pg-info'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  if(!rows.length){document.getElementById('an-sku-count').textContent='0 SKUs';document.getElementById('an-sku-container').innerHTML=`<div style="text-align:center;padding:36px;color:var(--muted);font-size:13px">🔍 Nenhum produto encontrado.</div>`;return;}
+  const groupMap={};
+  rows.forEach(r=>{
+    const key=`${r[1]}|||${r[2]}|||${r[3]}`;
+    if(!groupMap[key]) groupMap[key]={cat:r[1],var:r[2],mod:r[3],qtd:{},val:{},total:0,totalVal:0};
+    groupMap[key].qtd[r[0]]=(groupMap[key].qtd[r[0]]||0)+r[4];
+    groupMap[key].val[r[0]]=(groupMap[key].val[r[0]]||0)+r[5];
+    groupMap[key].total+=r[4]; groupMap[key].totalVal+=r[5];
+  });
+  const catMap={};
+  Object.values(groupMap).forEach(g=>{
+    if(!catMap[g.cat]) catMap[g.cat]={itens:[],total:0,totalVal:0};
+    catMap[g.cat].itens.push(g); catMap[g.cat].total+=g.total; catMap[g.cat].totalVal+=g.totalVal;
+  });
+  const cats=Object.entries(catMap).sort((a,b)=>b[1].totalVal-a[1].totalVal);
+  cats.forEach(([,c])=>c.itens.sort((a,b)=>b.total-a.total));
+  document.getElementById('an-sku-count').textContent=`${Object.keys(groupMap).length.toLocaleString('pt-BR')} variações · ${cats.length} categorias`;
+  const mLabel=([...anState.selMonths].size===5)?'Jan–Mai':[...anState.selMonths].sort((a,b)=>a-b).map(i=>AN.months[i]).join('+');
+  const lojaCols=lojas.map(f=>`<th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border);white-space:nowrap">${AN_LOJA_NAMES[f]}</th>`).join('');
+  const maxCatVal=cats[0]?.[1].totalVal||1;
+  const tbody=cats.map(([catNome,catData])=>{
+    const pct=Math.round(catData.totalVal/maxCatVal*100);
+    const colspan=3+lojas.length+2;
+    const catRow=`<tr style="background:rgba(255,255,255,.03);cursor:pointer" onclick="anToggleCat(this)">
       <td colspan="${colspan}" style="padding:10px 14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:10px;color:var(--muted);transition:transform .2s" class="an-cat-arrow">▶</span>
-            <span style="font-weight:600;font-size:13px">${nome}</span>
-            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(79,126,255,.12);color:var(--pks)">${total.toLocaleString('pt-BR')} un.</span>
+            <span style="font-size:10px;color:var(--muted);transition:transform .2s;display:inline-block" class="an-cat-arrow">▶</span>
+            <span style="font-weight:600;font-size:13px">${catNome}</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(79,126,255,.12);color:var(--pks)">${catData.total.toLocaleString('pt-BR')} un (${mLabel})</span>
           </div>
-          <span style="font-weight:600;font-size:12px;color:var(--green)">${anFmtK(totalVal)}</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:80px;height:4px;background:var(--border);border-radius:2px"><div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px"></div></div>
+            <span style="font-weight:600;font-size:12px;color:var(--green)">${anFmtK(catData.totalVal)}</span>
+          </div>
         </div>
-      </td>
-    </tr>`;
-  };
-
-  // Barra de proporção
-  const maxCatVal = cats[0]?.[1].totalVal || 1;
-
-  const tbody = cats.map(([catNome, catData]) => {
-    const pct = Math.round(catData.totalVal / maxCatVal * 100);
-    const bar = `<div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px">
-      <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px"></div>
-    </div>`;
-
-    const itemRows = catData.itens.map((g,idx) => {
-      // células por loja
-      const lojaCells = lojas.map(f => {
-        const q = g.qtd[f] || 0;
-        return `<td style="padding:7px 10px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:${q>0?AN_LOJA_COLORS[f]:'var(--muted)'}">
-          ${q > 0 ? q.toLocaleString('pt-BR') : '—'}
-        </td>`;
-      }).join('');
-      const ticket = g.total > 0 && g.totalVal > 0 ? anFmt(g.totalVal / g.total) : '—';
-      const rowBg  = idx % 2 === 0 ? '' : 'background:rgba(255,255,255,.01)';
-      return `<tr class="an-cat-row" style="border-bottom:1px solid var(--border);${rowBg}"
-          onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background='${idx%2===0?'':'rgba(255,255,255,.01)'}'">
+      </td></tr>`;
+    const itemRows=catData.itens.map((g,idx)=>{
+      const lojaCells=lojas.map(f=>{const q=g.qtd[f]||0;return`<td style="padding:7px 10px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:${q>0?AN_LOJA_COLORS[f]:'var(--muted)'}">${q>0?q.toLocaleString('pt-BR'):'—'}</td>`;}).join('');
+      const ticket=g.total>0&&g.totalVal>0?anFmt(g.totalVal/g.total):'—';
+      return`<tr class="an-cat-row" style="border-bottom:1px solid var(--border);background:${idx%2===0?'':'rgba(255,255,255,.01)'}" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background='${idx%2===0?'':'rgba(255,255,255,.01)'}'">
         <td style="padding:7px 12px 7px 28px;font-weight:500;font-size:12px">${g.var}</td>
         <td style="padding:7px 12px;color:var(--muted);font-size:11px">${g.mod||'—'}</td>
         ${lojaCells}
         <td style="padding:7px 10px;text-align:right;font-weight:600;font-size:12px;font-variant-numeric:tabular-nums">${g.total.toLocaleString('pt-BR')}</td>
         <td style="padding:7px 10px;text-align:right;font-weight:600;font-size:12px;color:var(--green)">${g.totalVal>0?anFmtK(g.totalVal):'—'}</td>
-        <td style="padding:7px 10px;text-align:right;font-size:11px;color:var(--muted)">${ticket}</td>
       </tr>`;
     }).join('');
-
-    // linha de total da categoria
-    const totalLojaCells = lojas.map(f => {
-      const q = catData.itens.reduce((s,g)=>s+(g.qtd[f]||0),0);
-      return `<td style="padding:7px 10px;text-align:right;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:${AN_LOJA_COLORS[f]};border-top:1px solid var(--border)">
-        ${q>0?q.toLocaleString('pt-BR'):'—'}
-      </td>`;
-    }).join('');
-    const totalRow = `<tr class="an-cat-row" style="background:rgba(255,255,255,.04)">
-      <td style="padding:7px 12px 7px 28px;font-size:11px;font-weight:600;color:var(--muted);border-top:1px solid var(--border)">Subtotal ${catNome}</td>
-      <td style="border-top:1px solid var(--border)"></td>
-      ${totalLojaCells}
+    const totalLoja=lojas.map(f=>{const q=catData.itens.reduce((s,g)=>s+(g.qtd[f]||0),0);return`<td style="padding:7px 10px;text-align:right;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:${AN_LOJA_COLORS[f]};border-top:1px solid var(--border)">${q>0?q.toLocaleString('pt-BR'):'—'}</td>`;}).join('');
+    const totalRow=`<tr class="an-cat-row" style="background:rgba(255,255,255,.04)">
+      <td style="padding:7px 12px 7px 28px;font-size:11px;font-weight:600;color:var(--muted);border-top:1px solid var(--border)" colspan="2">Subtotal ${catNome}</td>
+      ${totalLoja}
       <td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;border-top:1px solid var(--border)">${catData.total.toLocaleString('pt-BR')}</td>
       <td style="padding:7px 10px;text-align:right;font-weight:700;font-size:12px;color:var(--green);border-top:1px solid var(--border)">${anFmtK(catData.totalVal)}</td>
-      <td style="border-top:1px solid var(--border)"></td>
     </tr>`;
-
-    return catRow(catNome, catData.total, catData.totalVal) + itemRows + totalRow;
+    return catRow+itemRows+totalRow;
   }).join('');
-
-  document.getElementById('an-sku-container').innerHTML =
-    `<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
-       <thead>${thead}</thead>
-       <tbody>${tbody}</tbody>
-     </table>`;
-
-  // Inicializar todas as categorias expandidas
-  anExpandAll();
+  document.getElementById('an-sku-container').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
+      <thead><tr style="background:var(--surface)">
+        <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Variação / Cor</th>
+        <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Modelo</th>
+        ${lojaCols}
+        <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Total (${mLabel})</th>
+        <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Valor</th>
+      </tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  document.querySelectorAll('#an-sku-container .an-cat-arrow').forEach(a=>a.style.transform='rotate(90deg)');
 }
 
-/* ── Toggle expand/collapse de categoria ── */
-function anToggleCat(row) {
-  const arrow = row.querySelector('.an-cat-arrow');
-  let next = row.nextElementSibling;
-  let expanded = arrow.style.transform !== 'rotate(90deg)';
-  while (next && next.classList.contains('an-cat-row')) {
-    next.style.display = expanded ? 'none' : '';
-    next = next.nextElementSibling;
-  }
-  arrow.style.transform = expanded ? '' : 'rotate(90deg)';
+function anToggleCat(row){
+  const arrow=row.querySelector('.an-cat-arrow');
+  const expanded=arrow.style.transform==='rotate(90deg)';
+  let next=row.nextElementSibling;
+  while(next&&next.classList.contains('an-cat-row')){next.style.display=expanded?'none':'';next=next.nextElementSibling;}
+  arrow.style.transform=expanded?'':'rotate(90deg)';
 }
 
-function anExpandAll() {
-  document.querySelectorAll('#an-sku-container .an-cat-arrow').forEach(a => {
-    a.style.transform = 'rotate(90deg)';
-  });
-  document.querySelectorAll('#an-sku-container .an-cat-row').forEach(r => {
-    r.style.display = '';
-  });
-}
-
-/* ── Dispatcher: escolhe qual visão renderizar ── */
-function anBuildSKUs() {
-  const rows = anGetSKUs();
-  if (anState.view === 'grupo') {
-    document.getElementById('an-pg-prev').style.display = 'none';
-    document.getElementById('an-pg-next').style.display = 'none';
-    document.getElementById('an-pg-info').style.display = 'none';
+function anBuildSKUs(){
+  const rows=anGetSKUs();
+  if(anState.view==='grupo'){
+    ['an-pg-prev','an-pg-next','an-pg-info'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
     anBuildSKUGrupo(rows);
   } else {
-    document.getElementById('an-pg-prev').style.display = '';
-    document.getElementById('an-pg-next').style.display = '';
-    document.getElementById('an-pg-info').style.display = '';
+    ['an-pg-prev','an-pg-next','an-pg-info'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
     anBuildSKULista(rows);
   }
 }
-function anBuildKPIs() {
-  const lojas = anGetLojas();
-  const itens = lojas.map(f => anVolSel(f));
-  const vals  = lojas.map(f => anValSel(f));
-  const totalItens = anSum(itens);
-  const totalVal   = anSum(vals);
-  const ticket = totalItens > 0 ? totalVal / totalItens : 0;
 
-  const sel = [...anState.selMonths].sort((a,b)=>a-b);
-  let varPct = null;
-  if (sel.length >= 2) {
-    const v0 = lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
-    const v1 = lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
-    if (v0>0) varPct = Math.round((v1-v0)/v0*100);
-  }
-
-  const lojasSub = lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anFmtK(vals[lojas.indexOf(f)])}`).join(' · ');
-
-  document.getElementById('an-kpis').innerHTML = `
-    <div class="an-kpi">
-      <div class="an-kpi-label">Receita gerada (R$)</div>
-      <div class="an-kpi-val" style="color:#4F7EFF">${anFmtK(totalVal)}</div>
-      <div class="an-kpi-sub">${lojasSub}</div>
-    </div>
-    <div class="an-kpi">
-      <div class="an-kpi-label">Itens produzidos</div>
-      <div class="an-kpi-val">${totalItens.toLocaleString('pt-BR')}</div>
-      <div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anVolSel(f).toLocaleString('pt-BR')}`).join(' · ')}</div>
-    </div>
-    <div class="an-kpi">
-      <div class="an-kpi-label">Ticket médio / item</div>
-      <div class="an-kpi-val">${ticket>0?anFmt(ticket):'—'}</div>
-      <div class="an-kpi-sub">${lojas.map(f=>{const v=anVolSel(f);return v>0?`${AN_LOJA_NAMES[f]}: ${anFmt(anValSel(f)/v)}`:'';}).filter(Boolean).join(' · ')}</div>
-    </div>
-    <div class="an-kpi">
-      <div class="an-kpi-label">${varPct!==null?'Variação no período':'Meses selecionados'}</div>
-      <div class="an-kpi-val" style="color:${varPct===null?'var(--text)':varPct>=0?'var(--green)':'var(--red)'}">${varPct!==null?(varPct>=0?'+':'')+varPct+'%':anState.selMonths.size+' meses'}</div>
-      <div class="an-kpi-sub">${varPct!==null?`${AN.months[sel[0]]} vs ${AN.months[sel[sel.length-1]]} · volume de itens`:'Jan–Mai 2026'}</div>
-    </div>`;
-}
-
-/* ── Insights dinâmicos ── */
-function anBuildInsights() {
-  const lojas = anGetLojas();
-  const f3cl  = anSumSel(AN.closing[3]);
-  const f3tot = anSumSel(AN.vol[3]);
-  const f3pct = f3tot>0?Math.round(f3cl/f3tot*100):0;
-  const f6tot = anSumSel(AN.vol[6]);
-  const f6sent= anSumSel(AN.sent[6]);
-  const f6pct = f6tot>0?Math.round(f6sent/f6tot*100):0;
-  const tickets= lojas.map(f=>{const v=anVolSel(f);return v>0?Math.round(anValSel(f)/v):0;});
-  const maxT = Math.max(...tickets);
-  const maxTLoja = AN_LOJA_NAMES[lojas[tickets.indexOf(maxT)]];
-
-  const sel = [...anState.selMonths].sort((a,b)=>a-b);
-  let trendTxt = 'Selecione ≥ 2 meses para ver tendência.';
-  if (sel.length>=2) {
-    const v0 = lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
-    const v1 = lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
-    const p = v0>0?Math.round((v1-v0)/v0*100):0;
-    trendTxt = `${AN.months[sel[0]]}→${AN.months[sel[sel.length-1]]}: ${p>=0?'+':''}${p}% em volume combinado.`;
-  }
-
-  const ins = [
-    lojas.includes(3) && f3pct>40
-      ? {t:'danger',l:'⚠ Backlog crítico — Iguatemi',tx:`${f3pct}% dos itens em "closing" (${f3cl.toLocaleString('pt-BR')} un). Gargalo de expedição na unidade Iguatemi — pedidos de Jan/Fev represados.`}
-      : lojas.includes(3)
-        ? {t:'ok',l:'✅ Backlog Iguatemi controlado',tx:`Apenas ${f3pct}% em "closing" no período selecionado. Expedição normalizada.`}
-        : null,
-    lojas.includes(6) && f6pct>=95
-      ? {t:'ok',l:'✅ PKS — referência operacional',tx:`${f6pct}% dos itens já enviados. Zero cancelamentos. Pipeline mais limpo das 3 lojas.`}
-      : lojas.includes(6)
-        ? {t:'warn',l:'⚠ PKS abaixo do padrão',tx:`Taxa de envio em ${f6pct}% no período filtrado. Investigar backlog.`}
-        : null,
-    {t:'info',l:'📉 Tendência de volume',tx:trendTxt+` iPhone 17 Pro Max já é top-3 SKU em Cases nas 3 lojas.`},
-    {t:'info',l:'💎 Maior ticket médio',tx:`${maxTLoja}: R$${maxT}/item. Tote Bag CD (R$240+), Mala Joy CD (R$295+) e Mochila Rodinhas BTS (R$540+) são os maiores geradores de valor por unidade.`},
-  ].filter(Boolean);
-
-  document.getElementById('an-insights').innerHTML = ins.map(({t,l,tx})=>`
-    <div class="an-insight an-insight-${t}">
-      <p class="an-i-label">${l}</p>
-      <p class="an-i-text">${tx}</p>
-    </div>`).join('');
-}
-
-/* ── Charts ── */
-function anBuildCharts() {
-  const lojas = anGetLojas();
-  const sel   = [...anState.selMonths].sort((a,b)=>a-b);
-  const labels = sel.map(i=>AN.months[i]);
-
-  if (anVolChart) anVolChart.destroy();
-  anVolChart = new Chart(document.getElementById('an-vol-chart'), {
-    type:'bar',
-    data:{labels, datasets: lojas.map(f=>({
-      label: AN_LOJA_NAMES[f],
-      data: sel.map(i=>AN.vol[f][i]),
-      backgroundColor: AN_LOJA_COLORS[f]+'99',
-      borderColor: AN_LOJA_COLORS[f],
-      borderWidth:1,
-      borderRadius:3, stack:'s'
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString('pt-BR')+' itens'}}},
-      scales:{
-        x:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
-        y:{stacked:true,ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}
-      }}
-  });
-
-  if (anValChart) anValChart.destroy();
-  anValChart = new Chart(document.getElementById('an-val-chart'), {
-    type:'line',
-    data:{labels, datasets: lojas.map(f=>({
-      label: AN_LOJA_NAMES[f],
-      data: sel.map(i=>AN.val[f][i]),
-      borderColor: AN_LOJA_COLORS[f],
-      backgroundColor:'transparent',
-      pointBackgroundColor: AN_LOJA_COLORS[f],
-      pointRadius:4, tension:0.3
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+anFmt(ctx.parsed.y)}}},
-      scales:{
-        x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
-        y:{ticks:{color:'#6B7280',font:{size:10},callback:v=>anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}
-      }}
-  });
-
-  if (anMixChart) anMixChart.destroy();
-  anMixChart = new Chart(document.getElementById('an-mix-chart'), {
-    type:'bar',
-    data:{
-      labels: lojas.map(f=>AN_LOJA_NAMES[f]),
-      datasets: AN_TOP8.map((c,i)=>({
-        label:c,
-        data: lojas.map(f => [...anState.selMonths].reduce((s,mi)=>s+(AN.catVal[f]?.[c]?.[mi]||0),0)),
-        backgroundColor:AN_TOP8_COLORS[i]+'BB',
-        borderColor:AN_TOP8_COLORS[i],
-        borderWidth:1,
-        borderRadius:3, stack:'s'
-      }))
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10},boxWidth:10,padding:6}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+anFmt(ctx.parsed.y)}}},
-      scales:{
-        x:{stacked:true,ticks:{color:'#6B7280',font:{size:11}},grid:{display:false}},
-        y:{stacked:true,ticks:{color:'#6B7280',font:{size:10},callback:v=>anFmtK(v)},grid:{color:'rgba(255,255,255,.04)'}}
-      }}
-  });
-}
-
-/* ── Pareto ── */
-function anBuildPareto() {
-  const lojas = anGetLojas();
-  const cats = {};
-  lojas.forEach(f=>{
-    AN_TOP8.forEach(c=>{
-      const v = [...anState.selMonths].reduce((s,i)=>s+(AN.catVal[f]?.[c]?.[i]||0),0);
-      cats[c]=(cats[c]||0)+v;
-    });
-  });
-  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
-  const totalV = anSum(sorted.map(x=>x[1]));
-  const maxV   = sorted[0]?.[1]||1;
-
-  document.getElementById('an-pareto').innerHTML = sorted.map(([c,v])=>{
-    const pct = totalV>0?Math.round(v/totalV*100):0;
-    const bw  = Math.round(v/maxV*100);
-    const color = AN_TOP8_COLORS[AN_TOP8.indexOf(c)]||'#4F7EFF';
-    return `<div class="an-pareto-row">
-      <span class="an-pareto-lbl" title="${c}">${c}</span>
-      <div class="an-pareto-bg"><div class="an-pareto-fill" style="width:${bw}%;background:${color}"></div></div>
-      <span class="an-pareto-val">${anFmtK(v)}</span>
-      <span class="an-pareto-pct">${pct}%</span>
-    </div>`;
-  }).join('');
-}
-
-/* ── Tabela comparativa ── */
-function anBuildComp() {
-  const lojas = anGetLojas();
-  const itens  = lojas.map(f=>anVolSel(f));
-  const vals   = lojas.map(f=>anValSel(f));
-  const sent   = lojas.map(f=>anSumSel(AN.sent[f]));
-  const cls    = lojas.map(f=>anSumSel(AN.closing[f]));
-  const canc   = lojas.map(f=>anSumSel(AN.canc[f]));
-  const pctS   = itens.map((n,i)=>n>0?Math.round(sent[i]/n*100):0);
-  const pctC   = itens.map((n,i)=>n>0?Math.round(cls[i]/n*100):0);
-  const ticket = itens.map((n,i)=>n>0?vals[i]/n:0);
-
-  const head = `<tr style="background:var(--surface)"><th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Indicador</th>${lojas.map(f=>`<th style="padding:9px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:${AN_LOJA_COLORS[f]};border-bottom:1px solid var(--border)">${AN_LOJA_NAMES[f]}</th>`).join('')}</tr>`;
-  document.querySelector('#an-comp-body').closest('table').querySelector('thead').innerHTML = head;
-
-  const rows = [
-    ['Itens consumidos',   itens.map(v=>v.toLocaleString('pt-BR')), []],
-    ['Valor gerado',       vals.map(v=>anFmtK(v)),                  []],
-    ['Ticket médio/item',  ticket.map(v=>v>0?anFmt(v):'—'),         []],
-    ['% itens "sent"',     pctS.map(v=>v+'%'), pctS.map(v=>v>=90?'an-ok':v>=70?'an-warn':'an-danger')],
-    ['% itens "closing"',  pctC.map(v=>v+'%'), pctC.map(v=>v<=5?'an-ok':v<=30?'an-warn':'an-danger')],
-    ['Cancelamentos',      canc.map(v=>v>0?v.toLocaleString('pt-BR'):'0'), canc.map(v=>v===0?'an-ok':v<50?'an-warn':'an-danger')],
-  ];
-
-  document.getElementById('an-comp-body').innerHTML = rows.map(([label,vals,cls])=>`<tr>
-    <td style="color:var(--muted);font-size:11px">${label}</td>
-    ${lojas.map((_,i)=>`<td class="${cls[i]||''}">${vals[i]}</td>`).join('')}
-  </tr>`).join('');
-}
-
-/* ── Filtro de período ── */
-document.getElementById('an-month-btns').addEventListener('click', e=>{
-  const btn = e.target.closest('.an-mb[data-m]');
-  if (!btn) return;
-  const m = parseInt(btn.dataset.m);
-  if (anState.selMonths.has(m)) {
-    if (anState.selMonths.size > 1) { anState.selMonths.delete(m); btn.classList.remove('active'); }
-  } else {
-    anState.selMonths.add(m); btn.classList.add('active');
-  }
-  anState.pg = 0;
-  anUpdate();
+/* ═════════════════════ FILTROS ═════════════════════ */
+document.getElementById('an-month-btns').addEventListener('click',e=>{
+  const btn=e.target.closest('.an-mb[data-m]');
+  if(!btn)return;
+  const m=parseInt(btn.dataset.m);
+  if(anState.selMonths.has(m)){if(anState.selMonths.size>1){anState.selMonths.delete(m);btn.classList.remove('active');}}
+  else{anState.selMonths.add(m);btn.classList.add('active');}
+  anState.pg=0; anUpdate();
 });
 
-/* ── Filtro de loja ── */
-document.getElementById('an-loja-btns').addEventListener('click', e=>{
-  const btn = e.target.closest('.an-mb[data-l]');
-  if (!btn) return;
-  anState.selLoja = btn.dataset.l;
+document.getElementById('an-loja-btns').addEventListener('click',e=>{
+  const btn=e.target.closest('.an-mb[data-l]');
+  if(!btn)return;
+  anState.selLoja=btn.dataset.l;
   document.querySelectorAll('#an-loja-btns .an-mb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  anState.pg = 0;
-  anUpdate();
+  anState.pg=0; anUpdate();
 });
 
-function anSelAll() {
-  [0,1,2,3,4].forEach(i=>{anState.selMonths.add(i);document.querySelector(`.an-mb[data-m="${i}"]`).classList.add('active');});
-  anUpdate();
-}
-function anSelNone() {
-  const first=[...anState.selMonths].sort()[0]??0;
-  anState.selMonths.clear();anState.selMonths.add(first);
-  document.querySelectorAll('.an-mb[data-m]').forEach(b=>{b.classList.remove('active');if(parseInt(b.dataset.m)===first)b.classList.add('active');});
-  anUpdate();
-}
+function anSelAll(){[0,1,2,3,4].forEach(i=>{anState.selMonths.add(i);document.querySelector(`.an-mb[data-m="${i}"]`).classList.add('active');});anUpdate();}
+function anSelNone(){const first=[...anState.selMonths].sort()[0]??0;anState.selMonths.clear();anState.selMonths.add(first);document.querySelectorAll('.an-mb[data-m]').forEach(b=>{b.classList.remove('active');if(parseInt(b.dataset.m)===first)b.classList.add('active');});anUpdate();}
 function anPgCh(d){anState.pg+=d;anBuildSKUs();}
 
-/* ── Resumo do filtro ── */
-function anUpdateSummary() {
+function anUpdateSummary(){
   const sel=[...anState.selMonths].sort((a,b)=>a-b);
   const names=sel.map(i=>AN.months[i]);
   const lojaStr=anState.selLoja==='all'?'Todas as lojas':AN_LOJA_NAMES[parseInt(anState.selLoja)];
-  const cat=document.getElementById('an-cat-sel')?.value;
-  document.getElementById('an-filter-summary').textContent=
-    `${names[0]}${names.length>1?'–'+names[names.length-1]:''} 2026 · ${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}`;
+  const cat=(document.getElementById('an-cat-sel')?.value||'').trim();
+  document.getElementById('an-filter-summary').textContent=`${names[0]}${names.length>1?'–'+names[names.length-1]:''} 2026 · ${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}`;
 }
 
-/* ── Update geral ── */
-function anUpdate() {
-  anUpdateSummary();
-  anBuildKPIs();
-  anBuildInsights();
-  anBuildCharts();
-  anBuildPareto();
-  anBuildComp();
-  anBuildSKUs();
+function anUpdate(){
+  anUpdateSummary(); anBuildKPIs(); anBuildInsights();
+  anBuildCharts(); anBuildPareto(); anBuildComp(); anBuildSKUs();
 }
 
-/* ── Hook no navClick para inicializar ao abrir a seção ── */
-const _origNavClick = typeof navClick === 'function' ? navClick : null;
-// sobrescrevemos navClick para detectar abertura da seção análise
-const _navClickBase = window.navClick;
-window.navClick = function(sec, btn) {
-  _navClickBase(sec, btn);
-  if (sec === 'analise') {
-    // pequeno timeout para garantir que o canvas esteja visível antes de iniciar
-    setTimeout(anUpdate, 60);
-  }
-};
+/* ═════ Hook navClick ═════ */
+const _navClickBase=window.navClick;
+window.navClick=function(sec,btn){_navClickBase(sec,btn);if(sec==='analise')setTimeout(anUpdate,80);};
 </script>
 </body>
 </html>
