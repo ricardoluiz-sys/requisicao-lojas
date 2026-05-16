@@ -769,49 +769,107 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- ═ TOP CONSUMO ═ -->
     <section id="sec-consumo" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div><h1>Top Produtos Consumidos</h1><p>Ranking por faturamento e consumo real · dados Metabase</p></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="tc-periodo" onchange="tcRender()"
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-            <option value="30">Últimos 30 dias</option>
-            <option value="60">Últimos 60 dias</option>
-            <option value="90">Últimos 90 dias</option>
-            <option value="180" selected>Últimos 180 dias</option>
-          </select>
+        <div><h1>Top Produtos Consumidos</h1><p>Ranking por faturamento e consumo real · Jan–Mai 2026 · Banco Factory</p></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <!-- Badge atualização -->
+          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px">
+            <span style="font-size:13px">🔄</span>
+            <div>
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">15/05/2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── BARRA DE FILTROS ─── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">
+
+        <!-- Meses -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap" id="tc-month-btns">
+            <button class="an-mb active" data-m="0" onclick="tcToggleMes(0)" title="Jan 2026">Jan</button>
+            <button class="an-mb active" data-m="1" onclick="tcToggleMes(1)" title="Fev 2026">Fev</button>
+            <button class="an-mb active" data-m="2" onclick="tcToggleMes(2)" title="Mar 2026">Mar</button>
+            <button class="an-mb active" data-m="3" onclick="tcToggleMes(3)" title="Abr 2026">Abr</button>
+            <button class="an-mb active" data-m="4" onclick="tcToggleMes(4)" title="01/05–15/05/2026" style="position:relative">
+              Mai<span style="position:absolute;top:-6px;right:-6px;font-size:7px;background:var(--gold);color:#000;border-radius:4px;padding:1px 3px;font-weight:700;line-height:1.2">1-15</span>
+            </button>
+          </div>
+          <!-- Presets -->
+          <div style="margin-top:7px;display:flex;gap:3px;flex-wrap:wrap">
+            <button class="an-mb" onclick="tcQuick(4)" style="font-size:10px;padding:2px 8px">Mai atual</button>
+            <button class="an-mb" onclick="tcQuick(3,4)" style="font-size:10px;padding:2px 8px">Abr–Mai</button>
+            <button class="an-mb" onclick="tcQuick(2,3,4)" style="font-size:10px;padding:2px 8px">Mar–Mai</button>
+            <button class="an-mb" onclick="tcQuick(1,2,3,4)" style="font-size:10px;padding:2px 8px">Fev–Mai</button>
+            <button class="an-mb" onclick="tcQuick(0,1,2,3,4)" style="font-size:10px;padding:2px 8px">Todo período</button>
+          </div>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Loja -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Loja</div>
           <select id="tc-loja" onchange="tcRender()"
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
             <option value="todas">Todas as lojas</option>
             <option value="PKS">PKS Brasília</option>
             <option value="Iguatemi">Iguatemi</option>
             <option value="Anália Franco">Anália Franco</option>
           </select>
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Categoria -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Categoria</div>
           <select id="tc-cat" onchange="tcRender()"
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
             <option value="todas">Todas as categorias</option>
-            <option value="Case">Case</option>
-            <option value="Têxtil">Têxtil</option>
-            <option value="Térmico">Térmico</option>
-            <option value="Mala">Mala</option>
-            <option value="Gift">Gift</option>
-            <option value="Tech">Tech</option>
+            <option value="Capinhas">Capinhas</option>
+            <option value="Tote Bags">Tote Bags</option>
+            <option value="Malas">Malas</option>
+            <option value="Mochilas">Mochilas</option>
+            <option value="Lancheiras">Lancheiras</option>
+            <option value="Bolsas">Bolsas</option>
+            <option value="Bolsas Térmicas">Bolsas Térmicas</option>
+            <option value="Garrafas">Garrafas</option>
+            <option value="Copos">Copos</option>
+            <option value="Necessaires">Necessaires</option>
+            <option value="Eletrônicos">Eletrônicos</option>
+            <option value="Acessórios">Acessórios</option>
             <option value="Pets">Pets</option>
           </select>
-          <input type="text" id="tc-busca" placeholder="Buscar produto..."
-            style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:190px;"
+        </div>
+
+        <div style="width:1px;background:var(--border);align-self:stretch"></div>
+
+        <!-- Busca -->
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Buscar</div>
+          <input type="text" id="tc-busca" placeholder="🔍 Cor, modelo, SKU..."
+            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:180px;"
             oninput="tcRender()"
             onfocus="this.style.borderColor='var(--accent)'"
             onblur="this.style.borderColor='var(--border)'"/>
+        </div>
+
+        <!-- Resumo -->
+        <div style="margin-left:auto;text-align:right;align-self:flex-end">
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="tc-filter-range">Jan–Mai 2026</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px" id="tc-filter-sub">5 meses · Todas as lojas</div>
         </div>
       </div>
 
       <!-- Métricas rápidas -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px" id="tc-metrics"></div>
 
-      <!-- Grid lado a lado PKS / IGU / ANA ou tabela unificada -->
+      <!-- Tabela de ranking -->
       <div id="tc-content"></div>
-    </section>
-
-    <!-- ═ RUPTURAS ═ -->
+    </section><!-- ═ RUPTURAS ═ -->
     <section id="sec-ruptura" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div><h1>Consulta de Rupturas</h1><p>Itens em ruptura com previsão de chegada confirmada.</p></div>
@@ -1261,7 +1319,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .an-mb.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ── Cards de insight ── */
-.an-insight{border-left:3px solid;border-radius:0 9px 9px 0;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+/* ── KPI cards ── */
+.an-kpi{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s;}
+.an-kpi:hover{border-color:rgba(79,126,255,.35);}
+.an-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-accent,var(--accent));opacity:.7;}
+.an-kpi-icon{font-size:22px;margin-bottom:8px;display:block;line-height:1;}
+.an-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:6px;}
+.an-kpi-val{font-size:28px;font-weight:800;line-height:1;margin-bottom:10px;letter-spacing:-.5px;}
+.an-kpi-bar-wrap{display:flex;gap:2px;margin-bottom:8px;height:4px;border-radius:2px;overflow:hidden;}
+.an-kpi-bar-seg{height:100%;border-radius:2px;}
+.an-kpi-sub{font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
+.an-kpi-loja{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);}
+.an-kpi-loja-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.an-kpi-loja-name{font-weight:600;}
+
+/* ── Insight cards ── */
+.an-insight{border-radius:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .2s;}
+.an-insight:hover{border-color:rgba(255,255,255,.15);}
+.an-insight::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;}
+.an-insight-ok::before{background:var(--green);}
+.an-insight-ok{background:rgba(46,204,136,.04);border-color:rgba(46,204,136,.15);}
+.an-insight-warn::before{background:var(--gold);}
+.an-insight-warn{background:rgba(245,183,49,.04);border-color:rgba(245,183,49,.15);}
+.an-insight-danger::before{background:var(--red);}
+.an-insight-danger{background:rgba(255,92,92,.04);border-color:rgba(255,92,92,.15);}
+.an-insight-info::before{background:var(--accent);}
+.an-insight-info{background:rgba(79,126,255,.04);border-color:rgba(79,126,255,.15);}
+.an-i-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.an-i-icon{font-size:16px;flex-shrink:0;}
+.an-i-label{font-size:12px;font-weight:700;color:var(--text);}
+.an-i-text{font-size:11px;color:var(--muted);line-height:1.5;padding-left:0;}
 
 /* ── Pareto (Top Categorias) ── */
 .an-pareto-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
@@ -2723,14 +2810,47 @@ const TC_CAT_MAP = {
   'Guia Pet':'Pets','Peitoral Pet':'Pets','Coleira Pet':'Pets',
 };
 const TC_LOJA_MAP = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
+const TC_FID_MAP  = {'Iguatemi':3,'PKS':6,'Anália Franco':7};
+const TC_MONTHS   = ['Jan','Fev','Mar','Abr','Mai'];
+
+/* Estado dos meses selecionados */
+const tcState = { selMonths: new Set([0,1,2,3,4]) };
+
+function tcToggleMes(i) {
+  if (tcState.selMonths.has(i) && tcState.selMonths.size > 1) {
+    tcState.selMonths.delete(i);
+  } else {
+    tcState.selMonths.add(i);
+  }
+  document.querySelectorAll('#tc-month-btns .an-mb[data-m]').forEach(b => {
+    b.classList.toggle('active', tcState.selMonths.has(parseInt(b.dataset.m)));
+  });
+  tcRender();
+}
+
+function tcQuick(...months) {
+  tcState.selMonths.clear();
+  document.querySelectorAll('#tc-month-btns .an-mb[data-m]').forEach(b => b.classList.remove('active'));
+  months.forEach(i => {
+    tcState.selMonths.add(i);
+    const btn = document.querySelector(`#tc-month-btns .an-mb[data-m="${i}"]`);
+    if (btn) btn.classList.add('active');
+  });
+  tcRender();
+}
+
+function tcScaleForFactory(fid) {
+  const dist = AN_MONTHLY_DIST[fid];
+  if (!dist) return 1;
+  return [...tcState.selMonths].reduce((s, m) => s + (dist[m] || 0), 0);
+}
 
 function tcGetData() {
-  const dias       = parseInt(document.getElementById('tc-periodo')?.value)||180;
-  const lojaFiltro = document.getElementById('tc-loja')?.value||'todas';
-  const catFiltro  = document.getElementById('tc-cat')?.value||'todas';
-  const busca      = (document.getElementById('tc-busca')?.value||'').toLowerCase().trim();
+  const lojaFiltro = document.getElementById('tc-loja')?.value || 'todas';
+  const catFiltro  = document.getElementById('tc-cat')?.value  || 'todas';
+  const busca      = (document.getElementById('tc-busca')?.value || '').toLowerCase().trim();
   const words      = busca ? busca.split(/\s+/).filter(Boolean) : [];
-  const scale      = dias / 150;
+
   return AN.skus.filter(r => {
     const lojaName = TC_LOJA_MAP[r[0]];
     if (!lojaName) return false;
@@ -2742,27 +2862,47 @@ function tcGetData() {
       if (!words.every(w => hay.includes(w))) return false;
     }
     return r[4] > 0;
-  }).map(r => ({
-    loja:       TC_LOJA_MAP[r[0]],
-    prod:       r[2] + (r[3] ? ' / '+r[3] : ''),
-    cat:        TC_CAT_MAP[r[1]] || r[1],
-    fatPeriodo: Math.round(r[5] * scale),
-    cPeriodo:   Math.round(r[4] * scale),
-  })).sort((a,b) => b.fatPeriodo - a.fatPeriodo);
+  }).map(r => {
+    const scale = tcScaleForFactory(r[0]);
+    return {
+      loja:       TC_LOJA_MAP[r[0]],
+      prod:       r[2] + (r[3] ? ' / '+r[3] : ''),
+      cat:        TC_CAT_MAP[r[1]] || r[1],
+      fatPeriodo: Math.round(r[5] * scale),
+      cPeriodo:   Math.round(r[4] * scale),
+    };
+  }).sort((a,b) => b.fatPeriodo - a.fatPeriodo);
 }
 
 function tcRender() {
   const rows = tcGetData();
-  const dias = parseInt(document.getElementById('tc-periodo')?.value)||180;
+  const sel  = [...tcState.selMonths].sort((a,b) => a-b);
+  const nMeses = sel.length;
+  const loja   = document.getElementById('tc-loja')?.value || 'todas';
+  const nLojas = loja !== 'todas' ? 1 : 3;
+
+  // Atualizar resumo de filtro
+  const rangeEl = document.getElementById('tc-filter-range');
+  const subEl   = document.getElementById('tc-filter-sub');
+  const lojaStr = loja === 'todas' ? 'Todas as lojas' : loja;
+  if (rangeEl) {
+    const names = sel.map(i => TC_MONTHS[i]);
+    rangeEl.textContent = names.length === 1 ? `${names[0]} 2026` : `${names[0]}–${names[names.length-1]} 2026`;
+  }
+  if (subEl) {
+    subEl.textContent = `${nMeses} ${nMeses===1?'mês':'meses'} · ${lojaStr}${sel.includes(4)?' · ⚠ Mai parcial':''}`;
+  }
+
   const totalFat  = rows.reduce((s,r) => s+r.fatPeriodo, 0);
   const totalCons = rows.reduce((s,r) => s+r.cPeriodo, 0);
   const topProd   = rows[0];
-  const nLojas    = [...new Set(rows.map(r=>r.loja))].length;
+  const nLojasVis = [...new Set(rows.map(r=>r.loja))].length;
+  const nMesesLabel = nMeses + ' ' + (nMeses===1?'mês':'meses');
   document.getElementById('tc-metrics').innerHTML = [
-    {l:'Faturamento ('+dias+'d)',v:'R\u00a0'+totalFat.toLocaleString('pt-BR'),s:rows.length+' SKUs \u00b7 '+nLojas+' '+( nLojas===1?'loja':'lojas')},
-    {l:'#1 produto',v:topProd?(topProd.prod.length>28?topProd.prod.substring(0,28)+'\u2026':topProd.prod):'\u2014',s:topProd?'R\u00a0'+topProd.fatPeriodo.toLocaleString('pt-BR'):'\u2014'},
-    {l:'Consumo total ('+dias+'d)',v:totalCons.toLocaleString('pt-BR'),s:'unidades vendidas'},
-    {l:'Ticket médio',v:totalCons>0?'R\u00a0'+Math.round(totalFat/totalCons).toLocaleString('pt-BR'):'\u2014',s:'por unidade'},
+    {l:'Faturamento ('+nMesesLabel+')',v:'R$\u00a0'+totalFat.toLocaleString('pt-BR'),s:rows.length+' SKUs \u00b7 '+nLojasVis+' '+(nLojasVis===1?'loja':'lojas')},
+    {l:'#1 produto',v:topProd?(topProd.prod.length>28?topProd.prod.substring(0,28)+'\u2026':topProd.prod):'\u2014',s:topProd?'R$\u00a0'+topProd.fatPeriodo.toLocaleString('pt-BR'):'\u2014'},
+    {l:'Consumo total ('+nMesesLabel+')',v:totalCons.toLocaleString('pt-BR'),s:'unidades vendidas'},
+    {l:'Ticket médio',v:totalCons>0?'R$\u00a0'+Math.round(totalFat/totalCons).toLocaleString('pt-BR'):'\u2014',s:'por unidade'},
   ].map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">${m.l}</div>
     <div style="font-size:20px;font-weight:700">${m.v}</div>
@@ -2783,7 +2923,7 @@ function tcRender() {
       <td style="padding:9px 12px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.prod}">${r.prod}</td>
       <td style="padding:9px 12px;color:var(--muted);font-size:11px">${r.cat}</td>
       <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums">${r.cPeriodo.toLocaleString('pt-BR')}</td>
-      <td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--green)">R\u00a0${r.fatPeriodo.toLocaleString('pt-BR')}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--green)">R$\u00a0${r.fatPeriodo.toLocaleString('pt-BR')}</td>
       <td style="padding:9px 12px;min-width:80px"><div style="height:7px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.round(r.fatPeriodo/maxFat*100)}%;background:var(--accent);border-radius:3px"></div></div></td>
     </tr>`).join('')+'</tbody></table></div>';
 }
@@ -4092,20 +4232,69 @@ function anBuildKPIs() {
   const vals  = lojas.map(f => anValSel(f));
   const tot   = anSum(itens);
   const totV  = anSum(vals);
-  const ticket = tot>0 ? totV/tot : 0;
+  const ticket = tot > 0 ? totV / tot : 0;
+  const sel = [...anState.selMonths].sort((a,b) => a - b);
 
-  const sel = [...anState.selMonths].sort((a,b)=>a-b);
-  let varPct=null;
-  if (sel.length>=2) {
-    const v0=lojas.reduce((s,f)=>s+AN.vol[f][sel[0]],0);
-    const v1=lojas.reduce((s,f)=>s+AN.vol[f][sel[sel.length-1]],0);
-    if (v0>0) varPct=Math.round((v1-v0)/v0*100);
+  let varPct = null;
+  if (sel.length >= 2) {
+    const v0 = lojas.reduce((s,f) => s + AN.vol[f][sel[0]], 0);
+    const v1 = lojas.reduce((s,f) => s + AN.vol[f][sel[sel.length-1]], 0);
+    if (v0 > 0) varPct = Math.round((v1-v0)/v0*100);
   }
-  document.getElementById('an-kpis').innerHTML=`
-    <div class="an-kpi"><div class="an-kpi-label">Receita gerada (R$)</div><div class="an-kpi-val" style="color:#4F7EFF">${anFmtK(totV)}</div><div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anFmtK(vals[lojas.indexOf(f)])}`).join(' · ')}</div></div>
-    <div class="an-kpi"><div class="an-kpi-label">Itens produzidos</div><div class="an-kpi-val">${tot.toLocaleString('pt-BR')}</div><div class="an-kpi-sub">${lojas.map(f=>`${AN_LOJA_NAMES[f]}: ${anVolSel(f).toLocaleString('pt-BR')}`).join(' · ')}</div></div>
-    <div class="an-kpi"><div class="an-kpi-label">Ticket médio / item</div><div class="an-kpi-val">${ticket>0?anFmt(ticket):'—'}</div><div class="an-kpi-sub">${lojas.map(f=>{const v=anVolSel(f);return v>0?`${AN_LOJA_NAMES[f]}: ${anFmt(anValSel(f)/v)}`:''}).filter(Boolean).join(' · ')}</div></div>
-    <div class="an-kpi"><div class="an-kpi-label">${varPct!==null?'Variação no período':'Meses selecionados'}</div><div class="an-kpi-val" style="color:${varPct===null?'var(--text)':varPct>=0?'var(--green)':'var(--red)'}">${varPct!==null?(varPct>=0?'+':'')+varPct+'%':anState.selMonths.size+' meses'}</div><div class="an-kpi-sub">${varPct!==null?`${AN.months[sel[0]]} vs ${AN.months[sel[sel.length-1]]} · volume`:'Jan–Mai 2026'}</div></div>`;
+
+  const LC_DOT  = {3:'var(--igu)', 6:'var(--pks)', 7:'var(--ana)'};
+  const LC_NAME = {3:'Iguatemi',   6:'PKS',        7:'Anália'};
+
+  function lojaRows(getData) {
+    return lojas.map(f => `<div class="an-kpi-loja">
+      <span class="an-kpi-loja-dot" style="background:${LC_DOT[f]}"></span>
+      <span class="an-kpi-loja-name" style="color:${LC_DOT[f]}">${LC_NAME[f]}</span>
+      <span>${getData(f)}</span>
+    </div>`).join('');
+  }
+
+  function barSegs(data) {
+    const total = data.reduce((a,b) => a+b, 0);
+    if (!total) return '';
+    const colors = lojas.map(f => LC_DOT[f]);
+    return data.map((v,i) => `<div class="an-kpi-bar-seg" style="flex:${v||0.001};background:${colors[i]};opacity:.75"></div>`).join('');
+  }
+
+  const kpi4Accent = varPct === null ? 'var(--muted)' : varPct >= 0 ? 'var(--green)' : 'var(--red)';
+  const kpi4Val    = varPct !== null ? `${varPct >= 0 ? '+' : ''}${varPct}%` : `${anState.selMonths.size} ${anState.selMonths.size===1?'mês':'meses'}`;
+  const kpi4Color  = varPct === null ? 'var(--text)' : kpi4Accent;
+  const kpi4Icon   = varPct === null ? '📅' : varPct >= 0 ? '📈' : '📉';
+  const kpi4Sub    = varPct !== null ? `${AN.months[sel[0]]} → ${AN.months[sel[sel.length-1]]} · volume` : 'Jan–Mai 2026';
+
+  document.getElementById('an-kpis').innerHTML = `
+    <div class="an-kpi" style="--kpi-accent:var(--pks)">
+      <span class="an-kpi-icon">💰</span>
+      <div class="an-kpi-label">Receita gerada</div>
+      <div class="an-kpi-val" style="color:var(--pks)">${anFmtK(totV)}</div>
+      <div class="an-kpi-bar-wrap">${barSegs(vals)}</div>
+      <div class="an-kpi-sub">${lojaRows(f => anFmtK(anValSel(f)))}</div>
+    </div>
+    <div class="an-kpi" style="--kpi-accent:var(--igu)">
+      <span class="an-kpi-icon">📦</span>
+      <div class="an-kpi-label">Itens produzidos</div>
+      <div class="an-kpi-val">${tot.toLocaleString('pt-BR')}</div>
+      <div class="an-kpi-bar-wrap">${barSegs(itens)}</div>
+      <div class="an-kpi-sub">${lojaRows(f => anVolSel(f).toLocaleString('pt-BR'))}</div>
+    </div>
+    <div class="an-kpi" style="--kpi-accent:var(--ana)">
+      <span class="an-kpi-icon">🏷️</span>
+      <div class="an-kpi-label">Ticket médio / item</div>
+      <div class="an-kpi-val">${ticket > 0 ? anFmt(ticket) : '—'}</div>
+      <div class="an-kpi-bar-wrap">${barSegs(lojas.map(f => {const v=anVolSel(f);return v>0?anValSel(f)/v:0;}))}</div>
+      <div class="an-kpi-sub">${lojaRows(f => {const v=anVolSel(f);return v>0?anFmt(anValSel(f)/v):'—';})}</div>
+    </div>
+    <div class="an-kpi" style="--kpi-accent:${kpi4Accent}">
+      <span class="an-kpi-icon">${kpi4Icon}</span>
+      <div class="an-kpi-label">${varPct !== null ? 'Variação no período' : 'Período selecionado'}</div>
+      <div class="an-kpi-val" style="color:${kpi4Color}">${kpi4Val}</div>
+      <div class="an-kpi-bar-wrap" style="opacity:0"></div>
+      <div class="an-kpi-sub"><div class="an-kpi-loja"><span>${kpi4Sub}</span></div></div>
+    </div>`;
 }
 
 /* ═════════════════════ INSIGHTS ═════════════════════ */
@@ -4129,7 +4318,17 @@ function anBuildInsights() {
     {t:'info',l:'📉 Tendência de volume',tx:trendTxt+' iPhone 17 Pro Max é top-3 SKU em Cases nas 3 lojas.'},
     {t:'info',l:'💎 Maior ticket médio',tx:`${maxTLoja}: R$${maxT}/item. Tote Bag CD (R$240+), Mala Joy CD (R$295+) e Mochila Rodinhas BTS (R$540+) são os maiores geradores de valor.`},
   ].filter(Boolean);
-  document.getElementById('an-insights').innerHTML=ins.map(({t,l,tx})=>`<div class="an-insight an-insight-${t}"><p class="an-i-label">${l}</p><p class="an-i-text">${tx}</p></div>`).join('');
+    document.getElementById('an-insights').innerHTML = ins.map(({t,l,tx}) => {
+    const icon = l.match(/^(\S+)/)?.[1] || '';
+    const title = l.replace(/^\S+\s*/, '');
+    return `<div class="an-insight an-insight-${t}">
+      <div class="an-i-header">
+        <span class="an-i-icon">${icon}</span>
+        <span class="an-i-label">${title||l}</span>
+      </div>
+      <p class="an-i-text">${tx}</p>
+    </div>`;
+  }).join('');
 }
 
 /* ═════════════════════ CHARTS ═════════════════════ */
