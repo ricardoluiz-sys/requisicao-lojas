@@ -942,21 +942,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="user-grid" id="user-grid"></div>
     </section>
 
-    <!-- ═ DESEMPENHO DE PRODUÇÃO ═ -->
-    <section id="sec-desempenho" class="sec">
+    <!-- ═ DESEMPENHO DE PRODUÇÃO ═ -->\n    <section id="sec-desempenho" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
           <h1>Desempenho de Produção</h1>
-          <p>Tempo de produção dos pedidos Totem · Metabase #26340 · Mai 2026</p>
+          <p>Tempo de produção dos pedidos Totem · Metabase #26340 · Dados ao vivo</p>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <!-- Badge última atualização (dinâmico) -->
           <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
-            <span style="font-size:14px">🔄</span>
+            <span style="font-size:14px">📅</span>
             <div>
-              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Dados disponíveis</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/05 – 14/05/2026</div>
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 14/05/2026 (estático)</div>
             </div>
           </div>
+          <!-- Botão atualizar ao vivo -->
+          <button id="dp-refresh-btn" onclick="dpFetchLive()"
+            style="display:flex;align-items:center;gap:7px;background:var(--accent);border:none;border-radius:9px;padding:8px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <span>🔄</span> Atualizar dados
+          </button>
+          <!-- Botão limpar API key -->
+          <button onclick="dpClearKey()" title="Limpar API Key salva"
+            style="background:transparent;border:1px solid var(--border);border-radius:9px;padding:8px 10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">⚙️</button>
           <div style="font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;background:rgba(29,158,117,.12);color:var(--green)">SLA ≤ 120 min</div>
         </div>
       </div>
@@ -2981,7 +2991,7 @@ function tcRender() {
 /* ═══════════════════════════════════════════════════════════════
    DESEMPENHO DE PRODUÇÃO — Metabase #26340 — Mai 2026
 ═══════════════════════════════════════════════════════════════ */
-const DP_RAW=[
+let DP_RAW=[
 /* dia, loja, pedidos, prontos, em_producao, cancelados,
    mediana_op = mediana excluindo automáticos (<2min),
    mediana_total = mediana geral,
@@ -3033,6 +3043,292 @@ const DP_RAW=[
 ];
 const DP_LC={'PKS':{b:'#4F7EFF',bg:'rgba(79,126,255,.15)'},'Iguatemi':{b:'#2ECC88',bg:'rgba(46,204,136,.15)'},'Anália Franco':{b:'#C084FC',bg:'rgba(192,132,252,.15)'}};
 let dpVC,dpSC,dpTC;
+/* ═══════════════════════════════════════════════════════════════
+   DESEMPENHO — Fetch ao vivo via Metabase API
+   API Key: Metabase Admin → Settings → API Keys
+═══════════════════════════════════════════════════════════════ */
+const MB_BASE = 'https://metabase.gocase.com.br';
+const MB_DB   = 3; // Factory (Postgres)
+
+function dpClearKey() {
+  localStorage.removeItem('mb_api_key');
+  const btn = document.getElementById('dp-refresh-btn');
+  if (btn) { btn.textContent = '🔄 Atualizar dados'; btn.disabled = false; }
+  const lu = document.getElementById('dp-last-update');
+  if (lu) lu.textContent = '01/05 – 14/05/2026 (estático)';
+  alert('API Key removida. Dados estáticos restaurados.\nAo clicar em "Atualizar dados" será solicitada nova chave.');
+}
+
+async function dpFetchLive() {
+  // ── 1. Obter/solicitar API Key ──────────────────────────────────
+  let apiKey = localStorage.getItem('mb_api_key');
+  if (!apiKey) {
+    apiKey = prompt(
+      'Insira sua API Key do Metabase:\n' +
+      '(Admin → Settings → API Keys → Gerar chave)\n\n' +
+      'A chave será salva localmente neste navegador.'
+    );
+    if (!apiKey || !apiKey.trim()) return;
+    apiKey = apiKey.trim();
+    localStorage.setItem('mb_api_key', apiKey);
+  }
+
+  // ── 2. Ler intervalo de datas dos pickers (ou usar mês atual) ──
+  const today     = new Date();
+  const thisMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-01`;
+  const iniVal    = document.getElementById('dp-data-ini')?.value || thisMonth;
+  const fimVal    = document.getElementById('dp-data-fim')?.value || today.toISOString().split('T')[0];
+  const fimDate   = new Date(fimVal + 'T00:00:00');
+  fimDate.setDate(fimDate.getDate() + 1);
+  const fimQuery  = fimDate.toISOString().split('T')[0];
+
+  // ── 3. SQL: mesma lógica do banco, com distribuição de tempos ────
+  const SQL = `WITH base AS (
+  SELECT o.id oid, o.aasm_state, o.created_at,
+    (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
+    CASE f.name
+      WHEN 'Shopping Iguatemi (BR)'    THEN 'Iguatemi'
+      WHEN 'ParkShopping Brasília (BR)' THEN 'PKS'
+      ELSE 'Anália Franco' END loja
+  FROM orders o JOIN companies c ON c.id=o.company_id
+  JOIN factories f ON f.id=c.factory_id
+  WHERE f.operation='totem' AND f.id IN(3,6,7) AND o.deleted_at IS NULL
+    AND o.created_at >= '${iniVal}' AND o.created_at < '${fimQuery}'
+),
+fp AS (
+  SELECT DISTINCT ON(li.order_id) li.order_id,
+    MIN(lipl.created_at) OVER(PARTITION BY li.order_id) t0
+  FROM line_items li JOIN base b ON b.oid=li.order_id
+  JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
+  WHERE lipl.operation IN('production','surface') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  ORDER BY li.order_id, lipl.created_at
+),
+rp AS (
+  SELECT li.order_id, MAX(lipl.created_at) t1
+  FROM line_items li JOIN base b ON b.oid=li.order_id
+  JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
+  WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  GROUP BY li.order_id
+),
+calc AS (
+  SELECT b.dia, b.loja,
+    CASE WHEN b.aasm_state='canceled' THEN 'cancelado'
+         WHEN b.aasm_state='delivered' OR rp.t1 IS NOT NULL THEN 'pronto'
+         ELSE 'em_producao' END status,
+    CASE WHEN rp.t1 IS NOT NULL THEN
+      GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)
+    END pm,
+    CASE WHEN fp.t0 IS NOT NULL THEN 1 ELSE 0 END has_op
+  FROM base b LEFT JOIN fp ON fp.order_id=b.oid LEFT JOIN rp ON rp.order_id=b.oid
+)
+SELECT dia::text, loja,
+  COUNT(*) pedidos,
+  COUNT(*) FILTER(WHERE status='pronto') prontos,
+  COUNT(*) FILTER(WHERE status='em_producao') em_producao,
+  COUNT(*) FILTER(WHERE status='cancelado') cancelados,
+  COUNT(*) FILTER(WHERE has_op=1) com_operador,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm<=30) d30,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm<=120) d120,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120) acima120,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm BETWEEN 0 AND 15) f0_15,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>15 AND pm<=30) f15_30,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>30 AND pm<=60) f30_60,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>60 AND pm<=120) f60_120,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120 AND pm<=240) f120_240,
+  COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>240) f240_mais,
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)
+    FILTER(WHERE pm IS NOT NULL AND pm>=2)::numeric,1) mediana_op,
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric,1) mediana_total
+FROM calc GROUP BY dia, loja ORDER BY dia, loja`;
+
+  // ── 4. Loading state ─────────────────────────────────────────────
+  const btn = document.getElementById('dp-refresh-btn');
+  const lu  = document.getElementById('dp-last-update');
+  if (btn) { btn.innerHTML = '<span>⏳</span> Carregando...'; btn.disabled = true; }
+
+  try {
+    // ── 5. Chamar Metabase API ────────────────────────────────────
+    const resp = await fetch(`${MB_BASE}/api/dataset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Metabase-API-Key': apiKey
+      },
+      body: JSON.stringify({ database: MB_DB, type: 'native', native: { query: SQL } })
+    });
+
+    if (resp.status === 401) {
+      localStorage.removeItem('mb_api_key');
+      throw new Error('API Key inválida ou expirada. Chave removida — tente novamente.');
+    }
+    if (!resp.ok) throw new Error(`Erro ${resp.status}: ${resp.statusText}`);
+
+    const result = await resp.json();
+    if (result.error) throw new Error(result.error);
+
+    // ── 6. Converter resposta → DP_RAW ───────────────────────────
+    const cols = result.data.cols.map(c => c.name);
+    const rows = result.data.rows;
+
+    // Limpar e repopular DP_RAW
+    DP_RAW.length = 0;
+    rows.forEach(row => {
+      const r = Object.fromEntries(cols.map((c, i) => [c, row[i]]));
+      DP_RAW.push({
+        dia:         r.dia,
+        loja:        r.loja,
+        pedidos:     r.pedidos     || 0,
+        prontos:     r.prontos     || 0,
+        em_producao: r.em_producao || 0,
+        cancelados:  r.cancelados  || 0,
+        com_operador:r.com_operador|| 0,
+        d30:         r.d30         || 0,
+        d120:        r.d120        || 0,
+        acima120:    r.acima120    || 0,
+        f0_15:       r.f0_15       || 0,
+        f15_30:      r.f15_30      || 0,
+        f30_60:      r.f30_60      || 0,
+        f60_120:     r.f60_120     || 0,
+        f120_240:    r.f120_240    || 0,
+        f240_mais:   r.f240_mais   || 0,
+        mediana_op:  r.mediana_op,
+        mediana_total: r.mediana_total,
+      });
+    });
+
+    // ── 7. Segunda query: operadores por dia ─────────────────────
+    if (btn) btn.innerHTML = '<span>⏳</span> Buscando operadores...';
+
+    const SQL_OPR = `WITH base AS (
+  SELECT o.id oid, o.aasm_state, o.created_at,
+    (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
+    CASE f.name WHEN 'Shopping Iguatemi (BR)' THEN 'Iguatemi'
+                WHEN 'ParkShopping Brasília (BR)' THEN 'PKS'
+                ELSE 'Anália Franco' END loja
+  FROM orders o JOIN companies c ON c.id=o.company_id
+  JOIN factories f ON f.id=c.factory_id
+  WHERE f.operation='totem' AND f.id IN(3,6,7) AND o.deleted_at IS NULL
+    AND o.created_at>='${iniVal}' AND o.created_at<'${fimQuery}'
+),
+fp AS (
+  SELECT DISTINCT ON(li.order_id) li.order_id,
+    MIN(lipl.created_at) OVER(PARTITION BY li.order_id) t0, lipl.user_id uid
+  FROM line_items li JOIN base b ON b.oid=li.order_id
+  JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
+  WHERE lipl.operation IN('production','surface') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  ORDER BY li.order_id, lipl.created_at
+),
+rp AS (
+  SELECT li.order_id, MAX(lipl.created_at) t1
+  FROM line_items li JOIN base b ON b.oid=li.order_id
+  JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
+  WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  GROUP BY li.order_id
+)
+SELECT b.dia::text, b.loja, COALESCE(fp.uid::text,'0') uid,
+  COALESCE(u.name,'Sistema') nome,
+  COUNT(*) pedidos,
+  COUNT(*) FILTER(WHERE b.aasm_state='delivered' OR rp.t1 IS NOT NULL) prontos,
+  COUNT(*) FILTER(WHERE rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered')) em_producao,
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=30) d30,
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=120) d120,
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)>120) acima120,
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0))::numeric,1) mediana
+FROM base b LEFT JOIN fp ON fp.order_id=b.oid
+LEFT JOIN rp ON rp.order_id=b.oid
+LEFT JOIN users u ON u.id=fp.uid
+GROUP BY b.dia, b.loja, fp.uid, u.name
+ORDER BY b.dia, b.loja, pedidos DESC`;
+
+    const respOpr = await fetch(`${MB_BASE}/api/dataset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Metabase-API-Key': apiKey },
+      body: JSON.stringify({ database: MB_DB, type: 'native', native: { query: SQL_OPR } })
+    });
+
+    if (respOpr.ok) {
+      const resOpr = await respOpr.json();
+      if (!resOpr.error) {
+        const colsO = resOpr.data.cols.map(c => c.name);
+        DP_OPR_DAILY.length = 0;
+        resOpr.data.rows.forEach(row => {
+          const r = Object.fromEntries(colsO.map((c, i) => [c, row[i]]));
+          DP_OPR_DAILY.push({
+            dia:         r.dia,
+            loja:        r.loja,
+            uid:         parseInt(r.uid) || 0,
+            nome:        r.nome || 'Sistema',
+            pedidos:     r.pedidos     || 0,
+            prontos:     r.prontos     || 0,
+            em_producao: r.em_producao || 0,
+            d30:         r.d30         || 0,
+            d120:        r.d120        || 0,
+            acima120:    r.acima120    || 0,
+            mediana:     r.mediana,
+          });
+        });
+      }
+    }
+
+    // ── 8. Atualizar date pickers com o range real dos dados ─────
+    const allDates = [...new Set(DP_RAW.map(r => r.dia))].sort();
+    if (allDates.length) {
+      const iniEl = document.getElementById('dp-data-ini');
+      const fimEl = document.getElementById('dp-data-fim');
+      if (iniEl) { iniEl.min = allDates[0]; iniEl.max = allDates[allDates.length-1]; iniEl.value = allDates[0]; }
+      if (fimEl) { fimEl.min = allDates[0]; fimEl.max = allDates[allDates.length-1]; fimEl.value = allDates[allDates.length-1]; }
+
+      // Atualizar presets
+      document.querySelectorAll('#dp-presets button').forEach(b => {
+        const [s, e] = (b.dataset.range || '').split(':');
+        if (s && e) { b.dataset.range = allDates[0] + ':' + allDates[allDates.length-1]; }
+      });
+    }
+
+    // ── 8. Badge de atualização ──────────────────────────────────
+    const now = new Date().toLocaleDateString('pt-BR') + ' ' +
+                new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    const range = allDates.length
+      ? allDates[0].substring(5).split('-').reverse().join('/') + ' – ' +
+        allDates[allDates.length-1].substring(5).split('-').reverse().join('/') + '/2026'
+      : 'sem dados';
+    if (lu) lu.textContent = `${range} · ${now}`;
+    localStorage.setItem('dp_last_update_label', lu?.textContent || '');
+
+    // ── 10. Sucesso → re-render completo ────────────────────────
+    if (btn) {
+      btn.innerHTML = '<span>✅</span> Atualizado!';
+      setTimeout(() => { btn.innerHTML = '<span>🔄</span> Atualizar dados'; btn.disabled = false; }, 2500);
+    }
+    dpRender();
+    dpRenderOperadores();
+
+  } catch (err) {
+    // ── 10. Tratamento de erros (incluindo CORS) ─────────────────
+    if (btn) { btn.innerHTML = '<span>❌</span> Erro — tentar novamente'; btn.disabled = false; }
+
+    let msg = err.message;
+    if (err instanceof TypeError && err.message.includes('fetch')) {
+      msg = 'Erro de rede / CORS.\n\n' +
+            'O Metabase precisa permitir requisições deste domínio.\n\n' +
+            'Peça ao Admin do Metabase para acessar:\n' +
+            'Admin → Settings → Embedding → Authorized origins\n' +
+            'e adicionar: ' + location.origin;
+    }
+    alert('Erro ao atualizar dados:\n\n' + msg);
+    console.error('[dpFetchLive]', err);
+  }
+}
+
+// Restaurar label de última atualização ao carregar
+(function() {
+  const saved = localStorage.getItem('dp_last_update_label');
+  if (saved) {
+    const el = document.getElementById('dp-last-update');
+    if (el) el.textContent = saved;
+  }
+})();
+
 function dpSetPeriod(ini, fim) {
   const elIni = document.getElementById('dp-data-ini');
   const elFim = document.getElementById('dp-data-fim');
@@ -3292,13 +3588,13 @@ function dpGetOprFiltered() {
   daily.forEach(r => {
     const key = r.uid + '|' + r.loja;
     if (!map[key]) map[key] = {uid:r.uid, nome:r.nome||'Sistema', loja:r.loja,
-      pedidos:0, prontos:0, em:0, d15:0, d30:0, ac:0, dias:new Set()};
+      pedidos:0, prontos:0, em:0, d30:0, d120:0, ac120:0, dias:new Set()};
     map[key].pedidos += r.pedidos;
     map[key].prontos += r.prontos;
     map[key].em      += (r.em_producao||0);
-    map[key].d15     += (r.d15||0);
     map[key].d30     += (r.d30||0);
-    map[key].ac      += (r.acima30||0);
+    map[key].d120    += (r.d120||0);
+    map[key].ac120   += (r.acima120||0);
     map[key].dias.add(r.dia);
   });
 
@@ -3307,8 +3603,7 @@ function dpGetOprFiltered() {
     .map(o => ({
       ...o,
       dias_ativos: o.dias.size,
-      d30_op: o.d30_op || 0,
-      sla_pct: (o.d30+o.ac)>0 ? Math.round(o.d30/(o.d30+o.ac)*100) : null,
+      sla_pct:    (o.d120+o.ac120)>0 ? Math.round(o.d120/(o.d120+o.ac120)*100) : null,
       pct_prontos: o.pedidos>0 ? Math.round(o.prontos/o.pedidos*100) : 0,
     }))
     .sort((a,b) => b.pedidos - a.pedidos);
@@ -3355,10 +3650,9 @@ function dpRenderOperadores() {
           <td style="padding:9px 10px;text-align:right;color:var(--green)">${o.prontos}</td>
           <td style="padding:9px 10px;text-align:right;color:${o.em>10?'var(--gold)':'var(--muted)'}">${o.em}</td>
           <td style="padding:9px 10px;text-align:right;font-weight:600;color:${pCl}">${o.pct_prontos}%</td>
-          <td style="padding:9px 10px;text-align:right;color:var(--accent)">${o.d30_op||0}</td>
-          <td style="padding:9px 10px;text-align:right;color:var(--green)">${o.d30}</td>
-          <td style="padding:9px 10px;text-align:right;color:${o.ac>0?'var(--red)':'var(--muted)'}">${o.ac}</td>
-          <td style="padding:9px 10px;text-align:right;color:var(--muted)">${o.ac}</td>
+          <td style="padding:9px 10px;text-align:right;color:var(--accent)">${o.d30}</td>
+          <td style="padding:9px 10px;text-align:right;color:var(--green)">${o.d120}</td>
+          <td style="padding:9px 10px;text-align:right;color:${o.ac120>0?'var(--red)':'var(--muted)'}">${o.ac120}</td>
           <td style="padding:9px 10px;text-align:right;font-weight:700;color:${slaCl}">${o.sla_pct!==null?o.sla_pct+'%':'—'}</td>
           <td style="padding:9px 10px;text-align:right;color:var(--muted)">${o.dias_ativos}d</td>
         </tr>`;
