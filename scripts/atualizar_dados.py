@@ -23,7 +23,7 @@ MB_DB   = int(os.getenv("MB_DB",   "3"))
 MB_USER = os.getenv("MB_USER")
 MB_PASS = os.getenv("MB_PASS")
 
-HTML_FILE = Path(__file__).parent.parent / "requisicao-lojas.html"
+HTML_FILE = Path(__file__).parent.parent / "index.html"
 
 # Período: 1º do mês atual até hoje
 hoje  = datetime.date.today()
@@ -481,6 +481,26 @@ def main():
     html = HTML_FILE.read_text(encoding="utf-8")
     html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje)
     HTML_FILE.write_text(html, encoding="utf-8")
+
+    # Verificar quais blocos mudaram
+    with open(HTML_FILE, 'r', encoding='utf-8') as fh:
+        html_depois = fh.read()
+
+    import subprocess
+    result = subprocess.run(['git', 'diff', '--stat', 'requisicao-lojas.html'],
+                           capture_output=True, text=True, cwd=HTML_FILE.parent)
+    log(f"Git diff: {result.stdout.strip() or 'sem mudanças detectadas'}")
+
+    # Confirmar datas no novo HTML
+    import re as _re
+    datas = _re.findall(r"dia:'(2026-\d{2}-\d{2})'", html_depois)
+    if datas:
+        log(f"Dados Desempenho: {min(datas)} a {max(datas)} ({len(datas)} entradas)")
+    else:
+        log("⚠ Nenhum dado de desempenho encontrado no HTML após atualização")
+
+    skus = len(_re.findall(r'\[\d+,"', html_depois))
+    log(f"SKUs: {skus} encontrados no HTML")
 
     log(f"✅ {HTML_FILE.name} atualizado com dados de {ini} a {hoje.strftime('%d/%m/%Y')}")
 
