@@ -6785,12 +6785,14 @@ function dpRender(){
   const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op>2&&r.mediana_op<1440).map(r=>r.mediana_op).sort((a,b)=>a-b);
   const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
   document.getElementById('dp-metrics').innerHTML=[
-    {l:'Total pedidos',v:tot.toLocaleString('pt-BR'),s:'no período'},
-    {l:'Prontos',v:pctP+'%',s:pron.toLocaleString('pt-BR')+' pedidos',c:pctP>=80?'var(--green)':pctP>=60?'var(--gold)':'var(--red)'},
-    {l:'Em produção',v:em.toLocaleString('pt-BR'),s:'pendentes',c:em>50?'var(--gold)':'var(--text)'},
-    {l:'SLA ≤ 120 min',v:pctSla+'%',s:d120+' de '+(d120+ac)+' a tempo',c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
-    {l:'Prontos ≤30 min',v:d30.toLocaleString('pt-BR'),s:d30>0?Math.round(d30/(d120+ac)*100)+'% dos concluídos':'—'},
-    {l:'Mediana produção',v:medG!==null?medG.toFixed(1)+' min':'—',s:'excl. outliers >24h e <2min'},
+    {l:'Total pedidos',  v:tot.toLocaleString('pt-BR'),  s:'no período'},
+    {l:'Prontos',         v:pctP+'%',                     s:pron.toLocaleString('pt-BR')+' pedidos',       c:pctP>=80?'var(--green)':pctP>=60?'var(--gold)':'var(--red)'},
+    {l:'Em produção',     v:em.toLocaleString('pt-BR'),   s:'em prod./fechamento',                         c:em>50?'var(--gold)':'var(--text)'},
+    {l:'Aguardando',      v:s('aguardando').toLocaleString('pt-BR'), s:'pedidos na fila',                  c:s('aguardando')>0?'var(--gold)':'var(--text)'},
+    {l:'Cancelamentos',   v:s('cancelados').toLocaleString('pt-BR'), s:'no período',                       c:s('cancelados')>5?'var(--red)':s('cancelados')>0?'var(--gold)':'var(--muted)'},
+    {l:'SLA ≤ 120 min',   v:pctSla+'%',                  s:d120+' de '+(d120+ac)+' a tempo',             c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
+    {l:'Prontos ≤30 min', v:d30.toLocaleString('pt-BR'), s:d30>0?Math.round(d30/(d120+ac)*100)+'% dos concluídos':'—'},
+    {l:'Mediana produção', v:medG!==null?medG.toFixed(1)+' min':'—', s:'excl. outliers >24h e <2min'},
   ].map(m=>'<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">'+m.l+'</div><div style="font-size:22px;font-weight:700;color:'+(m.c||'var(--text)')+'">'+m.v+'</div><div style="font-size:10px;color:var(--muted);margin-top:4px">'+m.s+'</div></div>').join('');
   const dates=[...new Set(rows.map(r=>r.dia))].sort(),lbl=dates.map(d=>d.substring(5));
   const lojas=['PKS','Iguatemi','Anália Franco'],lf=document.getElementById('dp-loja')?.value||'todas',ll=lf==='todas'?lojas:[lf];
@@ -6848,6 +6850,8 @@ function dpRender(){
       <td style="padding:8px 12px;text-align:right">${r.pedidos}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--green)">${r.prontos}</td>
       <td style="padding:8px 12px;text-align:right;color:${emColor}">${r.em_producao}</td>
+      <td style="padding:8px 12px;text-align:right;color:${(r.aguardando||0)>0?'var(--gold)':'var(--muted)'}">${r.aguardando||0}</td>
+      <td style="padding:8px 12px;text-align:right;color:${(r.cancelados||0)>0?'var(--red)':'var(--muted)'}">${r.cancelados||0}</td>
       <td style="padding:8px 12px;text-align:right">${r.d120||0}</td>
       <td style="padding:8px 12px;text-align:right">${r.acima120||0}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--muted)">${medStr}</td>
