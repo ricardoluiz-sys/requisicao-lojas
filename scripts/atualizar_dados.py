@@ -41,7 +41,7 @@ def mb_session(user: str, senha: str) -> str:
     """Autentica no Metabase e retorna o session token."""
     r = requests.post(f"{MB_URL}/api/session",
                       json={"username": user, "password": senha},
-                      timeout=30)
+                      timeout=60)
     r.raise_for_status()
     token = r.json()["id"]
     log(f"Autenticado no Metabase (token: {token[:8]}…)")
@@ -59,7 +59,7 @@ def mb_query(token: str, sql: str, limit: int = 500) -> list[dict]:
         f"{MB_URL}/api/dataset",
         headers={"X-Metabase-Session": token, "Content-Type": "application/json"},
         json=payload,
-        timeout=120
+        timeout=600
     )
     r.raise_for_status()
     data = r.json()
@@ -73,32 +73,40 @@ def mb_query(token: str, sql: str, limit: int = 500) -> list[dict]:
 
 # ── SQLs ──────────────────────────────────────────────────────────────────────
 SQL_DESEMPENHO_LOJAS = f"""
-WITH base AS (
-  SELECT o.id oid, o.aasm_state, o.created_at,
-    (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
+WITH fac AS (
+  SELECT c.id cid,
     CASE f.name
       WHEN 'Shopping Iguatemi (BR)'      THEN 'Iguatemi'
       WHEN 'ParkShopping Brasília (BR)'  THEN 'PKS'
       ELSE 'Anália Franco' END loja
-  FROM orders o
-  JOIN companies c ON c.id=o.company_id
-  JOIN factories f ON f.id=c.factory_id
-  WHERE f.operation='totem' AND f.id IN(3,6,7) AND o.deleted_at IS NULL
+  FROM companies c JOIN factories f ON f.id=c.factory_id
+  WHERE f.operation='totem' AND f.id IN(3,6,7)
+),
+base AS (
+  SELECT o.id oid, o.aasm_state, o.created_at,
+    (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
+    fc.loja
+  FROM orders o JOIN fac fc ON fc.cid=o.company_id
+  WHERE o.deleted_at IS NULL
     AND o.created_at >= '{ini}' AND o.created_at < '{fim}'
 ),
 fp AS (
   SELECT DISTINCT ON(li.order_id) li.order_id,
     MIN(lipl.created_at) OVER(PARTITION BY li.order_id) t0
-  FROM line_items li JOIN base b ON b.oid=li.order_id
+  FROM line_items li
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
-  WHERE lipl.operation IN('production','surface') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  WHERE lipl.operation IN('production','surface') AND lipl.success=TRUE
+    AND li.deleted_at IS NULL
+    AND li.order_id IN (SELECT oid FROM base)
   ORDER BY li.order_id, lipl.created_at
 ),
 rp AS (
   SELECT li.order_id, MAX(lipl.created_at) t1
-  FROM line_items li JOIN base b ON b.oid=li.order_id
+  FROM line_items li
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
-  WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
+  WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE
+    AND li.deleted_at IS NULL
+    AND li.order_id IN (SELECT oid FROM base)
   GROUP BY li.order_id
 ),
 calc AS (
@@ -109,7 +117,9 @@ calc AS (
     CASE WHEN rp.t1 IS NOT NULL THEN
       GREATEST(0, EXTRACT(EPOCH FROM(rp.t1 - COALESCE(fp.t0, b.created_at)))/60.0)
     END pm
-  FROM base b LEFT JOIN fp ON fp.order_id=b.oid LEFT JOIN rp ON rp.order_id=b.oid
+  FROM base b
+  LEFT JOIN fp ON fp.order_id=b.oid
+  LEFT JOIN rp ON rp.order_id=b.oid
 )
 SELECT dia::text, loja,
   COUNT(*) pedidos,
