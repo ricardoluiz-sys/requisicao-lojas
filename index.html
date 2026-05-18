@@ -1050,7 +1050,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
       <!-- TAB RESUMO -->
       <div class="plan-section" id="plan-tab-resumo">
-        <div style="padding:18px 0 14px"><h2 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:4px">Resumo Consolidado</h2><p style="color:var(--muted);font-size:13px">Visão unificada das 3 lojas — prioridades e próximos passos</p></div>
+        <div style="padding:18px 0 14px;display:flex;align-items:center;justify-content:space-between"><h2 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:4px">Resumo Consolidado</h2><button onclick="planExportarResumo()" style="background:var(--accent);border:none;border-radius:9px;padding:8px 16px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;margin-left:auto">⬇ Exportar Resumo</button><p style="color:var(--muted);font-size:13px">Visão unificada das 3 lojas — prioridades e próximos passos</p></div>
         <div class="plan-resumo-grid">
           <div class="plan-resumo-card"><div class="plan-resumo-title" style="color:var(--red)">🚨 Urgentes — Ação Hoje</div><div id="plan-resumo-urgentes"></div></div>
           <div class="plan-resumo-card"><div class="plan-resumo-title" style="color:var(--gold)">⚠️ Alertas — Repor neste Ciclo</div><div id="plan-resumo-alertas"></div></div>
@@ -1426,7 +1426,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Pedidos</th>
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Prontos</th>
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Em produção</th>
-              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">≤120 min</th>
+              <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Aguardando</th><th style="padding:6px 12px;text-align:right;font-size:11px">Cancelados</th><th style="padding:6px 12px;text-align:right;font-size:11px">≤120 min</th>
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Fora SLA</th>
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">Mediana (min)</th>
               <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)">SLA %</th>
@@ -4120,15 +4120,17 @@ function dpRender(){
   const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
   const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('d30'),d120=s('d120'),ac=s('acima120');
   const pctSla=d120+ac>0?Math.round(d120/(d120+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
-  const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op<480).map(r=>r.mediana_op).sort((a,b)=>a-b);
+  const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op>2&&r.mediana_op<1440).map(r=>r.mediana_op).sort((a,b)=>a-b);
   const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
   document.getElementById('dp-metrics').innerHTML=[
-    {l:'Total pedidos',v:tot.toLocaleString('pt-BR'),s:'no período'},
-    {l:'Prontos',v:pctP+'%',s:pron.toLocaleString('pt-BR')+' pedidos',c:pctP>=80?'var(--green)':pctP>=60?'var(--gold)':'var(--red)'},
-    {l:'Em produção',v:em.toLocaleString('pt-BR'),s:'pendentes',c:em>50?'var(--gold)':'var(--text)'},
-    {l:'SLA ≤ 120 min',v:pctSla+'%',s:d120+' de '+(d120+ac)+' a tempo',c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
-    {l:'Prontos ≤30 min',v:d30.toLocaleString('pt-BR'),s:d30>0?Math.round(d30/(d120+ac)*100)+'% dos concluídos':'—'},
-    {l:'Mediana produção',v:medG!==null?medG.toFixed(1)+' min':'—',s:'excl. outliers >8h'},
+    {l:'Total pedidos',  v:tot.toLocaleString('pt-BR'),  s:'no período'},
+    {l:'Prontos',         v:pctP+'%',                     s:pron.toLocaleString('pt-BR')+' pedidos',       c:pctP>=80?'var(--green)':pctP>=60?'var(--gold)':'var(--red)'},
+    {l:'Em produção',     v:em.toLocaleString('pt-BR'),   s:'em prod./fechamento',                         c:em>50?'var(--gold)':'var(--text)'},
+    {l:'Aguardando',      v:s('aguardando').toLocaleString('pt-BR'), s:'pedidos na fila',                  c:s('aguardando')>0?'var(--gold)':'var(--text)'},
+    {l:'Cancelamentos',   v:s('cancelados').toLocaleString('pt-BR'), s:'no período',                       c:s('cancelados')>5?'var(--red)':s('cancelados')>0?'var(--gold)':'var(--muted)'},
+    {l:'SLA ≤ 120 min',   v:pctSla+'%',                  s:d120+' de '+(d120+ac)+' a tempo',             c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
+    {l:'Prontos ≤30 min', v:d30.toLocaleString('pt-BR'), s:d30>0?Math.round(d30/(d120+ac)*100)+'% dos concluídos':'—'},
+    {l:'Mediana produção', v:medG!==null?medG.toFixed(1)+' min':'—', s:'excl. outliers >24h e <2min'},
   ].map(m=>'<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">'+m.l+'</div><div style="font-size:22px;font-weight:700;color:'+(m.c||'var(--text)')+'">'+m.v+'</div><div style="font-size:10px;color:var(--muted);margin-top:4px">'+m.s+'</div></div>').join('');
   const dates=[...new Set(rows.map(r=>r.dia))].sort(),lbl=dates.map(d=>d.substring(5));
   const lojas=['PKS','Iguatemi','Anália Franco'],lf=document.getElementById('dp-loja')?.value||'todas',ll=lf==='todas'?lojas:[lf];
@@ -4186,6 +4188,8 @@ function dpRender(){
       <td style="padding:8px 12px;text-align:right">${r.pedidos}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--green)">${r.prontos}</td>
       <td style="padding:8px 12px;text-align:right;color:${emColor}">${r.em_producao}</td>
+      <td style="padding:8px 12px;text-align:right;color:${(r.aguardando||0)>0?'var(--gold)':'var(--muted)'}">${r.aguardando||0}</td>
+      <td style="padding:8px 12px;text-align:right;color:${(r.cancelados||0)>0?'var(--red)':'var(--muted)'}">${r.cancelados||0}</td>
       <td style="padding:8px 12px;text-align:right">${r.d120||0}</td>
       <td style="padding:8px 12px;text-align:right">${r.acima120||0}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--muted)">${medStr}</td>
@@ -4906,6 +4910,44 @@ function mbAbrir(sqlKey) {
   window.open('https://metabase.gocase.com.br/question/new?database=3&type=native', '_blank');
 }
 
+
+function planExportarResumo(){
+  // Coletar dados da tabela de resumo
+  const rows=[];
+  const lojas=['PKS','Iguatemi','Anália Franco'];
+  const tabela={};
+  for(const[loja,dados]of Object.entries(PLAN_DADOS)){
+    for(const d of dados){
+      const k=d.prod.substring(0,60);
+      if(!tabela[k])tabela[k]={prod:d.prod,cat:d.cat||'',classe:d.classe||'',lojas:{}};
+      const lote=planGetLote(d.prod);
+      tabela[k].lojas[loja]={u:d.u,qtd:planCalcQtd(d.seg,d.est,lote,d.saldo_cd!=null?d.saldo_cd:null,d.c30),est:d.est,seg:d.seg};
+    }
+  }
+  const header=['Produto','Categoria','Classe','PKS - Status','PKS - Qtd Sugerida','PKS - Estoque','Iguatemi - Status','Iguatemi - Qtd Sugerida','Iguatemi - Estoque','Anália - Status','Anália - Qtd Sugerida','Anália - Estoque'];
+  rows.push(header);
+  Object.values(tabela).sort((a,b)=>{
+    const ord={URGENTE:0,ALERTA:1,OK:2,REVISAR:3};
+    const ua=Math.min(...Object.values(a.lojas).map(l=>ord[l.u]??9));
+    const ub=Math.min(...Object.values(b.lojas).map(l=>ord[l.u]??9));
+    return ua-ub||a.prod.localeCompare(b.prod);
+  }).forEach(item=>{
+    const row=[item.prod,item.cat,item.classe];
+    lojas.forEach(l=>{
+      const ld=item.lojas[l];
+      if(ld){row.push(ld.u||'—',ld.qtd||0,ld.est??'—');}
+      else{row.push('—','—','—');}
+    });
+    rows.push(row);
+  });
+  // Exportar como CSV
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='resumo-consolidado-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(url);
+}
 /* navClick com callbacks está no bloco 2 */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -6740,7 +6782,7 @@ function dpRender(){
   const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
   const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('d30'),d120=s('d120'),ac=s('acima120');
   const pctSla=d120+ac>0?Math.round(d120/(d120+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
-  const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op<480).map(r=>r.mediana_op).sort((a,b)=>a-b);
+  const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op>2&&r.mediana_op<1440).map(r=>r.mediana_op).sort((a,b)=>a-b);
   const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
   document.getElementById('dp-metrics').innerHTML=[
     {l:'Total pedidos',v:tot.toLocaleString('pt-BR'),s:'no período'},
@@ -6748,7 +6790,7 @@ function dpRender(){
     {l:'Em produção',v:em.toLocaleString('pt-BR'),s:'pendentes',c:em>50?'var(--gold)':'var(--text)'},
     {l:'SLA ≤ 120 min',v:pctSla+'%',s:d120+' de '+(d120+ac)+' a tempo',c:pctSla>=80?'var(--green)':pctSla>=60?'var(--gold)':'var(--red)'},
     {l:'Prontos ≤30 min',v:d30.toLocaleString('pt-BR'),s:d30>0?Math.round(d30/(d120+ac)*100)+'% dos concluídos':'—'},
-    {l:'Mediana produção',v:medG!==null?medG.toFixed(1)+' min':'—',s:'excl. outliers >8h'},
+    {l:'Mediana produção',v:medG!==null?medG.toFixed(1)+' min':'—',s:'excl. outliers >24h e <2min'},
   ].map(m=>'<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px">'+m.l+'</div><div style="font-size:22px;font-weight:700;color:'+(m.c||'var(--text)')+'">'+m.v+'</div><div style="font-size:10px;color:var(--muted);margin-top:4px">'+m.s+'</div></div>').join('');
   const dates=[...new Set(rows.map(r=>r.dia))].sort(),lbl=dates.map(d=>d.substring(5));
   const lojas=['PKS','Iguatemi','Anália Franco'],lf=document.getElementById('dp-loja')?.value||'todas',ll=lf==='todas'?lojas:[lf];
