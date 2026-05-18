@@ -798,6 +798,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
+
+</div>
   <nav class="nav" id="main-nav">
     <button class="nb active" id="nb-nova"    onclick="navClick('nova',this)">Nova Requisição</button>
     <button class="nb"        id="nb-gestao"  onclick="navClick('gestao',this)">Gestão</button>
@@ -810,7 +812,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="nb"        id="nb-fluxo"   onclick="navClick('fluxo',this)">Fluxo &amp; Prazos</button>
     <button class="nb"        id="nb-usuarios" onclick="navClick('usuarios',this)" style="display:none">Usuários</button>
   </nav>
-</div>
 
   <div class="main">
 
@@ -1171,21 +1172,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="tc-month-btns">
-            <button class="an-mb active" data-m="0" onclick="tcToggleMes(0)" title="Jan 2026">Jan</button>
-            <button class="an-mb active" data-m="1" onclick="tcToggleMes(1)" title="Fev 2026">Fev</button>
-            <button class="an-mb active" data-m="2" onclick="tcToggleMes(2)" title="Mar 2026">Mar</button>
-            <button class="an-mb active" data-m="3" onclick="tcToggleMes(3)" title="Abr 2026">Abr</button>
-            <button class="an-mb active" data-m="4" onclick="tcToggleMes(4)" title="01/05–18/05/2026" style="position:relative">
+            <div id="tc-months-btns"></div>
               Mai<span style="position:absolute;top:-6px;right:-6px;font-size:7px;background:var(--gold);color:#000;border-radius:4px;padding:1px 3px;font-weight:700;line-height:1.2">1-15</span>
             </button>
           </div>
           <!-- Presets -->
           <div style="margin-top:7px;display:flex;gap:3px;flex-wrap:wrap">
-            <button class="an-mb" onclick="tcQuick(4)" style="font-size:10px;padding:2px 8px">Mai atual</button>
-            <button class="an-mb" onclick="tcQuick(3,4)" style="font-size:10px;padding:2px 8px">Abr–Mai</button>
-            <button class="an-mb" onclick="tcQuick(2,3,4)" style="font-size:10px;padding:2px 8px">Mar–Mai</button>
-            <button class="an-mb" onclick="tcQuick(1,2,3,4)" style="font-size:10px;padding:2px 8px">Fev–Mai</button>
-            <button class="an-mb" onclick="tcQuick(0,1,2,3,4)" style="font-size:10px;padding:2px 8px">Todo período</button>
+            <div id="tc-quick-btns"></div>
           </div>
         </div>
 
@@ -1504,11 +1497,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
           <!-- Meses individuais -->
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
-            <button class="an-mb active" data-m="0" title="01/01/2026 – 31/01/2026">Jan</button>
-            <button class="an-mb active" data-m="1" title="01/02/2026 – 28/02/2026">Fev</button>
-            <button class="an-mb active" data-m="2" title="01/03/2026 – 31/03/2026">Mar</button>
-            <button class="an-mb active" data-m="3" title="01/04/2026 – 30/04/2026">Abr</button>
-            <button class="an-mb active" data-m="4" title="01/05/2026 – 18/05/2026" style="position:relative">
+            <div id="an-months-btns"></div>
               Mai
               <span style="position:absolute;top:-6px;right:-6px;font-size:7px;background:var(--gold);color:#000;border-radius:4px;padding:1px 3px;font-weight:700;line-height:1.2">1-15</span>
             </button>
@@ -1517,11 +1506,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div style="margin-top:8px">
             <div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Seleção rápida</div>
             <div style="display:flex;gap:3px;flex-wrap:wrap">
-              <button class="an-mb" onclick="anQuick(4)" style="font-size:10px;padding:2px 8px" title="01/05/2026 – 18/05/2026">Mai atual</button>
-              <button class="an-mb" onclick="anQuick(3,4)" style="font-size:10px;padding:2px 8px" title="01/04/2026 – 18/05/2026">Abr–Mai</button>
-              <button class="an-mb" onclick="anQuick(2,3,4)" style="font-size:10px;padding:2px 8px" title="01/03/2026 – 18/05/2026">Mar–Mai</button>
-              <button class="an-mb" onclick="anQuick(1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/02/2026 – 18/05/2026">Fev–Mai</button>
-              <button class="an-mb" onclick="anQuick(0,1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/01/2026 – 18/05/2026">Todo período</button>
+              <div id="an-quick-btns"></div>
             </div>
           </div>
         </div>
@@ -4922,6 +4907,66 @@ function mbAbrir(sqlKey) {
 }
 
 /* navClick com callbacks está no bloco 2 */
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER DINÂMICO DE MESES — gerado a partir de AN.months
+   ═══════════════════════════════════════════════════════════════ */
+function renderMonthButtons() {
+  const meses = AN.months;   // ex: ['Jan','Fev','Mar','Abr','Mai','Jun']
+  const n = meses.length;
+  const ultimo = n - 1;
+
+  /* ── Top Consumo ─────────────────────────────────────────────── */
+  const tcContainer = document.getElementById('tc-months-btns');
+  if (tcContainer) {
+    tcContainer.innerHTML = meses.map((m, i) => {
+      const d = AN_MONTH_DATES[i] || {start:`01/${String(i+1).padStart(2,'0')}`, end:'30/' + String(i+1).padStart(2,'0')};
+      const isCurrent = i === ultimo;
+      const title = isCurrent ? `01/${String(i+1).padStart(2,'0')}–${d.end}/2026` : `${m} 2026`;
+      return `<button class="an-mb active" data-m="${i}" onclick="tcToggleMes(${i})" title="${title}">${m}</button>`;
+    }).join('');
+  }
+
+  const tcQuick = document.getElementById('tc-quick-btns');
+  if (tcQuick) {
+    const q = [];
+    q.push(`<button class="an-mb" onclick="tcQuick(${ultimo})" style="font-size:10px;padding:2px 8px">${meses[ultimo]} atual</button>`);
+    if (n >= 2) q.push(`<button class="an-mb" onclick="tcQuick(${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px">${meses[ultimo-1]}–${meses[ultimo]}</button>`);
+    if (n >= 3) q.push(`<button class="an-mb" onclick="tcQuick(${ultimo-2},${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px">${meses[ultimo-2]}–${meses[ultimo]}</button>`);
+    if (n >= 4) q.push(`<button class="an-mb" onclick="tcQuick(${ultimo-3},${ultimo-2},${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px">${meses[ultimo-3]}–${meses[ultimo]}</button>`);
+    q.push(`<button class="an-mb" onclick="tcQuick(${Array.from({length:n},(_,i)=>i).join(',')})" style="font-size:10px;padding:2px 8px">Todo período</button>`);
+    tcQuick.innerHTML = q.join('');
+  }
+
+  /* ── Análise de Consumo ──────────────────────────────────────── */
+  const anContainer = document.getElementById('an-months-btns');
+  if (anContainer) {
+    anContainer.innerHTML = meses.map((m, i) => {
+      const d = AN_MONTH_DATES[i] || {start:`01/${String(i+1).padStart(2,'0')}`, end:'30/' + String(i+1).padStart(2,'0')};
+      const isCurrent = i === ultimo;
+      return `<button class="an-mb active" data-m="${i}" title="${d.start}/2026 – ${d.end}/2026"${isCurrent ? ' style="position:relative"' : ''}>${m}${isCurrent ? `<span style="position:absolute;top:-5px;right:-5px;background:#facc15;color:#1a1a1a;border-radius:99px;font-size:8px;font-weight:700;padding:1px 4px">${d.end.split('/')[0]}</span>` : ''}</button>`;
+    }).join('');
+    // re-bind click handlers
+    anContainer.querySelectorAll('[data-m]').forEach(b => {
+      b.onclick = () => { anToggleMes(parseInt(b.dataset.m)); };
+    });
+  }
+
+  const anQuick = document.getElementById('an-quick-btns');
+  if (anQuick) {
+    const q = [];
+    const allIdx = Array.from({length:n}, (_, i) => i);
+    const last = AN_MONTH_DATES[ultimo];
+    const first = AN_MONTH_DATES[0];
+    q.push(`<button class="an-mb" onclick="anQuick(${ultimo})" style="font-size:10px;padding:2px 8px" title="01/${String(ultimo+1).padStart(2,'0')}/2026 – ${last.end}/2026">${meses[ultimo]} atual</button>`);
+    if (n>=2) q.push(`<button class="an-mb" onclick="anQuick(${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px" title="01/${String(ultimo).padStart(2,'0')}/2026 – ${last.end}/2026">${meses[ultimo-1]}–${meses[ultimo]}</button>`);
+    if (n>=3) q.push(`<button class="an-mb" onclick="anQuick(${ultimo-2},${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px" title="01/${String(ultimo-1).padStart(2,'0')}/2026 – ${last.end}/2026">${meses[ultimo-2]}–${meses[ultimo]}</button>`);
+    if (n>=4) q.push(`<button class="an-mb" onclick="anQuick(${ultimo-3},${ultimo-2},${ultimo-1},${ultimo})" style="font-size:10px;padding:2px 8px" title="01/${String(ultimo-2).padStart(2,'0')}/2026 – ${last.end}/2026">${meses[ultimo-3]}–${meses[ultimo]}</button>`);
+    q.push(`<button class="an-mb" onclick="anQuick(${allIdx.join(',')})" style="font-size:10px;padding:2px 8px" title="${first.start}/2026 – ${last.end}/2026">Todo período</button>`);
+    anQuick.innerHTML = q.join('');
+  }
+}
+
 </script>
 <script>
 // CONFIG
@@ -4973,7 +5018,9 @@ async function updateReq(payload){
 function init(){
   if(!localStorage.getItem('usuarios'))localStorage.setItem('usuarios',JSON.stringify(DEFAULT_USERS));
   const saved=sessionStorage.getItem('currentUser');
-  if(saved){currentUser=JSON.parse(saved);showApp();}
+  if(saved){currentUser=JSON.parse(saved);showApp();
+  setTimeout(renderMonthButtons,50);
+}
   loadLotes();
   setTimeout(checkMobileLayout,100);
 }
