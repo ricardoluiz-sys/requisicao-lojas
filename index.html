@@ -1441,7 +1441,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
           <span style="font-size:16px">👤</span>
           <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Desempenho por Operador</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">
+<!-- ═══════════════════════════════════════════════════════════
+     ANÁLISE POR HORA — adicionado automaticamente
+     ═══════════════════════════════════════════════════════════ -->
+<div id="dp-hora-section" style="margin-top:28px">
+  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--muted);margin-bottom:14px">⏱ Demanda &amp; Performance por Horário</div>
+
+  <!-- KPIs de hora -->
+  <div id="dp-hora-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px"></div>
+
+  <!-- Gráficos lado a lado -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
+                  color:var(--muted);margin-bottom:10px">Pedidos por hora — por loja</div>
+      <div style="position:relative;height:180px">
+        <canvas id="dp-hora-vol-chart"></canvas>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
+                  color:var(--muted);margin-bottom:10px">SLA% e Mediana por hora</div>
+      <div style="position:relative;height:180px">
+        <canvas id="dp-hora-sla-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela horária -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead>
+        <tr style="background:var(--surface)">
+          <th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">Hora</th>
+          <th style="padding:8px 12px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">Pedidos</th>
+          <th style="padding:8px 12px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">≤120 min</th>
+          <th style="padding:8px 12px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">Fora SLA</th>
+          <th style="padding:8px 12px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">SLA %</th>
+          <th style="padding:8px 12px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">Mediana</th>
+          <th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)">Volume relativo</th>
+        </tr>
+      </thead>
+      <tbody id="dp-hora-table-body"></tbody>
+    </table>
+  </div>
+  <div id="dp-hora-insights" style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+</div>
+
+Desempenho por Operador</div>
             <div style="font-size:11px;color:var(--muted)">Quem iniciou a produção de cada pedido · filtra pelo período e loja selecionados acima</div>
           </div>
         </div>
@@ -4197,6 +4246,7 @@ function dpRender(){
     </tr>`;
   }).join('');
   dpRenderOperadores();
+  dpRenderHora();
 }
 
 const DP_OPR = [
@@ -4948,6 +4998,152 @@ function planExportarResumo(){
   a.href=url;a.download='resumo-consolidado-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();URL.revokeObjectURL(url);
 }
+
+/* ═══ ANÁLISE POR HORA ═══ */
+const DP_HORA_RAW = [[0, 99, 39, 15, 611.8, 44, 31, 24], [13, 104, 38, 14, 89.0, 59, 42, 3], [14, 148, 40, 16, 46.3, 97, 38, 13], [15, 180, 56, 23, 59.0, 98, 64, 18], [16, 210, 76, 26, 91.7, 114, 74, 22], [17, 272, 71, 32, 87.0, 157, 76, 39], [18, 273, 99, 27, 63.9, 141, 87, 45], [19, 281, 67, 45, 110.0, 157, 67, 57], [20, 285, 88, 34, 95.3, 153, 83, 49], [21, 296, 116, 28, 46.7, 142, 113, 41], [22, 338, 180, 29, 19.8, 146, 156, 36], [23, 226, 73, 35, 64.4, 120, 78, 28]];
+// formato: [hora, total, d120, ac120, mediana, iguatemi, pks, analia]
+let dpHoraVolChart, dpHoraSlaChart;
+
+function dpRenderHora(){
+  const raw = DP_HORA_RAW;
+  const horas = raw.map(r=>r[0]+'h');
+  const totais = raw.map(r=>r[1]);
+  const maxTot = Math.max(...totais);
+
+  // ── KPI cards de hora ─────────────────────────────────────────────────
+  const melhorSla = [...raw].filter(r=>r[2]+r[3]>10).sort((a,b)=>{
+    const sa=a[2]/(a[2]+a[3]), sb=b[2]/(b[2]+b[3]); return sb-sa;
+  })[0];
+  const piorSla = [...raw].filter(r=>r[2]+r[3]>10).sort((a,b)=>{
+    const sa=a[2]/(a[2]+a[3]), sb=b[2]/(b[2]+b[3]); return sa-sb;
+  })[0];
+  const pico = [...raw].sort((a,b)=>b[1]-a[1])[0];
+  const maiRapido = [...raw].filter(r=>r[4]!=null&&r[1]>20).sort((a,b)=>a[4]-b[4])[0];
+
+  const kpiEl = document.getElementById('dp-hora-kpis');
+  if(kpiEl) kpiEl.innerHTML = [
+    {l:'Horário de pico',v:pico[0]+'h',s:pico[1]+' pedidos/dia (média)',c:'var(--accent)'},
+    {l:'Melhor SLA',v:melhorSla[0]+'h',s:Math.round(melhorSla[2]/(melhorSla[2]+melhorSla[3])*100)+'% no prazo',c:'var(--green)'},
+    {l:'Pior SLA',v:piorSla[0]+'h',s:Math.round(piorSla[2]/(piorSla[2]+piorSla[3])*100)+'% no prazo',c:'var(--red)'},
+    {l:'Mais ágil',v:maiRapido[0]+'h',s:maiRapido[4]!=null?maiRapido[4].toFixed(1)+' min mediana':'—',c:'var(--green)'},
+  ].map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 14px">
+    <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">${m.l}</div>
+    <div style="font-size:22px;font-weight:700;color:${m.c}">${m.v}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:3px">${m.s}</div>
+  </div>`).join('');
+
+  // ── Gráfico volume por hora (barras empilhadas) ───────────────────────
+  if(dpHoraVolChart) dpHoraVolChart.destroy();
+  dpHoraVolChart = new Chart(document.getElementById('dp-hora-vol-chart'),{
+    type:'bar',
+    data:{
+      labels:horas,
+      datasets:[
+        {label:'Iguatemi',data:raw.map(r=>r[5]),backgroundColor:'rgba(46,204,136,.7)',stack:'s'},
+        {label:'PKS',     data:raw.map(r=>r[6]),backgroundColor:'rgba(79,126,255,.7)',stack:'s'},
+        {label:'Anália',  data:raw.map(r=>r[7]),backgroundColor:'rgba(168,85,247,.7)',stack:'s'},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'rgba(255,255,255,.6)',font:{size:10}}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'rgba(255,255,255,.4)',font:{size:9}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:'rgba(255,255,255,.4)',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'}}
+      }
+    }
+  });
+
+  // ── Gráfico SLA% e Mediana por hora ──────────────────────────────────
+  if(dpHoraSlaChart) dpHoraSlaChart.destroy();
+  const slas = raw.map(r=>r[2]+r[3]>0?Math.round(r[2]/(r[2]+r[3])*100):null);
+  dpHoraSlaChart = new Chart(document.getElementById('dp-hora-sla-chart'),{
+    type:'line',
+    data:{
+      labels:horas,
+      datasets:[
+        {label:'SLA %',data:slas,borderColor:'#2ECC88',backgroundColor:'rgba(46,204,136,.1)',
+          yAxisID:'ySla',tension:.3,pointRadius:4,fill:true},
+        {label:'Mediana (min)',data:raw.map(r=>r[4]),borderColor:'#F5B731',
+          backgroundColor:'rgba(245,183,49,.1)',yAxisID:'yMed',tension:.3,
+          pointRadius:3,borderDash:[4,3]},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'rgba(255,255,255,.6)',font:{size:10}}}},
+      scales:{
+        x:{ticks:{color:'rgba(255,255,255,.4)',font:{size:9}},grid:{display:false}},
+        ySla:{position:'left',min:0,max:100,
+          ticks:{color:'rgba(255,255,255,.4)',font:{size:9},callback:v=>v+'%'},
+          grid:{color:'rgba(255,255,255,.06)'}},
+        yMed:{position:'right',
+          ticks:{color:'rgba(255,255,255,.4)',font:{size:9},callback:v=>v+'m'},
+          grid:{display:false}},
+      }
+    }
+  });
+
+  // ── Tabela horária ────────────────────────────────────────────────────
+  const tbody = document.getElementById('dp-hora-table-body');
+  if(tbody) tbody.innerHTML = raw.map(r=>{
+    const tot=r[1],d3=r[2],ac=r[3],med=r[4];
+    const sla=d3+ac>0?Math.round(d3/(d3+ac)*100):null;
+    const slaC=sla!=null?(sla>=80?'var(--green)':sla>=60?'var(--gold)':'var(--red)'):'var(--muted)';
+    const barW=Math.round(tot/maxTot*100);
+    const isPico=tot===maxTot;
+    return `<tr style="border-bottom:1px solid var(--border)${isPico?';background:rgba(79,126,255,.05)':''}">
+      <td style="padding:7px 12px;font-weight:${isPico?700:400};color:var(--text)">${r[0]}h${isPico?' 🔥':''}</td>
+      <td style="padding:7px 12px;text-align:right">${tot}</td>
+      <td style="padding:7px 12px;text-align:right;color:var(--green)">${d3}</td>
+      <td style="padding:7px 12px;text-align:right;color:var(--muted)">${ac}</td>
+      <td style="padding:7px 12px;text-align:right;font-weight:700;color:${slaC}">${sla!=null?sla+'%':'—'}</td>
+      <td style="padding:7px 12px;text-align:right;color:var(--muted)">${med!=null?med.toFixed(1)+'m':'—'}</td>
+      <td style="padding:7px 12px;min-width:100px">
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${barW}%;background:var(--accent);border-radius:4px;transition:width .3s"></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // ── Insights automáticos ─────────────────────────────────────────────
+  const insEl = document.getElementById('dp-hora-insights');
+  if(insEl){
+    const horasAtivas = raw.filter(r=>r[1]>20);
+    const picoH = [...raw].sort((a,b)=>b[1]-a[1])[0];
+    const slaList = horasAtivas.map(r=>({h:r[0],sla:r[2]+r[3]>0?Math.round(r[2]/(r[2]+r[3])*100):0,tot:r[1],med:r[4]}));
+    const melhorH = [...slaList].sort((a,b)=>b.sla-a.sla)[0];
+    const piorH   = [...slaList].sort((a,b)=>a.sla-b.sla)[0];
+    const maiRapido = horasAtivas.filter(r=>r[4]!=null).sort((a,b)=>a[4]-b[4])[0];
+    const maisLento = horasAtivas.filter(r=>r[4]!=null).sort((a,b)=>b[4]-a[4])[0];
+    const blocoFn = raw.filter(r=>r[0]>=20&&r[0]<=23);
+    const blocoTd = raw.filter(r=>r[0]>=17&&r[0]<=19);
+    const fnSla = Math.round(blocoFn.reduce((a,r)=>a+r[2],0)/(blocoFn.reduce((a,r)=>a+r[2]+r[3],0)||1)*100);
+    const tdSla = Math.round(blocoTd.reduce((a,r)=>a+r[2],0)/(blocoTd.reduce((a,r)=>a+r[2]+r[3],0)||1)*100);
+    const fnTot = blocoFn.reduce((a,r)=>a+r[1],0);
+    const tdTot = blocoTd.reduce((a,r)=>a+r[1],0);
+
+    const ins = [
+      {icon:'🔥',cor:'var(--accent)',titulo:'Horário crítico de demanda',
+       texto:`Pico às <strong>${picoH[0]}h</strong> com <strong>${picoH[1]} pedidos</strong>. O bloco <strong>17h–22h</strong> concentra a maior parte do volume — garanta operadores disponíveis nesse intervalo.`},
+      {icon:'✅',cor:'var(--green)',titulo:'Melhor janela de SLA',
+       texto:`Melhor hora: <strong>${melhorH.h}h</strong> com <strong>${melhorH.sla}% de SLA</strong>. ${maiRapido&&maiRapido[0]===melhorH.h?`Também o mais ágil — mediana de <strong>${maiRapido[4].toFixed(1)} min</strong>.`:`Hora mais ágil: <strong>${maiRapido?.[0]}h</strong> com mediana de <strong>${maiRapido?.[4]?.toFixed(1)} min</strong>.`}`},
+      {icon:'⚠️',cor:'var(--red)',titulo:'Gargalo identificado',
+       texto:`Às <strong>${piorH.h}h</strong> o SLA cai para <strong>${piorH.sla}%</strong> com ${piorH.tot} pedidos. ${maisLento&&maisLento[0]===piorH.h?`Mediana de <strong>${maisLento[4].toFixed(1)} min</strong> confirma sobrecarga.`:`Pior mediana: <strong>${maisLento?.[0]}h</strong> com <strong>${maisLento?.[4]?.toFixed(1)} min</strong>.`}`},
+      {icon:'📊',cor:'var(--gold)',titulo:'Tarde vs. fechamento',
+       texto:`<strong>17h–19h:</strong> ${tdTot} pedidos · SLA <strong>${tdSla}%</strong>. <strong>20h–23h:</strong> ${fnTot} pedidos · SLA <strong>${fnSla}%</strong>. ${fnSla>tdSla?'→ O time performa melhor no fechamento.':'→ A pressão da tarde compromete mais o SLA.'}`},
+    ];
+    insEl.innerHTML = ins.map(i=>`
+      <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${i.cor};border-radius:11px;padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:16px">${i.icon}</span>
+          <span style="font-size:11px;font-weight:600;color:var(--text)">${i.titulo}</span>
+        </div>
+        <p style="margin:0;font-size:12px;color:var(--muted);line-height:1.6">${i.texto}</p>
+      </div>`).join('');
+  }
+
+}
+
 /* navClick com callbacks está no bloco 2 */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -6859,6 +7055,7 @@ function dpRender(){
     </tr>`;
   }).join('');
   dpRenderOperadores();
+  dpRenderHora();
 }
 
 
