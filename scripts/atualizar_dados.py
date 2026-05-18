@@ -357,35 +357,26 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     return an_js, dist_js
 
 # ── Injeção no HTML ───────────────────────────────────────────────────────────
-def substituir_bloco(html: str, start_pat: str, end_pat: str, novo: str) -> str:
-    """
-    Tenta primeiro pelos marcadores @@TAG@@, depois por regex.
-    """
-    # Mapear padrão → marcador
-    marker_map = {
-        r'^let DP_RAW=\[':           ('/* @@DP_RAW_START@@ */',     '/* @@DP_RAW_END@@ */'),
-        r'^const DP_OPR_DAILY=\[':   ('/* @@DP_OPR_DAILY_START@@ */','/* @@DP_OPR_DAILY_END@@ */'),
-        r'^const AN = \{':           ('/* @@AN_START@@ */',          '/* @@AN_END@@ */'),
-        r'^const AN_MONTHLY_DIST = \{':('/* @@AN_DIST_START@@ */',   '/* @@AN_DIST_END@@ */'),
-    }
+def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str) -> str:
+    """Substitui o bloco <script id='dados-metabase'> por completo."""
+    START = '<script id="dados-metabase">'
+    END   = '</script>'
+    i_s = html.find(START)
+    if i_s < 0:
+        raise ValueError("Bloco <script id=\"dados-metabase\"> não encontrado no HTML!")
+    i_e = html.find(END, i_s) + len(END)
+    novo = (
+        f'{START}\n'
+        f'/* === DADOS METABASE — atualizado {datetime.date.today().strftime("%d/%m/%Y")} === */\n'
+        f'{dp_raw}\n'
+        f'{dp_opr}\n'
+        f'{an}\n'
+        f'{an_dist}\n'
+        f'{END}'
+    )
+    return html[:i_s] + novo + html[i_e:]
 
-    if start_pat in marker_map:
-        ms, me = marker_map[start_pat]
-        if ms in html and me in html:
-            i_s = html.index(ms)
-            i_e = html.index(me) + len(me)
-            return html[:i_s] + ms + '\n' + novo + '\n' + me + html[i_e:]
 
-    # Fallback: regex linha a linha
-    lines = html.split("\n")
-    start_idx = next((i for i,l in enumerate(lines) if re.match(start_pat, l)), None)
-    if start_idx is None:
-        raise ValueError(f"Padrão de início não encontrado: {start_pat!r}")
-    end_idx = next((i for i in range(start_idx+1, len(lines)) if re.match(end_pat, lines[i])), None)
-    if end_idx is None:
-        raise ValueError(f"Padrão de fim não encontrado: {end_pat!r}")
-    new_lines = lines[:start_idx] + [novo] + lines[end_idx+1:]
-    return "\n".join(new_lines)
 
 def injetar_no_html(html: str,
                     dp_raw_js: str,
@@ -393,67 +384,35 @@ def injetar_no_html(html: str,
                     an_js: str,
                     an_dist_js: str,
                     hoje: datetime.date) -> str:
-    # ── 1-4. Substituir arrays de dados ──────────────────────────────────
-    html = substituir_bloco(html, r'^let DP_RAW=\[', r'^\];', dp_raw_js)
-    log("  ↳ DP_RAW substituído")
+    # 1. Substituir bloco de dados
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js)
+    log("  ↳ Bloco de dados substituído")
 
-    html = substituir_bloco(html, r'^const DP_OPR_DAILY=\[', r'^\];', dp_opr_daily_js)
-    log("  ↳ DP_OPR_DAILY substituído")
-
-    html = substituir_bloco(html, r'^const AN = \{', r'^\};', an_js)
-    log("  ↳ AN substituído")
-
-    html = substituir_bloco(html, r'^const AN_MONTHLY_DIST = \{', r'^\};', an_dist_js)
-    log("  ↳ AN_MONTHLY_DIST substituído")
-
-    # ── 5. Atualizar datas nos badges ─────────────────────────────────────
-    hoje_str = hoje.strftime("%d/%m/%Y")   # 19/05/2026
-    hoje_dm  = hoje.strftime("%d/%m")      # 19/05
+    # 2. Atualizar datas nos badges
+    hoje_str = hoje.strftime("%d/%m/%Y")
+    hoje_dm  = hoje.strftime("%d/%m")
     mes_nome = MESES_PT[hoje.month - 1]
     n_sub = 0
 
-    # Substituir QUALQUER data DD/MM/YYYY nos badges de id específicos
-    # dp-last-update
+    def sub(pat, repl, s, **kw):
+        return re.subn(pat, repl, s, **kw)
+
     html, k = re.subn(r'(?<=id="dp-last-update">)[^<]+(?=</div>)',
-                      f'01/05 – {hoje_str} · atualizado {hoje_dm}', html)
-    n_sub += k
-
-    # an-filter-summary-range
+                      f'01/05 – {hoje_str} · atualizado {hoje_dm}', html); n_sub += k
     html, k = re.subn(r'(?<=id="an-filter-summary-range">)[^<]+(?=</div>)',
-                      f'01/01/2026 – {hoje_str}', html)
-    n_sub += k
-
-    # dp-filter-label
+                      f'01/01/2026 – {hoje_str}', html); n_sub += k
     html, k = re.subn(r'(?<=id="dp-filter-label">)[^<]+(?=</div>)',
-                      f'01/05 – {hoje_str}', html)
-    n_sub += k
-
-    # "Atualizado em DD/MM/YYYY" (span na Análise)
+                      f'01/05 – {hoje_str}', html); n_sub += k
     html, k = re.subn(r'Atualizado em \d{2}/\d{2}/\d{4}',
-                      f'Atualizado em {hoje_str}', html)
-    n_sub += k
-
-    # Badges com data isolada (padrão: ">DD/MM/YYYY</div>")
+                      f'Atualizado em {hoje_str}', html); n_sub += k
     html, k = re.subn(r'(?<=>)\d{2}/\d{2}/\d{4}(?=</div>)',
-                      hoje_str, html)
-    n_sub += k
-
-    # "01/01 – DD/MM/YYYY" ou "01/01/YYYY – DD/MM/YYYY"
+                      hoje_str, html); n_sub += k
     html, k = re.subn(r'01/01(/\d{4})? [–-] \d{2}/\d{2}/\d{4}',
-                      f'01/01/2026 – {hoje_str}', html)
-    n_sub += k
-
-    # Ranges terminando em datas nos title= dos botões
+                      f'01/01/2026 – {hoje_str}', html); n_sub += k
     html, k = re.subn(r'(01/\d{2}/\d{4} [–-] )\d{2}/\d{2}/\d{4}',
-                      lambda m: m.group(1) + hoje_str, html)
-    n_sub += k
+                      lambda m: m.group(1) + hoje_str, html); n_sub += k
 
-    # Comentário JS do bloco Desempenho
-    html, k = re.subn(r'DESEMPENHO DE PRODUÇÃO[^*]*20\d{2}',
-                      f'DESEMPENHO DE PRODUÇÃO — Metabase — {mes_nome} {hoje.year}', html)
-    n_sub += k
-
-    log(f"  ↳ {n_sub} substituição(ões) de data realizadas para {hoje_str}")
+    log(f"  ↳ {n_sub} datas atualizadas para {hoje_str}")
     return html
 
 
