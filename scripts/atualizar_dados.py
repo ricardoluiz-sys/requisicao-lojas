@@ -359,8 +359,24 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
 # ── Injeção no HTML ───────────────────────────────────────────────────────────
 def substituir_bloco(html: str, start_pat: str, end_pat: str, novo: str) -> str:
     """
-    Substitui tudo entre start_pat (inclusive) e a próxima linha que casa end_pat (inclusive).
+    Tenta primeiro pelos marcadores @@TAG@@, depois por regex.
     """
+    # Mapear padrão → marcador
+    marker_map = {
+        r'^let DP_RAW=\[':           ('/* @@DP_RAW_START@@ */',     '/* @@DP_RAW_END@@ */'),
+        r'^const DP_OPR_DAILY=\[':   ('/* @@DP_OPR_DAILY_START@@ */','/* @@DP_OPR_DAILY_END@@ */'),
+        r'^const AN = \{':           ('/* @@AN_START@@ */',          '/* @@AN_END@@ */'),
+        r'^const AN_MONTHLY_DIST = \{':('/* @@AN_DIST_START@@ */',   '/* @@AN_DIST_END@@ */'),
+    }
+
+    if start_pat in marker_map:
+        ms, me = marker_map[start_pat]
+        if ms in html and me in html:
+            i_s = html.index(ms)
+            i_e = html.index(me) + len(me)
+            return html[:i_s] + ms + '\n' + novo + '\n' + me + html[i_e:]
+
+    # Fallback: regex linha a linha
     lines = html.split("\n")
     start_idx = next((i for i,l in enumerate(lines) if re.match(start_pat, l)), None)
     if start_idx is None:
