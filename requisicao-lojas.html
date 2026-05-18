@@ -1158,7 +1158,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:13px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
-              <div style="font-size:11px;font-weight:700;color:var(--text)">15/05/2026</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">18/05/2026</div>
             </div>
           </div>
         </div>
@@ -1324,118 +1324,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="user-grid" id="user-grid"></div>
     </section>
 
-    <!-- ═ DESEMPENHO DE PRODUÇÃO — Metabase — Mai 2026 · Ebook excluído · Banco Factory (Postgres)</p>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <!-- Badge última atualização -->
-          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
-            <span style="font-size:14px">🔄</span>
-            <div>
-              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">15/05/2026</div>
-            </div>
-          </div>
-          <!-- Badge cobertura -->
-          <div style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 13px">
-            <span style="font-size:14px">📅</span>
-            <div>
-              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01 – 15/05/2026</div>
-            </div>
-          </div>
-          <!-- Lojas -->
-          <div style="display:flex;gap:4px">
-            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600">F3 · Iguatemi</span>
-            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(79,126,255,.12);color:var(--pks);font-weight:600">F6 · PKS</span>
-            <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(192,132,252,.12);color:var(--ana);font-weight:600">F7 · Anália</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── BARRA DE FILTROS ─── -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
-
-        <!-- Período -->
-        <div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
-            Período
-            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 15/05/2026</span>
-          </div>
-          <!-- Meses individuais -->
-          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
-            <button class="an-mb active" data-m="0" title="01/01/2026 – 31/01/2026">Jan</button>
-            <button class="an-mb active" data-m="1" title="01/02/2026 – 28/02/2026">Fev</button>
-            <button class="an-mb active" data-m="2" title="01/03/2026 – 31/03/2026">Mar</button>
-            <button class="an-mb active" data-m="3" title="01/04/2026 – 30/04/2026">Abr</button>
-            <button class="an-mb active" data-m="4" title="01/05/2026 – 15/05/2026" style="position:relative">
-              Mai
-              <span style="position:absolute;top:-6px;right:-6px;font-size:7px;background:var(--gold);color:#000;border-radius:4px;padding:1px 3px;font-weight:700;line-height:1.2">1-15</span>
-            </button>
-          </div>
-          <!-- Seleções rápidas -->
-          <div style="margin-top:8px">
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Seleção rápida</div>
-            <div style="display:flex;gap:3px;flex-wrap:wrap">
-              <button class="an-mb" onclick="anQuick(4)" style="font-size:10px;padding:2px 8px" title="01/05/2026 – 15/05/2026">Mai atual</button>
-              <button class="an-mb" onclick="anQuick(3,4)" style="font-size:10px;padding:2px 8px" title="01/04/2026 – 15/05/2026">Abr–Mai</button>
-              <button class="an-mb" onclick="anQuick(2,3,4)" style="font-size:10px;padding:2px 8px" title="01/03/2026 – 15/05/2026">Mar–Mai</button>
-              <button class="an-mb" onclick="anQuick(1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/02/2026 – 15/05/2026">Fev–Mai</button>
-              <button class="an-mb" onclick="anQuick(0,1,2,3,4)" style="font-size:10px;padding:2px 8px" title="01/01/2026 – 15/05/2026">Todo período</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="width:1px;background:var(--border);align-self:stretch"></div>
-
-        <!-- Loja -->
-        <div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Loja</div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-loja-btns">
-            <button class="an-mb active" data-l="all">Todas</button>
-            <button class="an-mb" data-l="3" style="color:var(--green)">Iguatemi</button>
-            <button class="an-mb" data-l="6" style="color:var(--pks)">PKS</button>
-            <button class="an-mb" data-l="7" style="color:var(--ana)">Anália Franco</button>
-          </div>
-        </div>
-
-        <div style="width:1px;background:var(--border);align-self:stretch"></div>
-
-        <!-- Categoria -->
-        <div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Categoria</div>
-          <select id="an-cat-sel" onchange="anCatFilter()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;min-width:160px;">
-            <option value="">Todas as categorias</option>
-            <option>Case</option><option>Tote Bag CD</option><option>Mala Joy CD</option>
-            <option>BackpackCD</option><option>Lunch Bag CD</option><option>Garrafa Ebook</option>
-            <option>Garrafa</option><option>Bags</option><option>Copo Ebook</option><option>Copo</option>
-            <option>NecessaireCD</option><option>Lancheira BTS</option><option>Mochila BTS</option>
-            <option>Mochila Rodinhas BTS</option><option>Travel Case CD</option>
-            <option>Base Travel Case CD</option><option>Estojo BTS</option><option>Necessaire</option>
-            <option>Tote Shopper</option><option>Acessorios Termicos</option>
-            <option>Bolsa Térmica Urban</option><option>Skin Gocase</option>
-            <option>Gift</option>
-          </select>
-        </div>
-
-        <div style="width:1px;background:var(--border);align-self:stretch"></div>
-
-        <!-- Busca SKU -->
-        <div style="flex:1;min-width:180px">
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Buscar produto</div>
-          <div style="position:relative">
-            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none">🔍</span>
-            <input type="text" id="an-busca" placeholder="Cor, modelo, SKU..."
-              style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px 7px 30px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .2s"
-              oninput="anSkuFilter()"
-              onfocus="this.style.borderColor='var(--accent)'"
-              onblur="this.style.borderColor='var(--border)'"/>
-          </div>
-        </div>
-
-        <!-- Resumo do filtro -->
-        <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 15/05/2026</div>
+    <!-- ═ DESEMPENHO DE PRODUÇÃO — Metabase — Mai 2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
