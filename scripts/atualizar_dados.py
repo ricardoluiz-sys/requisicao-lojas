@@ -377,63 +377,67 @@ def injetar_no_html(html: str,
                     an_js: str,
                     an_dist_js: str,
                     hoje: datetime.date) -> str:
-    # 1. DP_RAW
+    # ── 1-4. Substituir arrays de dados ──────────────────────────────────
     html = substituir_bloco(html, r'^let DP_RAW=\[', r'^\];', dp_raw_js)
-    log("  \u21b3 DP_RAW substituído")
+    log("  ↳ DP_RAW substituído")
 
-    # 2. DP_OPR_DAILY
     html = substituir_bloco(html, r'^const DP_OPR_DAILY=\[', r'^\];', dp_opr_daily_js)
-    log("  \u21b3 DP_OPR_DAILY substituído")
+    log("  ↳ DP_OPR_DAILY substituído")
 
-    # 3. AN object
     html = substituir_bloco(html, r'^const AN = \{', r'^\};', an_js)
-    log("  \u21b3 AN substituído")
+    log("  ↳ AN substituído")
 
-    # 4. AN_MONTHLY_DIST
     html = substituir_bloco(html, r'^const AN_MONTHLY_DIST = \{', r'^\};', an_dist_js)
-    log("  \u21b3 AN_MONTHLY_DIST substituído")
+    log("  ↳ AN_MONTHLY_DIST substituído")
 
-    # ── Atualizar todas as datas nos badges ──────────────────────────────
-    hoje_str = hoje.strftime("%d/%m/%Y")    # ex: 19/05/2026
-    hoje_dm  = hoje.strftime("%d/%m")       # ex: 19/05
+    # ── 5. Atualizar datas nos badges ─────────────────────────────────────
+    hoje_str = hoje.strftime("%d/%m/%Y")   # 19/05/2026
+    hoje_dm  = hoje.strftime("%d/%m")      # 19/05
     mes_nome = MESES_PT[hoje.month - 1]
-    ini_ano  = f"01/01/{hoje.year}"
+    n_sub = 0
 
-    def sub(pattern, repl, s, **kw):
-        return re.sub(pattern, repl, s, **kw)
-
-    # Badge "ATUALIZADO" Top Consumo e "ÚLTIMA ATUALIZAÇÃO" Análise
-    html = sub(r'(?<=font-weight:700;color:var\(--text\)">)\d{2}/\d{2}/\d{4}(?=</div>)',
-               hoje_str, html, count=3)
-
-    # "01/01 – 15/05/2026" → "01/01 – hoje" (badge COBRE PERÍODO)
-    html = sub(r'01/01 [–-] \d{2}/\d{2}/\d{4}(?=</div>)',
-               f'01/01 – {hoje_str}', html)
-
-    # dp-last-update (Desempenho header)
-    html = sub(r'(?<=id="dp-last-update">)[^<]+(?=</div>)',
-               f'01/05 – {hoje_str} · atualizado {hoje_dm}', html)
-
-    # dp-filter-label
-    html = sub(r'(?<=id="dp-filter-label">)[^<]+(?=</div>)',
-               f'01/05 – {hoje_str}', html)
-
-    # Span "Atualizado em XX/XX/XXXX"
-    html = sub(r'(?<=Atualizado em )\d{2}/\d{2}/\d{4}', hoje_str, html)
-
-    # Títulos dos botões de mês/preset que terminam com uma data (01/XX/XXXX – DD/MM/YYYY)
-    html = sub(r'(01/\d{2}/\d{4} [–-] )\d{2}/\d{2}/\d{4}',
-               lambda m: m.group(1) + hoje_str, html)
+    # Substituir QUALQUER data DD/MM/YYYY nos badges de id específicos
+    # dp-last-update
+    html, k = re.subn(r'(?<=id="dp-last-update">)[^<]+(?=</div>)',
+                      f'01/05 – {hoje_str} · atualizado {hoje_dm}', html)
+    n_sub += k
 
     # an-filter-summary-range
-    html = sub(r'(?<=id="an-filter-summary-range">)[^<]+(?=</div>)',
-               f'01/01/2026 – {hoje_str}', html)
+    html, k = re.subn(r'(?<=id="an-filter-summary-range">)[^<]+(?=</div>)',
+                      f'01/01/2026 – {hoje_str}', html)
+    n_sub += k
+
+    # dp-filter-label
+    html, k = re.subn(r'(?<=id="dp-filter-label">)[^<]+(?=</div>)',
+                      f'01/05 – {hoje_str}', html)
+    n_sub += k
+
+    # "Atualizado em DD/MM/YYYY" (span na Análise)
+    html, k = re.subn(r'Atualizado em \d{2}/\d{2}/\d{4}',
+                      f'Atualizado em {hoje_str}', html)
+    n_sub += k
+
+    # Badges com data isolada (padrão: ">DD/MM/YYYY</div>")
+    html, k = re.subn(r'(?<=>)\d{2}/\d{2}/\d{4}(?=</div>)',
+                      hoje_str, html)
+    n_sub += k
+
+    # "01/01 – DD/MM/YYYY" ou "01/01/YYYY – DD/MM/YYYY"
+    html, k = re.subn(r'01/01(/\d{4})? [–-] \d{2}/\d{2}/\d{4}',
+                      f'01/01/2026 – {hoje_str}', html)
+    n_sub += k
+
+    # Ranges terminando em datas nos title= dos botões
+    html, k = re.subn(r'(01/\d{2}/\d{4} [–-] )\d{2}/\d{2}/\d{4}',
+                      lambda m: m.group(1) + hoje_str, html)
+    n_sub += k
 
     # Comentário JS do bloco Desempenho
-    html = sub(r'DESEMPENHO DE PRODUÇÃO[^*]*20\d{2}',
-               f'DESEMPENHO DE PRODUÇÃO — Metabase — {mes_nome} {hoje.year}', html)
+    html, k = re.subn(r'DESEMPENHO DE PRODUÇÃO[^*]*20\d{2}',
+                      f'DESEMPENHO DE PRODUÇÃO — Metabase — {mes_nome} {hoje.year}', html)
+    n_sub += k
 
-    log(f"  \u21b3 Datas atualizadas para {hoje_str}")
+    log(f"  ↳ {n_sub} substituição(ões) de data realizadas para {hoje_str}")
     return html
 
 
