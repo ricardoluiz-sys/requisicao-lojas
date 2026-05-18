@@ -47,29 +47,49 @@ def mb_session(user: str, senha: str) -> str:
     log(f"Autenticado no Metabase (token: {token[:8]}…)")
     return token
 
-def mb_query(token: str, sql: str, limit: int = 500) -> list[dict]:
-    """Executa uma query SQL nativa e retorna lista de dicts."""
+def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[dict]:
+    """Executa uma query SQL nativa com retry automático."""
+    import time
     payload = {
         "database": MB_DB,
         "type": "native",
         "native": {"query": sql},
         "middleware": {"js-int-to-string?": False}
     }
-    r = requests.post(
-        f"{MB_URL}/api/dataset",
-        headers={"X-Metabase-Session": token, "Content-Type": "application/json"},
-        json=payload,
-        timeout=600
-    )
-    r.raise_for_status()
-    data = r.json()
+    headers = {
+        "X-Metabase-Session": token,
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+    }
+    last_err = None
+    for attempt in range(1, retries + 1):
+        try:
+            if attempt > 1:
+                wait = 15 * attempt
+                log(f"  Tentativa {attempt}/{retries} — aguardando {wait}s...")
+                time.sleep(wait)
+            r = requests.post(
+                f"{MB_URL}/api/dataset",
+                headers=headers,
+                json=payload,
+                timeout=300,
+            )
+            r.raise_for_status()
+            data = r.json()
+            if "error" in data:
+                raise RuntimeError(f"Metabase query error: {data['error']}")
+            cols = [c["name"] for c in data["data"]["cols"]]
+            rows = data["data"]["rows"][:limit]
+            return [dict(zip(cols, row)) for row in rows]
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.ReadTimeout,
+                requests.exceptions.ChunkedEncodingError) as e:
+            last_err = e
+            log(f"  ⚠ Conexão interrompida (tentativa {attempt}/{retries}): {type(e).__name__}")
+            if attempt == retries:
+                raise RuntimeError(f"Query falhou após {retries} tentativas: {last_err}") from e
+    raise RuntimeError("Unreachable")
 
-    if "error" in data:
-        raise RuntimeError(f"Metabase query error: {data['error']}")
-
-    cols = [c["name"] for c in data["data"]["cols"]]
-    rows = data["data"]["rows"][:limit]
-    return [dict(zip(cols, row)) for row in rows]
 
 # ── SQLs ──────────────────────────────────────────────────────────────────────
 SQL_DESEMPENHO_LOJAS = f"""
@@ -358,49 +378,64 @@ def injetar_no_html(html: str,
                     an_dist_js: str,
                     hoje: datetime.date) -> str:
     # 1. DP_RAW
-    html = substituir_bloco(html,
-        r'^let DP_RAW=\[',
-        r'^\];',
-        dp_raw_js)
-    log("  ↳ DP_RAW substituído")
+    html = substituir_bloco(html, r'^let DP_RAW=\[', r'^\];', dp_raw_js)
+    log("  \u21b3 DP_RAW substituído")
 
     # 2. DP_OPR_DAILY
-    html = substituir_bloco(html,
-        r'^const DP_OPR_DAILY=\[',
-        r'^\];',
-        dp_opr_daily_js)
-    log("  ↳ DP_OPR_DAILY substituído")
+    html = substituir_bloco(html, r'^const DP_OPR_DAILY=\[', r'^\];', dp_opr_daily_js)
+    log("  \u21b3 DP_OPR_DAILY substituído")
 
     # 3. AN object
-    html = substituir_bloco(html,
-        r'^const AN = \{',
-        r'^\};',
-        an_js)
-    log("  ↳ AN substituído")
+    html = substituir_bloco(html, r'^const AN = \{', r'^\};', an_js)
+    log("  \u21b3 AN substituído")
 
     # 4. AN_MONTHLY_DIST
-    html = substituir_bloco(html,
-        r'^const AN_MONTHLY_DIST = \{',
-        r'^\};',
-        an_dist_js)
-    log("  ↳ AN_MONTHLY_DIST substituído")
+    html = substituir_bloco(html, r'^const AN_MONTHLY_DIST = \{', r'^\};', an_dist_js)
+    log("  \u21b3 AN_MONTHLY_DIST substituído")
 
-    # 5. Atualizar badge de data no comentário do bloco de desempenho
+    # ── Atualizar todas as datas nos badges ──────────────────────────────
+    hoje_str = hoje.strftime("%d/%m/%Y")    # ex: 19/05/2026
+    hoje_dm  = hoje.strftime("%d/%m")       # ex: 19/05
     mes_nome = MESES_PT[hoje.month - 1]
-    dia_str  = hoje.strftime("%d/%m/%Y")
-    html = re.sub(
-        r'DESEMPENHO DE PRODUÇÃO[^*]*Mai 2026',
-        f'DESEMPENHO DE PRODUÇÃO — Metabase — {mes_nome} {hoje.year}',
-        html
-    )
-    # 6. Badge "atualizado" no dashboard
-    html = re.sub(
-        r'atualizado \d{2}/\d{2}',
-        f'atualizado {dia_str[:5]}',
-        html
-    )
+    ini_ano  = f"01/01/{hoje.year}"
 
+    def sub(pattern, repl, s, **kw):
+        return re.sub(pattern, repl, s, **kw)
+
+    # Badge "ATUALIZADO" Top Consumo e "ÚLTIMA ATUALIZAÇÃO" Análise
+    html = sub(r'(?<=font-weight:700;color:var\(--text\)">)\d{2}/\d{2}/\d{4}(?=</div>)',
+               hoje_str, html, count=3)
+
+    # "01/01 – 15/05/2026" → "01/01 – hoje" (badge COBRE PERÍODO)
+    html = sub(r'01/01 [–-] \d{2}/\d{2}/\d{4}(?=</div>)',
+               f'01/01 – {hoje_str}', html)
+
+    # dp-last-update (Desempenho header)
+    html = sub(r'(?<=id="dp-last-update">)[^<]+(?=</div>)',
+               f'01/05 – {hoje_str} · atualizado {hoje_dm}', html)
+
+    # dp-filter-label
+    html = sub(r'(?<=id="dp-filter-label">)[^<]+(?=</div>)',
+               f'01/05 – {hoje_str}', html)
+
+    # Span "Atualizado em XX/XX/XXXX"
+    html = sub(r'(?<=Atualizado em )\d{2}/\d{2}/\d{4}', hoje_str, html)
+
+    # Títulos dos botões de mês/preset que terminam com uma data (01/XX/XXXX – DD/MM/YYYY)
+    html = sub(r'(01/\d{2}/\d{4} [–-] )\d{2}/\d{2}/\d{4}',
+               lambda m: m.group(1) + hoje_str, html)
+
+    # an-filter-summary-range
+    html = sub(r'(?<=id="an-filter-summary-range">)[^<]+(?=</div>)',
+               f'01/01/2026 – {hoje_str}', html)
+
+    # Comentário JS do bloco Desempenho
+    html = sub(r'DESEMPENHO DE PRODUÇÃO[^*]*20\d{2}',
+               f'DESEMPENHO DE PRODUÇÃO — Metabase — {mes_nome} {hoje.year}', html)
+
+    log(f"  \u21b3 Datas atualizadas para {hoje_str}")
     return html
+
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
