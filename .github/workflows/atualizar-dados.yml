@@ -49,7 +49,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add requisicao-lojas.html
+          git add index.html
           if git diff --staged --quiet; then
             echo "Nenhuma mudança detectada — sem commit."
           else
