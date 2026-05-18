@@ -1244,10 +1244,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div style="font-size:11px;font-weight:600;color:var(--text)" id="tc-filter-range">Jan–Mai 2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="tc-filter-sub">5 meses · Todas as lojas</div>
         </div>
-      
-          <button onclick="mbAbrir('consumo')"
-            style="background:rgba(46,204,136,.12);border:1px solid var(--green);border-radius:9px;padding:7px 13px;color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap"
-            onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🗄️ SQL atualização</button>
         </div>
 
       <!-- Métricas rápidas -->
@@ -1341,29 +1337,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 16/05/2026 · atualizado 16/05 · clique SQL para atualizar</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 16/05/2026 · atualizado 16/05</div>
             </div>
           </div>
-          <!-- Botão atualizar ao vivo -->
-          <button onclick="mbAbrir('desempenho_lojas')"
-            style="background:var(--accent);border:none;border-radius:9px;padding:8px 14px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px"
-            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-            🗄️ SQL — Lojas
-          </button>
-          <button onclick="mbAbrir('desempenho_operadores')"
-            style="background:rgba(79,126,255,.18);border:1px solid var(--pks);border-radius:9px;padding:8px 14px;color:var(--pks);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px"
-            onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-            🗄️ SQL — Operadores
-          </button>
-          <button id="dp-refresh-btn" style="display:none" onclick="dpFetchLive()"
-            style="display:flex;align-items:center;gap:7px;background:var(--accent);border:none;border-radius:9px;padding:8px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s"
-            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-            <span>🔄</span> Atualizar dados
-          </button>
-          <!-- Botão configurar token -->
-          <button onclick="dpClearKey()" title="Redefinir token de sessão"
-            style="background:transparent;border:1px solid var(--border);border-radius:9px;padding:8px 12px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px"
-            onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">⚙️ Token</button>
+
           <div style="font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;background:rgba(29,158,117,.12);color:var(--green)">SLA ≤ 120 min</div>
         </div>
       </div>
@@ -4230,7 +4207,170 @@ const AN = {
   6:{'Case':[89587.6, 65011.4, 63783.53, 94991.57, 44238.33],'Tote Bag CD':[53217.7, 69671.1, 53819.1, 32946.7, 27598.8],'Mochila Rodinhas BTS':[27655.0, 13037.7, 0, 0, 0],'Lancheira BTS':[27393.3, 0, 0, 0, 0],'Mala Joy CD':[18574.1, 23661.4, 20163.5, 19693.7, 12376.0],'Mochila BTS':[22360.0, 0, 0, 0, 0],'Travel Case CD':[18305.6, 0, 11957.3, 0, 0],'Lunch Bag CD':[13013.9, 11224.3, 17449.8, 6527.2, 4508.0],'Bags':[13113.7, 11124.4, 12015.2, 3208.8, 0],'BackpackCD':[13094.9, 11615.6, 9266.7, 7586.7, 3118.5]},
   7:{'Case':[27865.6, 45347.6, 52171.5, 35932.6, 21780.0],'Tote Bag CD':[37673.2, 42922.0, 35094.2, 22719.8, 17072.7],'Mala Joy CD':[12956.0, 17753.7, 24712.2, 15175.0, 8177.4],'Mochila Rodinhas BTS':[22705.8, 0, 0, 0, 0],'Lancheira BTS':[19348.3, 0, 0, 0, 0],'Bags':[2938.6, 6137.0, 9486.2, 4048.5, 17543.5],'BackpackCD':[9005.7, 0, 5327.8, 0, 5147.7],'Travel Case CD':[8963.6, 0, 0, 0, 6878.4],'Mochila BTS':[9056.8, 0, 0, 0, 0],'Lunch Bag CD':[10514.7, 5046.7, 7734.5, 0, 0],'Tote Shopper':[5328.2, 4678.3, 5957.8, 1869.3, 539.8]}
   },
-  skus:[]
+  skus:[
+[3, "Tote Bag CD", "Tote Bag Preta", "", 412, 103681],
+[3, "Mala Joy CD", "Mala Joy Sarja Preto CD", "", 342, 94766.8],
+[3, "Bags", "Bolsa Moove Preta", "", 390, 84212.1],
+[3, "Tote Bag CD", "Mini Tote Preta", "Tote Bag", 347, 77816.4],
+[3, "Case", "Infinite Air", "iPhone 17 Pro Max", 487, 56587.3],
+[3, "Tote Bag CD", "Mini Tote Off White", "Tote Bag", 246, 54955.4],
+[3, "Tote Bag CD", "Tote Bag Rosa", "", 235, 53636.5],
+[3, "Travel Case CD", "Mala de Bordo Trip 20\" - Preta", "", 119, 49089.8],
+[3, "BackpackCD", "Mochila Voyage Preta", "", 112, 45808.8],
+[3, "Mochila BTS", "Mochila BTS Preta", "", 193, 43200.7],
+[3, "Tote Bag CD", "Mini Tote Marrom", "Tote Bag", 170, 40603],
+[3, "BackpackCD", "Mochila Voyage Off White", "", 95, 40280.5],
+[3, "Tote Bag CD", "Tote Bag Off White", "", 168, 39493.2],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 15", 451, 39235.1],
+[3, "Base Travel Case CD", "Base Preta - Mala de Bordo Trip 20\"", "", 93, 36504.9],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 16", 356, 34347.5],
+[3, "Mala Joy CD", "Mala Joy Sarja Rosa CH", "", 106, 33069.4],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro Max", 285, 31282.6],
+[3, "Tote Bag CD", "Tote Bag Amora", "Tote Daily", 111, 30798.9],
+[3, "Lunch Bag CD", "Lancheira Fruit - Preta PRO", "", 138, 29906.2],
+[3, "Tote Bag CD", "Tote Puff Marrom", "Tote Bag", 97, 29090.3],
+[3, "Lunch Bag CD", "Bolsa Térmica Mix PRO Preta", "Mix Pro", 125, 27167.5],
+[3, "Tote Bag CD", "Mini Tote Cinza", "Tote Bag", 118, 26028.2],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 14 Pro Max", 273, 24445.8],
+[3, "Tote Bag CD", "Tote Bag Marrom", "Tote Bag", 89, 23831.1],
+[3, "Lunch Bag CD", "Bolsa Térmica Mix Off White", "Mix PRO", 105, 23029.5],
+[3, "Mala Joy CD", "Mala Joy Vinho", "Mala Joy CH", 74, 22722.6],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 15 Pro Max", 224, 22256.7],
+[3, "Mala Joy CD", "Mala Joy - WaitList - ", "", 72, 22172.8],
+[3, "Lancheira BTS", "Lancheira Play Preta", "", 170, 21783],
+[3, "NecessaireCD", "Necessaire Makeup Double - Preta", "", 189, 21581.1],
+[3, "Tote Bag CD", "Tote Puff Preto", "Tote Bag", 66, 19943.4],
+[3, "Mala Joy CD", "Mala Joy - Marrom", "", 59, 19294.1],
+[3, "Travel Case CD", "Mala de Bordo Trip 20\" - Rosa", "", 46, 19261.4],
+[3, "Mochila Rodinhas BTS", "Mochila Rodinha BTS Azul", "", 36, 18846.4],
+[3, "Travel Case CD", "Mala de Bordo Trip 20\" - Off White", "", 43, 18445.7],
+[3, "Tote Shopper", "Tote Shopper - Marrom", "", 63, 17793.7],
+[3, "Tote Bag CD", "Mini Tote Vinho", "Tote Bag", 75, 17332.5],
+[3, "Tote Shopper", "Tote Shopper - Vinho", "", 61, 17263.9],
+[3, "BackpackCD", "Mochila Casual Pro", "Casual Preta", 92, 17070.8],
+[3, "Mochila Rodinhas BTS", "Mochila de Rodinhas BTS Melancia", "", 30, 16987],
+[3, "BackpackCD", "Mochila Executiva Preta", "", 64, 16653.6],
+[3, "Necessaire", "Necessaire Makeup Double - Stitch", "", 158, 15394.2],
+[3, "Case", "Infinite Air", "iPhone 17 Pro", 144, 15064.7],
+[3, "Tote Bag CD", "Tote Puff Off White", "Tote Puff", 49, 14835.1],
+[3, "Case", "Impact Slim Standard iPhone 11", "", 225, 14686.8],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 13", 218, 14127.5],
+[3, "Lunch Bag CD", "Lancheira Midi - Poeira das Estrelas CH", "", 137, 12316.3],
+[3, "Case", "Infinite Air", "iPhone 17", 123, 12243.7],
+[3, "Lancheira BTS", "Lancheira Fun Azul Marinho", "", 64, 12043.6],
+[3, "BackpackCD", "Mochila Pop", "Pop Preta", 58, 11444.2],
+[3, "Tote Shopper", "Tote Shopper - Preta", "", 42, 11355.8],
+[3, "Lancheira BTS", "Lancheira BTS Azul", "", 61, 10733.9],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro", 89, 9395.1],
+[3, "Mochila BTS", "Mochila BTS Melancia", "", 39, 9366.1],
+[3, "Tote Bag CD", "Tote Puff Vinho", "Tote Bag", 28, 9237.2],
+[3, "Mochila Rodinhas BTS", "Mochila Rodinhas Azul Marinho", "", 16, 8498.4],
+[3, "Case", "Case Anti Impacto Slim Air", "iPhone 15 Pro", 81, 8081],
+[3, "BackpackCD", "Mochila Voyage Off White", "", 95, 40280.5],
+[3, "Tote Shopper", "Tote Shopper - Preta", "", 42, 11355.8],
+[3, "Case", "Case Anti Impacto Slim Air", "Samsung Galaxy S25", 60, 5626],
+[3, "Case", "Infinite Air", "Samsung Galaxy S25 FE", 76, 5444.4],
+[6, "Tote Bag CD", "Tote Bag Preta", "", 210, 56019],
+[6, "Tote Bag CD", "Mini Tote Preta", "Tote Bag", 209, 48719.1],
+[6, "Case", "Infinite Air", "iPhone 17 Pro Max", 377, 42918.5],
+[6, "Mala Joy CD", "Mala Joy Sarja Preto CD", "", 132, 38256.8],
+[6, "Bags", "Bolsa Moove Preta", "", 150, 33325],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 15", 353, 31516.9],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro Max", 232, 25350.5],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 16", 251, 24297],
+[6, "Travel Case CD", "Mala de Bordo Trip 20\" - Preta", "", 55, 23284.5],
+[6, "Tote Bag CD", "Mini Tote Off White", "Tote Bag", 98, 22960.2],
+[6, "Tote Bag CD", "Mini Tote Cinza", "Tote Bag", 88, 19951.2],
+[6, "Tote Bag CD", "Mini Tote Vinho", "Tote Bag", 72, 17512.8],
+[6, "Case", "Infinite Air", "iPhone 17 Pro", 166, 16983.6],
+[6, "Mochila BTS", "Mochila BTS Preta", "", 75, 16582.5],
+[6, "Case", "Infinite Air", "iPhone 17", 159, 16150.3],
+[6, "Mochila Rodinhas BTS", "Mochila Rodinha BTS Preta", "", 25, 16067.5],
+[6, "Tote Bag CD", "Tote Bag Amora", "Tote Daily", 54, 14924.6],
+[6, "BackpackCD", "Mochila Voyage Preta", "", 36, 14776.4],
+[6, "Tote Bag CD", "Tote Bag Off White", "", 61, 14523.9],
+[6, "Mala Joy CD", "Mala Joy - WaitList - ", "", 45, 13835.5],
+[6, "BackpackCD", "Mochila Pop", "Pop Preta", 65, 13653.5],
+[6, "Tote Bag CD", "Mini Tote Marrom", "Tote Bag", 56, 13554.4],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 15 Pro Max", 128, 12678.3],
+[6, "Mala Joy CD", "Mala Joy Vinho", "Mala Joy CH", 41, 12515.9],
+[6, "Lancheira BTS", "Lancheira BTS Preta", "", 56, 12434.4],
+[6, "Mochila Rodinhas BTS", "Mochila Rodinha BTS Azul", "", 24, 12397.6],
+[6, "Lancheira BTS", "Lancheira Play Preta", "", 94, 12240.6],
+[6, "Travel Case CD", "Mala de Bordo Trip 20\" - Off White", "", 28, 11767.2],
+[6, "Lunch Bag CD", "Bolsa Térmica Mix PRO Preta", "Mix Pro", 54, 11754.6],
+[6, "Lunch Bag CD", "Lancheira Fruit - Preta PRO", "", 52, 11594.8],
+[6, "Mochila Rodinhas BTS", "Mochila Rodinhas Azul Marinho", "", 17, 10208.3],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro", 101, 10195.9],
+[6, "Base Travel Case CD", "Base Preta - Mala de Bordo Trip 20\"", "", 24, 9934.6],
+[6, "Lunch Bag CD", "Bolsa Térmica Mix Marrom", "Mix Pro", 42, 9735.8],
+[6, "Case", "Anti Impacto Slim Air", "Samsung Galaxy S25 Ultra", 106, 9392.7],
+[6, "Estojo BTS", "Estojo BTS Preto", "", 71, 9002.9],
+[6, "Mala Joy CD", "Mala Joy Sarja Rosa CH", "", 29, 8777.1],
+[6, "Tote Bag CD", "Tote Bag Rosa", "", 36, 8556.4],
+[6, "Lunch Bag CD", "Bolsa Térmica Mix Off White", "Mix PRO", 36, 8056.4],
+[6, "Case", "Anti Impacto Slim Air", "iPhone 16 SE", 82, 7937.8],
+[6, "Lancheira BTS", "Lancheira BTS Azul", "", 44, 7485.6],
+[6, "BackpackCD", "Mochila Casual Pro", "Casual Preta", 38, 7206.2],
+[6, "Case", "Case Anti Impacto Slim Air", "iPhone 15 Pro", 69, 6957.1],
+[6, "NecessaireCD", "Necessaire Makeup Double - Preta", "", 57, 6784.3],
+[6, "Case", "Infinite Air", "iPhone 13", 101, 6718.1],
+[6, "Case", "Infinite Air", "iPhone 14", 93, 6509.8],
+[6, "Mala Joy CD", "Bolsa de Viagem Voyage Preta", "", 17, 6318.3],
+[6, "Tote Shopper", "Tote Shopper - Preta", "", 21, 5597.9],
+[6, "Case", "Infinite Air", "Samsung Galaxy S25 FE", 70, 5496.3],
+[6, "Case", "Case Anti Impacto Slim Air", "Samsung Galaxy A55", 93, 6445.8],
+[7, "Tote Bag CD", "Tote Bag Preta", "", 147, 38615.3],
+[7, "Tote Bag CD", "Mini Tote Preta", "Tote Bag", 146, 33795.4],
+[7, "Mala Joy CD", "Mala Joy Sarja Preto CD", "", 112, 32918.8],
+[7, "Bags", "Bolsa Moove Preta", "", 118, 29848.2],
+[7, "Tote Bag CD", "Mini Tote Off White", "Tote Bag", 108, 24549.2],
+[7, "Case", "Infinite Air", "iPhone 17 Pro Max", 197, 22423.4],
+[7, "Case", "Case Anti Impacto Slim Air", "iPhone 16", 205, 20663.9],
+[7, "Mochila Rodinhas BTS", "Mochila Rodinha BTS Preta", "", 30, 17617],
+[7, "NecessaireCD", "Necessaire Makeup Double - Preta", "", 134, 15746.6],
+[7, "Travel Case CD", "Mala de Bordo Trip 20\" - Off White", "", 26, 10983.1],
+[7, "Travel Case CD", "Mala de Bordo Trip 20\" - Preta", "", 25, 10367.5],
+[7, "Mala Joy CD", "Mala Joy - WaitList - ", "", 33, 10276.7],
+[7, "Mala Joy CD", "Mala Joy Vinho", "Mala Joy CH", 32, 10056.8],
+[7, "Lancheira BTS", "Lancheira BTS Preta", "", 43, 9735.7],
+[7, "Mala Joy CD", "Mala Joy - Marrom", "", 30, 9727],
+[7, "BackpackCD", "Mochila Pop", "Pop Preta", 46, 9545.4],
+[7, "Case", "Infinite Air", "iPhone 17 Pro", 91, 9404.9],
+[7, "Case", "Case Anti Impacto Slim Air", "iPhone 15", 111, 9328],
+[7, "Tote Bag CD", "Mini Tote Cinza", "Tote Bag", 39, 8656.1],
+[7, "Lunch Bag CD", "Lancheira Fruit - Preta PRO", "", 37, 8296.3],
+[7, "Copo Ebook", "Copo Life Preto", "Copo Life 1180mL + Ebook", 44, 8235.6],
+[7, "Case", "Infinite Air", "iPhone 17", 79, 7933.2],
+[7, "Base Travel Case CD", "Base Preta - Mala de Bordo Trip 20\"", "", 20, 7854.5],
+[7, "Tote Bag CD", "Tote Bag Rosa", "", 31, 7336.9],
+[7, "Tote Bag CD", "Tote Bag Amora", "Tote Daily", 27, 7017.3],
+[7, "Tote Bag CD", "Tote Bag Off White", "", 28, 6667.2],
+[7, "Powerbank Fast Charge", "Fast Charge Preto", "Powerbank 20000Mah", 27, 6557.3],
+[7, "BackpackCD", "Mochila Executiva Preta", "", 24, 6417.6],
+[7, "Tote Shopper", "Tote Shopper - Preta", "", 23, 6267.7],
+[7, "Bags", "Bolsa Moove Off White", "", 26, 6177.4],
+[7, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro Max", 49, 5529.1],
+[7, "Mala Joy CD", "Mala Joy Sarja Rosa CH", "", 17, 5308.3],
+[7, "Powerbank Fast Charge", "Fast Charge Branco", "Powerbank 20000Mah", 22, 5277.8],
+[7, "Garrafa Ebook", "Garrafa Térmica Fresh 360 v3", "Preta 650ml - Ebook", 30, 5247],
+[7, "Mochila BTS", "Mochila Fun Azul Marinho", "", 16, 5108.4],
+[7, "Tote Bag CD", "Mini Tote Marrom", "Tote Bag", 21, 5017.9],
+[7, "Tote Bag CD", "Mini Tote Vinho", "Tote Bag", 21, 4887.9],
+[7, "Case", "Case Anti Impacto Slim Air", "iPhone 16 Pro", 48, 4885.2],
+[7, "Tote Shopper", "Tote Shopper - Marrom", "", 17, 4868.3],
+[7, "Garrafa Ebook", "Garrafa Térmica Fresh 360 v3", "Branca 650ml - Ebook", 26, 4717.4],
+[7, "Mochila BTS", "Mochila BTS Melancia", "", 17, 4338.3],
+[7, "Tote Bag CD", "Tote Puff Preto", "Tote Bag", 14, 4318.6],
+[7, "Necessaire", "Necessaire Makeup Double - Stitch", "", 45, 4315.5],
+[7, "Bolsa de Garrafa", "Bolsa de Garrafa Preta", "", 24, 4217.6],
+[7, "Bags", "Bolsa Moove Rosa", "", 18, 4128.2],
+[7, "Case", "Infinite Air", "iPhone 17 Air", 41, 4115.9],
+[7, "Bolsa Térmica Urban", "Bolsa Térmica Urban Preta", "", 45, 4075.5],
+[7, "Tote Shopper", "Tote Shopper - Vinho", "", 14, 3988.6],
+[7, "Case", "Anti Impacto Slim Air", "Samsung Galaxy A56", 54, 3768.6],
+[7, "Lancheira BTS", "Lancheira Azul Marinho Play", "", 27, 3337.3]
+]
 };
 
 /* ═══ DISTRIBUIÇÃO MENSAL (proporcional ao volume real por factory) ═══
