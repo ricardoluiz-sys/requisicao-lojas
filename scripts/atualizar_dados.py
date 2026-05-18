@@ -132,6 +132,7 @@ rp AS (
 calc AS (
   SELECT b.dia, b.loja,
     CASE WHEN b.aasm_state='canceled' THEN 'cancelado'
+         WHEN b.aasm_state='waiting' THEN 'aguardando'
          WHEN b.aasm_state='delivered' OR rp.t1 IS NOT NULL THEN 'pronto'
          ELSE 'em_producao' END status,
     CASE WHEN rp.t1 IS NOT NULL THEN
@@ -146,6 +147,7 @@ SELECT dia::text, loja,
   COUNT(*) FILTER(WHERE status='pronto') prontos,
   COUNT(*) FILTER(WHERE status='em_producao') em_producao,
   COUNT(*) FILTER(WHERE status='cancelado') cancelados,
+  COUNT(*) FILTER(WHERE status='aguardando') aguardando,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm<=30) d30,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm<=120) d120,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120) acima120,
@@ -156,7 +158,7 @@ SELECT dia::text, loja,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120 AND pm<=240) f120_240,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>240) f240_mais,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)
-    FILTER(WHERE pm IS NOT NULL AND pm>=2)::numeric, 1) mediana_op,
+    FILTER(WHERE pm IS NOT NULL AND pm>=2 AND pm<1440)::numeric, 1) mediana_op,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric, 1) mediana_total
 FROM calc
 GROUP BY dia, loja
@@ -260,7 +262,7 @@ ORDER BY b.factory_id, mes
 # ── Geradores de JS ───────────────────────────────────────────────────────────
 def gerar_dp_raw(rows: list[dict]) -> str:
     """Gera o array JS let DP_RAW=[...]."""
-    campos = ["dia","loja","pedidos","prontos","em_producao","cancelados",
+    campos = ["dia","loja","pedidos","prontos","em_producao","cancelados","aguardando",
               "d30","d120","acima120","f0_15","f15_30","f30_60",
               "f60_120","f120_240","f240_mais","mediana_op","mediana_total"]
     linhas = []
@@ -301,10 +303,12 @@ def gerar_dp_opr_daily(rows: list[dict]) -> str:
 def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     """
     Gera const AN={...} e const AN_MONTHLY_DIST={...}.
+    Inclui todos os meses de Janeiro até o mês atual automaticamente.
     Retorna (an_js, dist_js).
     """
-    # Determinar meses disponíveis (1-indexed)
-    meses_disponiveis = sorted({int(r["mes"]) for r in vol_rows})
+    # Incluir todos os meses de Jan até o mês atual (não só os com dados)
+    mes_atual = hoje.month
+    meses_disponiveis = list(range(1, mes_atual + 1))
     meses_labels = [MESES_PT[m-1] for m in meses_disponiveis]
 
     # Construir vol e rev por fábrica por mês
@@ -356,8 +360,27 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
 
     return an_js, dist_js
 
+
+def gerar_an_month_dates(hoje: datetime.date) -> str:
+    """Gera AN_MONTH_DATES com todos os meses até o atual."""
+    import calendar
+    meses_disponiveis = list(range(1, hoje.month + 1))
+    linhas = []
+    for m in meses_disponiveis:
+        start = f"01/{m:02d}"
+        if m < hoje.month:
+            # Mês completo
+            ultimo_dia = calendar.monthrange(hoje.year, m)[1]
+            end = f"{ultimo_dia:02d}/{m:02d}"
+        else:
+            # Mês atual: até hoje
+            end = hoje.strftime("%d/%m")
+        linhas.append(f"  {{start:'{start}', end:'{end}'}}")
+    return "const AN_MONTH_DATES = [\n" + ",\n".join(linhas) + "\n];"
+
 # ── Injeção no HTML ───────────────────────────────────────────────────────────
-def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str) -> str:
+def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str,
+                           an_month_dates: str = "") -> str:
     """Substitui o bloco <script id='dados-metabase'> por completo."""
     START = '<script id="dados-metabase">'
     END   = '</script>'
@@ -372,7 +395,8 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
         f'{dp_opr}\n'
         f'{an}\n'
         f'{an_dist}\n'
-        f'{END}'
+        + (f'{an_month_dates}\n' if an_month_dates else '')
+        + f'{END}'
     )
     return html[:i_s] + novo + html[i_e:]
 
@@ -385,7 +409,8 @@ def injetar_no_html(html: str,
                     an_dist_js: str,
                     hoje: datetime.date) -> str:
     # 1. Substituir bloco de dados
-    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js)
+    an_month_dates_js = gerar_an_month_dates(hoje)
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js)
     log("  ↳ Bloco de dados substituído")
 
     # 2. Atualizar datas nos badges
