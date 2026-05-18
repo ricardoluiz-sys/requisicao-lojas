@@ -413,6 +413,56 @@ def injetar_no_html(html: str,
                       lambda m: m.group(1) + hoje_str, html); n_sub += k
 
     log(f"  ↳ {n_sub} datas atualizadas para {hoje_str}")
+
+    # 3. Atualizar AN_MONTH_DATES — end do mês atual
+    # Meses: Jan=0, Fev=1, ..., Dez=11
+    mes_idx = hoje.month - 1
+    html, k = re.subn(
+        r"(\{start:'01/" + f"{hoje.month:02d}" + r"',\s*end:')\d{2}/" + f"{hoje.month:02d}" + r"('\}[^,\n]*)",
+        lambda m: m.group(1) + hoje_dm + "'} /* ← dados até " + hoje_dm + " */",
+        html
+    )
+    if k:
+        log(f"  ↳ AN_MONTH_DATES mês {hoje.month} atualizado para {hoje_dm}")
+
+    # Atualizar texto 'dados até DD/MM' no anUpdateSummary
+    html = re.sub(r'dados até \d{2}/\d{2} —', f'dados até {hoje_dm} —', html)
+
+    # ── Top Consumo: badge ATUALIZADO e botão Mai ─────────────────────────
+    html, k = re.subn(
+        r'(?<=>)\d{2}/\d{2}/\d{4}(?=</div>)',
+        hoje_str, html)
+    html = re.sub(
+        r'title="01/05[–-]\d{2}/\d{2}/\d{4}"',
+        f'title="01/05–{hoje_str}"', html)
+
+    # ── Desempenho: inputs de data e botões de período ────────────────────
+    mes_ini = hoje.replace(day=1)
+    mes_ini_iso = mes_ini.strftime('%Y-%m-%d')
+    hoje_iso    = hoje.strftime('%Y-%m-%d')
+    sem1_fim    = hoje.replace(day=7).strftime('%Y-%m-%d')
+    sem2_ini    = hoje.replace(day=8).strftime('%Y-%m-%d')
+    sem2_fim    = hoje.replace(day=14).strftime('%Y-%m-%d')
+
+    # Input date fim (value e max)
+    html = re.sub(
+        r'(id="dp-data-fim" value=")2026-\d{2}-\d{2}(" min="2026-\d{2}-\d{2}" max=")2026-\d{2}-\d{2}"',
+        lambda m: m.group(1) + hoje_iso + m.group(2) + hoje_iso + '"', html)
+
+    # Input date ini max
+    html = re.sub(
+        r'(id="dp-data-ini"[^>]*max=")\d{4}-\d{2}-\d{2}"',
+        lambda m: m.group(1) + hoje_iso + '"', html)
+
+    # Botões período no Desempenho
+    html = re.sub(r"dpSetPeriod\('\d{4}-\d{2}-01','\d{4}-\d{2}-07'\)",
+                  f"dpSetPeriod('{mes_ini_iso}','{sem1_fim}')", html)
+    html = re.sub(r"dpSetPeriod\('\d{4}-\d{2}-08','\d{4}-\d{2}-14'\)",
+                  f"dpSetPeriod('{sem2_ini}','{sem2_fim}')", html)
+    html = re.sub(r"dpSetPeriod\('\d{4}-\d{2}-01','\d{4}-\d{2}-\d{2}'\)",
+                  f"dpSetPeriod('{mes_ini_iso}','{hoje_iso}')", html)
+
+    log(f"  ↳ Datas TC e DP atualizadas para {hoje_str}")
     return html
 
 
