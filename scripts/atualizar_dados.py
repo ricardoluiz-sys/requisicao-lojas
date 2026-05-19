@@ -47,6 +47,23 @@ def mb_session(user: str, senha: str) -> str:
     log(f"Autenticado no Metabase (token: {token[:8]}…)")
     return token
 
+
+# Sessão HTTP global (reutiliza conexão TCP para reduzir latência)
+_http_session: requests.Session | None = None
+
+def get_http_session() -> requests.Session:
+    global _http_session
+    if _http_session is None:
+        _http_session = requests.Session()
+        _http_session.headers.update({"Connection": "keep-alive"})
+        adapter = requests.adapters.HTTPAdapter(
+            max_retries=0,
+            pool_connections=1,
+            pool_maxsize=4,
+        )
+        _http_session.mount("https://", adapter)
+    return _http_session
+
 def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[dict]:
     """Executa uma query SQL nativa com retry automático."""
     import time
@@ -54,8 +71,10 @@ def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[d
         "database": MB_DB,
         "type": "native",
         "native": {"query": sql},
-        "middleware": {"js-int-to-string?": False}
+        "middleware": {"js-int-to-string?": False},
     }
+    if limit > 2000:
+        payload["constraints"] = {"max-results": limit}  # supera o limite padrão Metabase
     headers = {
         "X-Metabase-Session": token,
         "Content-Type": "application/json",
@@ -68,9 +87,10 @@ def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[d
                 wait = 15 * attempt
                 log(f"  Tentativa {attempt}/{retries} — aguardando {wait}s...")
                 time.sleep(wait)
-            r = requests.post(
+            sess = get_http_session()
+            sess.headers["X-Metabase-Session"] = token
+            r = sess.post(
                 f"{MB_URL}/api/dataset",
-                headers=headers,
                 json=payload,
                 timeout=300,
             )
@@ -240,6 +260,7 @@ WHERE o.deleted_at IS NULL
   AND o.created_at <  '{prox_mes}'
 GROUP BY b.factory_id, li.material_id, mes
 ORDER BY b.factory_id, val DESC
+LIMIT 500
 """
 
 
