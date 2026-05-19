@@ -673,6 +673,16 @@ def main():
                 'qtd_total':    totais['qtd'],
                 'val_total':    round(totais['val'], 2),
             })
+    # Debug: verificar correspondência de IDs
+    if consumo_acc and not skus_rows:
+        sample_ids = list(consumo_acc.keys())[:5]
+        mat_keys = sorted(mat_map.keys())[:5] if mat_map else []
+        log(f"  DEBUG consumo_acc sample: {sample_ids}")
+        log(f"  DEBUG mat_map primeiras chaves: {mat_keys}")
+        log(f"  DEBUG mat_map total: {len(mat_map)}")
+        # Tentar encontrar um match manual
+        for (fid, mid), _ in list(consumo_acc.items())[:3]:
+            log(f"  DEBUG mid={mid} type={type(mid).__name__} in mat_map={mid in mat_map}")
     log(f"  ↳ {len(skus_rows)} SKUs após merge")
 
     vol_rows = vol_rows_list if vol_rows_list else None
