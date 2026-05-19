@@ -218,7 +218,7 @@ GROUP BY b.dia, b.loja, fp.uid, u.name
 ORDER BY b.dia, b.loja, pedidos DESC
 """
 
-SQL_CONSUMO = f"""
+SQL_CONSUMO = """
 SELECT
   b.factory_id,
   mc.name                          AS categoria,
@@ -227,17 +227,18 @@ SELECT
   COUNT(li.id)                     AS qtd_total,
   ROUND(SUM(li.price)::numeric, 2) AS val_total
 FROM orders o
-JOIN batches  b  ON b.id  = o.batch_id       AND b.factory_id IN (3,6,7)
-JOIN line_items li ON li.order_id = o.id     AND li.deleted_at IS NULL
-                                             AND li.price > 0
+JOIN batches  b  ON b.id  = o.batch_id  AND b.factory_id = {fid}
+JOIN line_items li ON li.order_id = o.id AND li.deleted_at IS NULL
+                                          AND li.price > 0
 JOIN materials m   ON m.id = li.material_id
 JOIN material_categories mc ON mc.id = m.material_category_id
                            AND mc.name <> 'Ebook'
 WHERE o.deleted_at IS NULL
-  AND o.created_at >= '2026-01-01'
-  AND o.created_at <  '{{fim}}'
+  AND o.created_at >= '{ano}-01-01'
+  AND o.created_at <  '{fim}'
 GROUP BY b.factory_id, mc.name, variacao_cor, modelo
-ORDER BY b.factory_id, val_total DESC
+ORDER BY val_total DESC
+LIMIT 200
 """
 
 SQL_VOL_MENSAL = """
@@ -382,24 +383,39 @@ def gerar_an_month_dates(hoje: datetime.date) -> str:
 # ── Injeção no HTML ───────────────────────────────────────────────────────────
 def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str,
                            an_month_dates: str = "") -> str:
-    """Substitui o bloco <script id='dados-metabase'> por completo."""
+    """Substitui o bloco <script id='dados-metabase'> por completo.
+    Se an/an_dist são None, preserva os dados de AN existentes no HTML."""
     START = '<script id="dados-metabase">'
     END   = '</script>'
     i_s = html.find(START)
     if i_s < 0:
         raise ValueError("Bloco <script id=\"dados-metabase\"> não encontrado no HTML!")
     i_e = html.find(END, i_s) + len(END)
+
+    # Se AN não disponível, extrair do HTML existente
+    an_final = an if an else _extrair_bloco_entre(html, '/* @@AN_START@@ */', '/* @@AN_END@@ */')
+    an_dist_final = an_dist if an_dist else _extrair_bloco_entre(html, '/* @@AN_DIST_START@@ */', '/* @@AN_DIST_END@@ */')
+
     novo = (
         f'{START}\n'
         f'/* === DADOS METABASE — atualizado {datetime.date.today().strftime("%d/%m/%Y")} === */\n'
         f'{dp_raw}\n'
         f'{dp_opr}\n'
-        f'{an}\n'
-        f'{an_dist}\n'
+        + (f'{an_final}\n' if an_final else '')
+        + (f'{an_dist_final}\n' if an_dist_final else '')
         + (f'{an_month_dates}\n' if an_month_dates else '')
         + f'{END}'
     )
     return html[:i_s] + novo + html[i_e:]
+
+
+def _extrair_bloco_entre(html: str, inicio: str, fim: str) -> str:
+    """Extrai o conteúdo entre dois marcadores no HTML."""
+    i_s = html.find(inicio)
+    i_e = html.find(fim, i_s)
+    if i_s < 0 or i_e < 0:
+        return ""
+    return html[i_s:i_e + len(fim)]
 
 
 
@@ -518,28 +534,37 @@ def main():
     log(f"  ↳ {len(dp_opr_rows)} linhas")
 
     log("Consultando Consumo por SKU (Jan–hoje)...")
-    # Consumo dividido em 3 requests (um por fábrica) para evitar timeout
+    # Consumo: 1 request por fábrica com LIMIT 200 top SKUs
     skus_rows = []
+    ano = hoje.year
     for fid in [3, 6, 7]:
-        sql_fac = SQL_CONSUMO.format(fim=fim).replace(
-            'b.factory_id IN (3,6,7)',
-            f'b.factory_id = {fid}'
-        )
-        rows_fac = mb_query(token, sql_fac, limit=200)
-        log(f"  ↳ Factory {fid}: {len(rows_fac)} SKUs")
-        skus_rows.extend(rows_fac)
+        try:
+            sql_fac = SQL_CONSUMO.format(fid=fid, ano=ano, fim=fim)
+            rows_fac = mb_query(token, sql_fac, limit=200, retries=3)
+            log(f"  ↳ Factory {fid}: {len(rows_fac)} SKUs")
+            skus_rows.extend(rows_fac)
+        except Exception as e:
+            log(f"  ⚠ Factory {fid} falhou após retries: {e} — mantendo dados existentes")
     log(f"  ↳ {len(skus_rows)} linhas")
 
     log("Consultando Volume mensal por fábrica...")
-    vol_rows = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100)
+    try:
+        vol_rows = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=3)
+    except Exception as e:
+        log(f"  ⚠ Vol mensal falhou: {e} — mantendo dados existentes")
+        vol_rows = None
     log(f"  ↳ {len(vol_rows)} linhas")
 
     # Gerar JS
     log("Gerando blocos JS...")
     dp_raw_js      = gerar_dp_raw(dp_raw_rows)
     dp_opr_daily_js = gerar_dp_opr_daily(dp_opr_rows)
-    an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
-
+    if vol_rows is None or not skus_rows:
+        log("  ⚠ Dados de consumo incompletos — mantendo AN existente no HTML")
+        an_js, an_dist_js, an_month_dates_js = None, None, None
+    else:
+        an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
+    
     # Injetar no HTML
     log("Injetando no HTML...")
     html = HTML_FILE.read_text(encoding="utf-8")
