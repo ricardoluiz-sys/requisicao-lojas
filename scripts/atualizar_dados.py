@@ -218,28 +218,31 @@ GROUP BY b.dia, b.loja, fp.uid, u.name
 ORDER BY b.dia, b.loja, pedidos DESC
 """
 
-SQL_CONSUMO = """
+SQL_MATERIAIS = """
+SELECT m.id, mc.name AS categoria, m.reference
+FROM materials m
+JOIN material_categories mc ON mc.id = m.material_category_id
+WHERE mc.name <> 'Ebook'
+ORDER BY m.id
+"""
+
+SQL_CONSUMO_MES = """
 SELECT
   b.factory_id,
-  mc.name                          AS categoria,
-  SPLIT_PART(m.reference,' / ',1)  AS variacao_cor,
-  SPLIT_PART(m.reference,' / ',2)  AS modelo,
-  COUNT(li.id)                     AS qtd_total,
-  ROUND(SUM(li.price)::numeric, 2) AS val_total
+  li.material_id,
+  EXTRACT(MONTH FROM o.created_at AT TIME ZONE 'America/Sao_Paulo')::int AS mes,
+  COUNT(li.id)                     AS qtd,
+  ROUND(SUM(li.price)::numeric, 2) AS val
 FROM orders o
-JOIN batches  b  ON b.id  = o.batch_id  AND b.factory_id = {fid}
-JOIN line_items li ON li.order_id = o.id AND li.deleted_at IS NULL
-                                          AND li.price > 0
-JOIN materials m   ON m.id = li.material_id
-JOIN material_categories mc ON mc.id = m.material_category_id
-                           AND mc.name <> 'Ebook'
+JOIN batches  b  ON b.id  = o.batch_id  AND b.factory_id IN (3,6,7)
+JOIN line_items li ON li.order_id = o.id AND li.deleted_at IS NULL AND li.price > 0
 WHERE o.deleted_at IS NULL
-  AND o.created_at >= '{ano}-01-01'
-  AND o.created_at <  '{fim}'
-GROUP BY b.factory_id, mc.name, variacao_cor, modelo
-ORDER BY val_total DESC
-LIMIT 200
+  AND o.created_at >= '{ano}-{mes:02d}-01'
+  AND o.created_at <  '{prox_mes}'
+GROUP BY b.factory_id, li.material_id, mes
+ORDER BY b.factory_id, val DESC
 """
+
 
 SQL_VOL_MENSAL = """
 SELECT
@@ -381,8 +384,40 @@ def gerar_an_month_dates(hoje: datetime.date) -> str:
     return "const AN_MONTH_DATES = [\n" + ",\n".join(linhas) + "\n];"
 
 # ── Injeção no HTML ───────────────────────────────────────────────────────────
+
+def gerar_skus_mes(rows: list[dict], hoje) -> str:
+    """Gera const AN_SKUS_MES = [...] com os dados do mês atual."""
+    import json
+    linhas = []
+    for r in rows:
+        fid = int(r.get('factory_id', 0))
+        cat = str(r.get('categoria', ''))
+        var = str(r.get('variacao_cor', ''))
+        mod = str(r.get('modelo', '') or '')
+        qtd = int(r.get('qtd_mes', 0) or 0)
+        val = float(r.get('val_mes', 0) or 0)
+        cat_esc = cat.replace('"', '\\"')
+        var_esc = var.replace('"', '\\"')
+        mod_esc = mod.replace('"', '\\"')
+        linhas.append(f'[{fid},"{cat_esc}","{var_esc}","{mod_esc}",{qtd},{round(val,2)}]')
+    mes = hoje.month
+    return f'const AN_SKUS_MES = {{mes:{mes},rows:[\n' + ',\n'.join(linhas) + '\n]}};'
+
+
+def gerar_vol_mes(rows: list[dict], hoje) -> str:
+    """Gera const AN_VOL_MES = {{mes:N, 3:[vol,rev], 6:[vol,rev], 7:[vol,rev]}}."""
+    data = {3: [0, 0.0], 6: [0, 0.0], 7: [0, 0.0]}
+    for r in rows:
+        fid = int(r.get('factory_id', 0))
+        if fid in data:
+            data[fid] = [int(r.get('volume', 0) or 0), float(r.get('receita', 0) or 0)]
+    mes = hoje.month
+    parts = ', '.join(f'{fid}:{data[fid]}' for fid in [3, 6, 7])
+    return f'const AN_VOL_MES = {{mes:{mes}, {parts}}};'
+
 def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str,
-                           an_month_dates: str = "") -> str:
+                           an_month_dates: str = "",
+                           skus_mes: str = "", vol_mes: str = "") -> str:
     """Substitui o bloco <script id='dados-metabase'> por completo.
     Se an/an_dist são None, preserva os dados de AN existentes no HTML."""
     START = '<script id="dados-metabase">'
@@ -404,6 +439,8 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
         + (f'{an_final}\n' if an_final else '')
         + (f'{an_dist_final}\n' if an_dist_final else '')
         + (f'{an_month_dates}\n' if an_month_dates else '')
+        + (f'{skus_mes}\n' if skus_mes else '')
+        + (f'{vol_mes}\n' if vol_mes else '')
         + f'{END}'
     )
     return html[:i_s] + novo + html[i_e:]
@@ -424,10 +461,12 @@ def injetar_no_html(html: str,
                     dp_opr_daily_js: str,
                     an_js: str,
                     an_dist_js: str,
-                    hoje: datetime.date) -> str:
+                    hoje: datetime.date,
+                    skus_mes: str = "",
+                    vol_mes: str = "") -> str:
     # 1. Substituir bloco de dados
     an_month_dates_js = gerar_an_month_dates(hoje)
-    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js)
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js, skus_mes, vol_mes)
     log("  ↳ Bloco de dados substituído")
 
     # 2. Atualizar datas nos badges
@@ -533,42 +572,103 @@ def main():
     dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR, limit=500)
     log(f"  ↳ {len(dp_opr_rows)} linhas")
 
-    log("Consultando Consumo por SKU (Jan–hoje)...")
-    # Consumo: 1 request por fábrica com LIMIT 200 top SKUs
-    skus_rows = []
-    ano = hoje.year
-    for fid in [3, 6, 7]:
-        try:
-            sql_fac = SQL_CONSUMO.format(fid=fid, ano=ano, fim=fim)
-            rows_fac = mb_query(token, sql_fac, limit=200, retries=3)
-            log(f"  ↳ Factory {fid}: {len(rows_fac)} SKUs")
-            skus_rows.extend(rows_fac)
-        except Exception as e:
-            log(f"  ⚠ Factory {fid} falhou após retries: {e} — mantendo dados existentes")
-    log(f"  ↳ {len(skus_rows)} linhas")
 
-    log("Consultando Volume mensal por fábrica...")
+    # ── Consumo: 2 queries leves + join em Python ────────────────────────
+    # Query 1: catálogo de materiais (rápida, tabela pequena)
+    log("Consultando catálogo de materiais...")
     try:
-        vol_rows = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=3)
+        mat_rows = mb_query(token, SQL_MATERIAIS, limit=2000, retries=2)
+        mat_map = {}
+        for r in mat_rows:
+            ref = (r.get('reference') or '').split(' / ')
+            mat_map[int(r['id'])] = {
+                'categoria': r['categoria'],
+                'variacao_cor': ref[0] if ref else '',
+                'modelo': ref[1] if len(ref) > 1 else '',
+            }
+        log(f"  ↳ {len(mat_map)} materiais")
     except Exception as e:
-        log(f"  ⚠ Vol mensal falhou: {e} — mantendo dados existentes")
-        vol_rows = None
+        log(f"  ⚠ Catálogo falhou: {e}")
+        mat_map = {}
+
+    # Query 2: consumo por material_id por mês (sem JOIN material_categories)
+    log("Consultando Consumo por SKU (mês a mês)...")
+    consumo_acc = {}  # (factory_id, material_id) → {qtd, val}
+    ano = hoje.year
+    meses = list(range(1, hoje.month + 1))
+    vol_rows_list = []  # para montar AN.vol e AN.rev
+
+    for mes in meses:
+        prox = f"{ano}-{mes+1:02d}-01" if mes < 12 else f"{ano+1}-01-01"
+        if mes == hoje.month:
+            prox = fim
+        sql_m = SQL_CONSUMO_MES.format(ano=ano, mes=mes, prox_mes=prox)
+        try:
+            rows_m = mb_query(token, sql_m, limit=500, retries=2)
+            for r in rows_m:
+                key = (int(r['factory_id']), int(r['material_id']))
+                if key not in consumo_acc:
+                    consumo_acc[key] = {'qtd': 0, 'val': 0.0}
+                consumo_acc[key]['qtd'] += int(r['qtd'] or 0)
+                consumo_acc[key]['val'] += float(r['val'] or 0)
+            # Agregar volume por fábrica para vol_rows
+            for fid in [3, 6, 7]:
+                fid_rows = [r for r in rows_m if int(r['factory_id']) == fid]
+                if fid_rows:
+                    vol_rows_list.append({
+                        'factory_id': fid,
+                        'mes': mes,
+                        'volume': sum(int(r['qtd'] or 0) for r in fid_rows),
+                        'receita': round(sum(float(r['val'] or 0) for r in fid_rows), 2),
+                    })
+            log(f"  ↳ Mês {mes:02d}: {len(rows_m)} linhas")
+        except Exception as e:
+            log(f"  ⚠ Mês {mes:02d} falhou: {e}")
+
+    # Montar skus_rows (join consumo_acc × mat_map)
+    skus_rows = []
+    for (fid, mid), totais in consumo_acc.items():
+        mat = mat_map.get(mid)
+        if mat:
+            skus_rows.append({
+                'factory_id': fid,
+                'categoria':    mat['categoria'],
+                'variacao_cor': mat['variacao_cor'],
+                'modelo':       mat['modelo'],
+                'qtd_total':    totais['qtd'],
+                'val_total':    round(totais['val'], 2),
+            })
+    log(f"  ↳ {len(skus_rows)} SKUs após merge")
+
+    vol_rows = vol_rows_list if vol_rows_list else None
+    log(f"  ↳ Volume mensal: {len(vol_rows_list)} entradas")
+
+
     log(f"  ↳ {len(vol_rows)} linhas")
 
     # Gerar JS
     log("Gerando blocos JS...")
-    dp_raw_js      = gerar_dp_raw(dp_raw_rows)
+    dp_raw_js       = gerar_dp_raw(dp_raw_rows)
     dp_opr_daily_js = gerar_dp_opr_daily(dp_opr_rows)
-    if vol_rows is None or not skus_rows:
-        log("  ⚠ Dados de consumo incompletos — mantendo AN existente no HTML")
-        an_js, an_dist_js, an_month_dates_js = None, None, None
-    else:
+
+    # Mês atual: sempre gerar se tiver dados
+    skus_mes_js  = gerar_skus_mes(skus_mes_rows, hoje) if skus_mes_rows else None
+    vol_mes_js   = gerar_vol_mes(vol_mes_rows, hoje)   if vol_mes_rows  else None
+
+    # Histórico: usar novo se disponível, senão preservar HTML
+    if vol_rows is not None and skus_rows:
+        log("  ↳ Atualizando AN histórico + mês atual")
         an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
+        an_month_dates_js = gerar_an_month_dates(hoje)
+    else:
+        log("  ↳ AN histórico: mantendo dados existentes no HTML")
+        an_js, an_dist_js, an_month_dates_js = None, None, None
     
     # Injetar no HTML
     log("Injetando no HTML...")
     html = HTML_FILE.read_text(encoding="utf-8")
-    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje)
+    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje,
+                         skus_mes=skus_mes_js, vol_mes=vol_mes_js)
     HTML_FILE.write_text(html, encoding="utf-8")
 
     # Verificar quais blocos mudaram
