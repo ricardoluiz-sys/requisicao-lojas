@@ -240,22 +240,22 @@ GROUP BY b.factory_id, mc.name, variacao_cor, modelo
 ORDER BY b.factory_id, val_total DESC
 """
 
-SQL_VOL_MENSAL = f"""
+SQL_VOL_MENSAL = """
 SELECT
   b.factory_id,
-  EXTRACT(MONTH FROM li.created_at AT TIME ZONE 'America/Sao_Paulo') AS mes,
-  COUNT(li.id) AS volume,
+  EXTRACT(MONTH FROM o.created_at AT TIME ZONE 'America/Sao_Paulo') AS mes,
+  COUNT(li.id)                     AS volume,
   ROUND(SUM(li.price)::numeric, 2) AS receita
-FROM line_items li
-JOIN orders o ON o.id = li.order_id AND o.deleted_at IS NULL
-JOIN batches b ON b.id = o.batch_id AND b.factory_id IN (3,6,7)
-JOIN material_categories mc ON mc.id = (
-  SELECT material_category_id FROM materials WHERE id = li.material_id LIMIT 1
-)
-WHERE li.created_at >= '2026-01-01'
-  AND li.deleted_at IS NULL
-  AND mc.name != 'Ebook'
-  AND li.price > 0
+FROM orders o
+JOIN batches  b  ON b.id  = o.batch_id       AND b.factory_id IN (3,6,7)
+JOIN line_items li ON li.order_id = o.id     AND li.deleted_at IS NULL
+                                             AND li.price > 0
+JOIN materials m   ON m.id = li.material_id
+JOIN material_categories mc ON mc.id = m.material_category_id
+                           AND mc.name <> 'Ebook'
+WHERE o.deleted_at IS NULL
+  AND o.created_at >= '2026-01-01'
+  AND o.created_at <  '{fim}'
 GROUP BY b.factory_id, mes
 ORDER BY b.factory_id, mes
 """
@@ -531,7 +531,7 @@ def main():
     log(f"  ↳ {len(skus_rows)} linhas")
 
     log("Consultando Volume mensal por fábrica...")
-    vol_rows = mb_query(token, SQL_VOL_MENSAL, limit=60)
+    vol_rows = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100)
     log(f"  ↳ {len(vol_rows)} linhas")
 
     # Gerar JS
