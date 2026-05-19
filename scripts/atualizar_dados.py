@@ -64,23 +64,6 @@ def get_http_session() -> requests.Session:
         _http_session.mount("https://", adapter)
     return _http_session
 
-def mb_query_csv(token: str, sql: str) -> list[dict]:
-    """Executa SQL via endpoint CSV — sem limite de 2000 linhas do /api/dataset."""
-    import csv, io
-    payload = {
-        "database": MB_DB,
-        "type": "native",
-        "native": {"query": sql},
-        "middleware": {"js-int-to-string?": False},
-    }
-    sess = get_http_session()
-    sess.headers["X-Metabase-Session"] = token
-    r = sess.post(f"{MB_URL}/api/dataset/csv", json=payload, timeout=120)
-    r.raise_for_status()
-    reader = csv.DictReader(io.StringIO(r.text))
-    return [row for row in reader]
-
-
 def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[dict]:
     """Executa uma query SQL nativa com retry automático."""
     import time
@@ -260,6 +243,9 @@ SELECT m.id, mc.name AS categoria, m.reference
 FROM materials m
 JOIN material_categories mc ON mc.id = m.material_category_id
 WHERE mc.name <> 'Ebook'
+  AND m.id > {min_id}
+ORDER BY m.id
+LIMIT 2000
 """
 
 SQL_CONSUMO_MES = """
@@ -607,129 +593,28 @@ def main():
 
     # ── Consumo: 2 queries leves + join em Python ────────────────────────
     # Query 1: catálogo de materiais (rápida, tabela pequena)
-    log("Consultando catálogo de materiais...")
+    log("Consultando catálogo de materiais (paginado)...")
+    mat_map = {}
     try:
-        mat_rows = mb_query_csv(token, SQL_MATERIAIS)
-        mat_map = {}
-        for r in mat_rows:
-            ref = (r.get('reference') or '').split(' / ')
-            try:
-                mat_map[int(r['id'])] = {
-                    'categoria': r['categoria'],
-                    'variacao_cor': ref[0].strip() if ref else '',
-                    'modelo': ref[1].strip() if len(ref) > 1 else '',
-                }
-            except (ValueError, KeyError):
-                pass
-        log(f"  ↳ {len(mat_map)} materiais")
+        min_id = 0
+        while True:
+            page = mb_query(token, SQL_MATERIAIS.format(min_id=min_id), limit=2000, retries=2)
+            if not page:
+                break
+            for r in page:
+                ref = (r.get('reference') or '').split(' / ')
+                try:
+                    mat_map[int(r['id'])] = {
+                        'categoria': r['categoria'],
+                        'variacao_cor': ref[0].strip() if ref else '',
+                        'modelo': ref[1].strip() if len(ref) > 1 else '',
+                    }
+                except (ValueError, KeyError):
+                    pass
+            min_id = max(int(r['id']) for r in page)
+            if len(page) < 2000:
+                break  # última página
+        log(f"  ↳ {len(mat_map)} materiais carregados")
     except Exception as e:
         log(f"  ⚠ Catálogo falhou: {e}")
         mat_map = {}
-
-    # Query 2: consumo por material_id por mês (sem JOIN material_categories)
-    log("Consultando Consumo por SKU (mês a mês)...")
-    consumo_acc = {}  # (factory_id, material_id) → {qtd, val}
-    ano = hoje.year
-    meses = list(range(1, hoje.month + 1))
-    vol_rows_list = []  # para montar AN.vol e AN.rev
-
-    for mes in meses:
-        prox = f"{ano}-{mes+1:02d}-01" if mes < 12 else f"{ano+1}-01-01"
-        if mes == hoje.month:
-            prox = fim
-        sql_m = SQL_CONSUMO_MES.format(ano=ano, mes=mes, prox_mes=prox)
-        try:
-            rows_m = mb_query(token, sql_m, limit=500, retries=2)
-            for r in rows_m:
-                key = (int(r['factory_id']), int(r['material_id']))
-                if key not in consumo_acc:
-                    consumo_acc[key] = {'qtd': 0, 'val': 0.0}
-                consumo_acc[key]['qtd'] += int(r['qtd'] or 0)
-                consumo_acc[key]['val'] += float(r['val'] or 0)
-            # Agregar volume por fábrica para vol_rows
-            for fid in [3, 6, 7]:
-                fid_rows = [r for r in rows_m if int(r['factory_id']) == fid]
-                if fid_rows:
-                    vol_rows_list.append({
-                        'factory_id': fid,
-                        'mes': mes,
-                        'volume': sum(int(r['qtd'] or 0) for r in fid_rows),
-                        'receita': round(sum(float(r['val'] or 0) for r in fid_rows), 2),
-                    })
-            log(f"  ↳ Mês {mes:02d}: {len(rows_m)} linhas")
-        except Exception as e:
-            log(f"  ⚠ Mês {mes:02d} falhou: {e}")
-
-    # Montar skus_rows (join consumo_acc × mat_map)
-    skus_rows = []
-    for (fid, mid), totais in consumo_acc.items():
-        mat = mat_map.get(mid)
-        if mat:
-            skus_rows.append({
-                'factory_id': fid,
-                'categoria':    mat['categoria'],
-                'variacao_cor': mat['variacao_cor'],
-                'modelo':       mat['modelo'],
-                'qtd_total':    totais['qtd'],
-                'val_total':    round(totais['val'], 2),
-            })
-    # Debug: verificar correspondência de IDs
-    if consumo_acc and not skus_rows:
-        sample_ids = list(consumo_acc.keys())[:5]
-        mat_keys = sorted(mat_map.keys())[:5] if mat_map else []
-        log(f"  DEBUG consumo_acc sample: {sample_ids}")
-        log(f"  DEBUG mat_map primeiras chaves: {mat_keys}")
-        log(f"  DEBUG mat_map total: {len(mat_map)}")
-        # Tentar encontrar um match manual
-        for (fid, mid), _ in list(consumo_acc.items())[:3]:
-            log(f"  DEBUG mid={mid} type={type(mid).__name__} in mat_map={mid in mat_map}")
-    log(f"  ↳ {len(skus_rows)} SKUs após merge")
-
-    vol_rows = vol_rows_list if vol_rows_list else None
-    log(f"  ↳ Volume mensal: {len(vol_rows_list)} entradas")
-
-
-    # Gerar JS
-    log("Gerando blocos JS...")
-    dp_raw_js       = gerar_dp_raw(dp_raw_rows)
-    dp_opr_daily_js = gerar_dp_opr_daily(dp_opr_rows)
-
-    # Consumo: usar dados do loop mês-a-mês
-    if vol_rows is not None and skus_rows:
-        log(f"  ↳ Atualizando AN: {len(skus_rows)} SKUs, {len(vol_rows)} entradas mensais")
-        an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
-        an_month_dates_js = gerar_an_month_dates(hoje)
-    else:
-        log("  ↳ AN: mantendo dados existentes no HTML")
-        an_js, an_dist_js, an_month_dates_js = None, None, None
-    
-    # Injetar no HTML
-    log("Injetando no HTML...")
-    html = HTML_FILE.read_text(encoding="utf-8")
-    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje)
-    HTML_FILE.write_text(html, encoding="utf-8")
-
-    # Verificar quais blocos mudaram
-    with open(HTML_FILE, 'r', encoding='utf-8') as fh:
-        html_depois = fh.read()
-
-    import subprocess
-    result = subprocess.run(['git', 'diff', '--stat', 'requisicao-lojas.html'],
-                           capture_output=True, text=True, cwd=HTML_FILE.parent)
-    log(f"Git diff: {result.stdout.strip() or 'sem mudanças detectadas'}")
-
-    # Confirmar datas no novo HTML
-    import re as _re
-    datas = _re.findall(r"dia:'(2026-\d{2}-\d{2})'", html_depois)
-    if datas:
-        log(f"Dados Desempenho: {min(datas)} a {max(datas)} ({len(datas)} entradas)")
-    else:
-        log("⚠ Nenhum dado de desempenho encontrado no HTML após atualização")
-
-    skus = len(_re.findall(r'\[\d+,"', html_depois))
-    log(f"SKUs: {skus} encontrados no HTML")
-
-    log(f"✅ {HTML_FILE.name} atualizado com dados de {ini} a {hoje.strftime('%d/%m/%Y')}")
-
-if __name__ == "__main__":
-    main()
