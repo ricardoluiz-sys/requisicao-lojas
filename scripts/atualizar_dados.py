@@ -218,23 +218,24 @@ GROUP BY b.dia, b.loja, fp.uid, u.name
 ORDER BY b.dia, b.loja, pedidos DESC
 """
 
-SQL_CONSUMO = """
+SQL_CONSUMO = f"""
 SELECT
   b.factory_id,
-  mc.name AS categoria,
-  SPLIT_PART(m.reference, ' / ', 1) AS variacao_cor,
-  SPLIT_PART(m.reference, ' / ', 2) AS modelo,
-  COUNT(li.id) AS qtd_total,
+  mc.name                          AS categoria,
+  SPLIT_PART(m.reference,' / ',1)  AS variacao_cor,
+  SPLIT_PART(m.reference,' / ',2)  AS modelo,
+  COUNT(li.id)                     AS qtd_total,
   ROUND(SUM(li.price)::numeric, 2) AS val_total
-FROM line_items li
-JOIN orders o ON o.id = li.order_id AND o.deleted_at IS NULL
-JOIN batches b ON b.id = o.batch_id AND b.factory_id IN (3,6,7)
-JOIN materials m ON m.id = li.material_id
+FROM orders o
+JOIN batches  b  ON b.id  = o.batch_id       AND b.factory_id IN (3,6,7)
+JOIN line_items li ON li.order_id = o.id     AND li.deleted_at IS NULL
+                                             AND li.price > 0
+JOIN materials m   ON m.id = li.material_id
 JOIN material_categories mc ON mc.id = m.material_category_id
-WHERE li.created_at >= '2026-01-01'
-  AND li.deleted_at IS NULL
-  AND mc.name != 'Ebook'
-  AND li.price > 0
+                           AND mc.name <> 'Ebook'
+WHERE o.deleted_at IS NULL
+  AND o.created_at >= '2026-01-01'
+  AND o.created_at <  '{{fim}}'
 GROUP BY b.factory_id, mc.name, variacao_cor, modelo
 ORDER BY b.factory_id, val_total DESC
 """
@@ -517,7 +518,16 @@ def main():
     log(f"  ↳ {len(dp_opr_rows)} linhas")
 
     log("Consultando Consumo por SKU (Jan–hoje)...")
-    skus_rows = mb_query(token, SQL_CONSUMO, limit=500)
+    # Consumo dividido em 3 requests (um por fábrica) para evitar timeout
+    skus_rows = []
+    for fid in [3, 6, 7]:
+        sql_fac = SQL_CONSUMO.format(fim=fim).replace(
+            'b.factory_id IN (3,6,7)',
+            f'b.factory_id = {fid}'
+        )
+        rows_fac = mb_query(token, sql_fac, limit=200)
+        log(f"  ↳ Factory {fid}: {len(rows_fac)} SKUs")
+        skus_rows.extend(rows_fac)
     log(f"  ↳ {len(skus_rows)} linhas")
 
     log("Consultando Volume mensal por fábrica...")
