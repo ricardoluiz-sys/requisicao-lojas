@@ -1162,7 +1162,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:13px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
-              <div style="font-size:11px;font-weight:700;color:var(--text)">18/05/2026</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">19/05/2026</div>
             </div>
           </div>
         </div>
@@ -1333,7 +1333,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 18/05/2026 · atualizado 18/05</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 19/05/2026 · atualizado 18/05</div>
             </div>
           </div>
 
@@ -1348,19 +1348,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
           <div style="display:flex;align-items:center;gap:6px">
-            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-18"
+            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-19"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
             <span style="color:var(--muted);font-size:12px">até</span>
-            <input type="date" id="dp-data-fim" value="2026-05-18" min="2026-05-01" max="2026-05-18"
+            <input type="date" id="dp-data-fim" value="2026-05-19" min="2026-05-01" max="2026-05-19"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
           </div>
           <!-- Presets rápidos -->
           <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap">
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-18')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-19')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
             <button onclick="dpSetPeriod('2026-05-08','2026-05-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-18')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-19')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
           </div>
         </div>
 
@@ -1380,7 +1380,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Resumo -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 18/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 19/05/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="dp-filter-sub">Todas as lojas</div>
         </div>
       </div>
@@ -1518,7 +1518,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">18/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">19/05/2026</div>
             </div>
           </div>
           <!-- Badge cobertura -->
@@ -1526,7 +1526,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01 – 18/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01 – 19/05/2026</div>
             </div>
           </div>
           <!-- Lojas -->
@@ -1545,7 +1545,7 @@ Desempenho por Operador</div>
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
             Período
-            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 18/05/2026</span>
+            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 19/05/2026</span>
           </div>
           <!-- Meses individuais -->
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
@@ -1613,7 +1613,7 @@ Desempenho por Operador</div>
 
         <!-- Resumo do filtro -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 18/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">19/05/2026 – 19/05/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
@@ -2279,6 +2279,14 @@ const AN_MONTHLY_DIST = {
   6: [2467/9205,1851/9205,1883/9205,1905/9205,1099/9205],
   7: [1440/5904,1411/5904,1363/5904,1016/5904,674/5904],
 };
+
+const AN_MONTH_DATES = [
+  {start:'01/01', end:'31/01'},
+  {start:'01/02', end:'28/02'},
+  {start:'01/03', end:'31/03'},
+  {start:'01/04', end:'30/04'},
+  {start:'01/05', end:'19/05'}, /* ← dados até 19/05 */
+];
 </script>
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -4904,13 +4912,7 @@ function anSelNone(){const first=[...anState.selMonths].sort()[0]??0;anState.sel
 function anPgCh(d){anState.pg+=d;anBuildSKUs();}
 
 /* Datas exatas por mês (último dia = data real de dados) */
-const AN_MONTH_DATES = [
-  {start:'01/01', end:'31/01'},
-  {start:'01/02', end:'28/02'},
-  {start:'01/03', end:'31/03'},
-  {start:'01/04', end:'30/04'},
-  {start:'01/05', end:'19/05'}, /* ← dados até 19/05 */
-];
+// AN_MONTH_DATES definido no bloco dados-metabase
 
 function anUpdateSummary(){
   const sel=[...anState.selMonths].sort((a,b)=>a-b);
@@ -4930,10 +4932,10 @@ function anUpdateSummary(){
 
   if(rangeEl) {
     rangeEl.textContent = rangeStr;
-    rangeEl.title = hasMai ? 'Mai: dados até 19/05 — última extração do banco' : '';
+    rangeEl.title = hasMai ? `Mai: dados até ${AN_MONTH_DATES[4]?.end || '?'} — última extração do banco` : '';
   }
   if(summEl) {
-    summEl.textContent = `${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}${hasMai ? ' · ⚠ Mai parcial (até dia 15)' : ''}`;
+    summEl.textContent = `${names.length} ${names.length===1?'mês':'meses'} · ${lojaStr}${cat?' · '+cat:''}${hasMai ? ` · ⚠ Mai parcial (até dia ${AN_MONTH_DATES[4]?.end?.split('/')[0] || '?'})` : ''}`;
   }
 }
 
