@@ -223,7 +223,6 @@ SELECT m.id, mc.name AS categoria, m.reference
 FROM materials m
 JOIN material_categories mc ON mc.id = m.material_category_id
 WHERE mc.name <> 'Ebook'
-ORDER BY m.id
 """
 
 SQL_CONSUMO_MES = """
@@ -461,9 +460,7 @@ def injetar_no_html(html: str,
                     dp_opr_daily_js: str,
                     an_js: str,
                     an_dist_js: str,
-                    hoje: datetime.date,
-                    skus_mes: str = "",
-                    vol_mes: str = "") -> str:
+                    hoje: datetime.date) -> str:
     # 1. Substituir bloco de dados
     an_month_dates_js = gerar_an_month_dates(hoje)
     html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js, skus_mes, vol_mes)
@@ -577,7 +574,7 @@ def main():
     # Query 1: catálogo de materiais (rápida, tabela pequena)
     log("Consultando catálogo de materiais...")
     try:
-        mat_rows = mb_query(token, SQL_MATERIAIS, limit=2000, retries=2)
+        mat_rows = mb_query(token, SQL_MATERIAIS, limit=15000, retries=2)
         mat_map = {}
         for r in mat_rows:
             ref = (r.get('reference') or '').split(' / ')
@@ -644,31 +641,24 @@ def main():
     log(f"  ↳ Volume mensal: {len(vol_rows_list)} entradas")
 
 
-    log(f"  ↳ {len(vol_rows)} linhas")
-
     # Gerar JS
     log("Gerando blocos JS...")
     dp_raw_js       = gerar_dp_raw(dp_raw_rows)
     dp_opr_daily_js = gerar_dp_opr_daily(dp_opr_rows)
 
-    # Mês atual: sempre gerar se tiver dados
-    skus_mes_js  = gerar_skus_mes(skus_mes_rows, hoje) if skus_mes_rows else None
-    vol_mes_js   = gerar_vol_mes(vol_mes_rows, hoje)   if vol_mes_rows  else None
-
-    # Histórico: usar novo se disponível, senão preservar HTML
+    # Consumo: usar dados do loop mês-a-mês
     if vol_rows is not None and skus_rows:
-        log("  ↳ Atualizando AN histórico + mês atual")
+        log(f"  ↳ Atualizando AN: {len(skus_rows)} SKUs, {len(vol_rows)} entradas mensais")
         an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
         an_month_dates_js = gerar_an_month_dates(hoje)
     else:
-        log("  ↳ AN histórico: mantendo dados existentes no HTML")
+        log("  ↳ AN: mantendo dados existentes no HTML")
         an_js, an_dist_js, an_month_dates_js = None, None, None
     
     # Injetar no HTML
     log("Injetando no HTML...")
     html = HTML_FILE.read_text(encoding="utf-8")
-    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje,
-                         skus_mes=skus_mes_js, vol_mes=vol_mes_js)
+    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje)
     HTML_FILE.write_text(html, encoding="utf-8")
 
     # Verificar quais blocos mudaram
