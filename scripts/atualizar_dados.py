@@ -64,6 +64,23 @@ def get_http_session() -> requests.Session:
         _http_session.mount("https://", adapter)
     return _http_session
 
+def mb_query_csv(token: str, sql: str) -> list[dict]:
+    """Executa SQL via endpoint CSV — sem limite de 2000 linhas do /api/dataset."""
+    import csv, io
+    payload = {
+        "database": MB_DB,
+        "type": "native",
+        "native": {"query": sql},
+        "middleware": {"js-int-to-string?": False},
+    }
+    sess = get_http_session()
+    sess.headers["X-Metabase-Session"] = token
+    r = sess.post(f"{MB_URL}/api/dataset/csv", json=payload, timeout=120)
+    r.raise_for_status()
+    reader = csv.DictReader(io.StringIO(r.text))
+    return [row for row in reader]
+
+
 def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[dict]:
     """Executa uma query SQL nativa com retry automático."""
     import time
@@ -436,8 +453,7 @@ def gerar_vol_mes(rows: list[dict], hoje) -> str:
     return f'const AN_VOL_MES = {{mes:{mes}, {parts}}};'
 
 def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str,
-                           an_month_dates: str = "",
-                           skus_mes: str = "", vol_mes: str = "") -> str:
+                           an_month_dates: str = "") -> str:
     """Substitui o bloco <script id='dados-metabase'> por completo.
     Se an/an_dist são None, preserva os dados de AN existentes no HTML."""
     START = '<script id="dados-metabase">'
@@ -459,9 +475,7 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
         + (f'{an_final}\n' if an_final else '')
         + (f'{an_dist_final}\n' if an_dist_final else '')
         + (f'{an_month_dates}\n' if an_month_dates else '')
-        + (f'{skus_mes}\n' if skus_mes else '')
-        + (f'{vol_mes}\n' if vol_mes else '')
-        + f'{END}'
+                + f'{END}'
     )
     return html[:i_s] + novo + html[i_e:]
 
@@ -484,7 +498,7 @@ def injetar_no_html(html: str,
                     hoje: datetime.date) -> str:
     # 1. Substituir bloco de dados
     an_month_dates_js = gerar_an_month_dates(hoje)
-    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js, skus_mes, vol_mes)
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js)
     log("  ↳ Bloco de dados substituído")
 
     # 2. Atualizar datas nos badges
@@ -595,15 +609,18 @@ def main():
     # Query 1: catálogo de materiais (rápida, tabela pequena)
     log("Consultando catálogo de materiais...")
     try:
-        mat_rows = mb_query(token, SQL_MATERIAIS, limit=15000, retries=2)
+        mat_rows = mb_query_csv(token, SQL_MATERIAIS)
         mat_map = {}
         for r in mat_rows:
             ref = (r.get('reference') or '').split(' / ')
-            mat_map[int(r['id'])] = {
-                'categoria': r['categoria'],
-                'variacao_cor': ref[0] if ref else '',
-                'modelo': ref[1] if len(ref) > 1 else '',
-            }
+            try:
+                mat_map[int(r['id'])] = {
+                    'categoria': r['categoria'],
+                    'variacao_cor': ref[0].strip() if ref else '',
+                    'modelo': ref[1].strip() if len(ref) > 1 else '',
+                }
+            except (ValueError, KeyError):
+                pass
         log(f"  ↳ {len(mat_map)} materiais")
     except Exception as e:
         log(f"  ⚠ Catálogo falhou: {e}")
