@@ -620,3 +620,73 @@ def main():
     except Exception as e:
         log(f"  ⚠ Catálogo falhou: {e}")
         mat_map = {}
+
+    # ── Query 2: consumo mês a mês (leve, sem JOIN categories) ──────────────
+    log("Consultando consumo mensal...")
+    consumo_acc = {}   # {(factory_id, material_id, mes): qtd}
+    vol_acc = {}       # {(factory_id, mes): (qtd, val)}
+    try:
+        primeiro_mes = datetime.date(hoje.year, 1, 1)
+        mes_atual = primeiro_mes
+        while mes_atual <= hoje:
+            mes_ini_iso = mes_atual.isoformat()
+            mes_fim = (mes_atual.replace(day=28) + datetime.timedelta(days=4)).replace(day=1)
+            mes_fim_iso = min(mes_fim, hoje + datetime.timedelta(days=1)).isoformat()
+            rows_mes = mb_query(token, SQL_CONSUMO_MES.format(
+                ini=mes_ini_iso, fim=mes_fim_iso), limit=5000, retries=2)
+            for r in rows_mes:
+                fid = r.get('factory_id')
+                mid = r.get('material_id')
+                mes = r.get('mes')
+                qtd = r.get('qtd', 0) or 0
+                if fid and mid and mes:
+                    consumo_acc[(int(fid), int(mid), int(mes))] = int(qtd)
+            mes_atual = mes_fim
+        log(f"  ↳ {len(consumo_acc)} entradas de consumo")
+
+        rows_vol = mb_query(token, SQL_VOL_MENSAL, limit=100, retries=2)
+        for r in rows_vol:
+            fid = r.get('factory_id')
+            mes = r.get('mes')
+            if fid and mes:
+                vol_acc[(int(fid), int(mes))] = (int(r.get('volume',0) or 0),
+                                                  float(r.get('receita',0) or 0))
+        log(f"  ↳ {len(vol_acc)} entradas de volume")
+    except Exception as e:
+        log(f"  ⚠ Consumo falhou: {e}")
+
+    # ── Gerar JS ─────────────────────────────────────────────────────────────
+    dp_raw_js      = gerar_dp_raw(dp_raw_rows)
+    dp_opr_daily_js= gerar_dp_opr_daily(dp_opr_rows)
+
+    an_js      = None
+    an_dist_js = None
+    if consumo_acc and mat_map:
+        try:
+            an_js, an_dist_js = gerar_an(consumo_acc, vol_acc, mat_map, hoje)
+            log("  ↳ AN gerado com sucesso")
+        except Exception as e:
+            log(f"  ⚠ gerar_an falhou: {e}")
+    else:
+        log("  ⚠ Sem dados de consumo — AN preservado do HTML existente")
+
+    # ── Atualizar HTML ───────────────────────────────────────────────────────
+    log("Atualizando HTML...")
+    with open(HTML_FILE, encoding='utf-8') as f:
+        html = f.read()
+
+    html = injetar_no_html(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, hoje)
+
+    with open(HTML_FILE, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    log(f"✅ HTML atualizado: {HTML_FILE}")
+    log(f"   Desempenho: {len(dp_raw_rows)} linhas ({ini} → {hoje.isoformat()})")
+    if an_js:
+        log(f"   Consumo AN: atualizado")
+    else:
+        log(f"   Consumo AN: preservado (dados insuficientes)")
+
+
+if __name__ == '__main__':
+    main()
