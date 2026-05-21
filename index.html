@@ -5361,15 +5361,15 @@ async function srepCarregarPedidos(){
     _srepPedidosMap = {};
 
     data.forEach(p => {
-      // Considerar apenas os status: concluído, ag.coleta, aguardando nf, aguardando
+      // Considerar apenas: ag.coleta, aguardando nf, aguardando
       const st = _normStr(p.status || '');
-      const stOk = st.includes('conclu') ||
-                   st.includes('ag.coleta') || st.includes('agcoleta') ||
-                   st.includes('aguardando nf') || st.includes('aguardandonf') ||
-                   st.includes('aguardando');
+      const stOk = st.includes('ag.coleta')    || st.includes('agcoleta') ||
+                   st.includes('aguardando nf') || st.includes('aguardondonf') ||
+                   st === 'aguardando';
       if(!stOk) return;
 
-      const pend = parseInt(String(p.pendente||'0').replace(/\D/g,'')) || 0;
+      // Usar quantidade realizada (já enviada/em processo)
+      const pend = parseInt(String(p.realizado||'0').replace(/\D/g,'')) || 0;
       if(pend <= 0) return;
 
       const lojaK  = _lojaKey(p.destino || '');
@@ -5584,7 +5584,7 @@ function srepRender(fidFiltro='todas', stFiltro=null){
           <div style="font-size:22px;font-weight:700;color:${r.pedido===0?'var(--green)':' var(--accent)'}">
             ${r.pedido===0 ? '✅' : r.pedido}
           </div>
-          ${r.temPedido ? `<div style="font-size:9px;color:var(--gold);margin-top:2px" title="Já há ${r.pendente} un. em pedido aberto">📦 ${r.pendente} em pedido</div>` : ''}
+          ${r.temPedido ? `<div style="font-size:9px;color:var(--gold);margin-top:2px" title="${r.pendente} un. realizadas/em trânsito">📦 ${r.pendente} em pedido</div>` : ''}
         </td>
         <td style="padding:8px 12px;text-align:center;font-weight:600;color:var(--text)">${r.freq}</td>
         <td style="padding:8px 12px;text-align:center;font-weight:700;color:${pedidoCor}">${r.dataPedido}</td>
