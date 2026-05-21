@@ -810,6 +810,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="nb"        id="nb-pedidos" onclick="navClick('pedidos',this)">Pedidos</button>
     <button class="nb"        id="nb-consumo" onclick="navClick('consumo',this)">🏆 Top Consumo</button>
     <button class="nb"        id="nb-analise" onclick="navClick('analise',this)">📈 Análise de Consumo</button>
+    <button onclick="navClick('sugestao',this)" class="nb">💡 Sugestão Reposição</button>
     <button class="nb"        id="nb-desempenho" onclick="navClick('desempenho',this)">📊 Desempenho</button>
     <button class="nb"        id="nb-ruptura" onclick="navClick('ruptura',this)">Rupturas</button>
     <button class="nb"        id="nb-fluxo"   onclick="navClick('fluxo',this)">Fluxo &amp; Prazos</button>
@@ -1312,7 +1313,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </section>
 
     <!-- ═ USUÁRIOS ═ -->
-    <section id="sec-usuarios" class="sec">
+    <div id="sec-sugestao" class="sec" style="padding:20px 24px">
+  <h2 style="font-family:'DM Serif Display',serif;font-size:2rem;margin-bottom:4px">💡 Sugestão de Reposição</h2>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:20px">
+    Calculado em tempo real a partir do consumo dos últimos meses · Atualiza junto com o dashboard
+  </p>
+  <div id="srep-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-bottom:16px;font-size:12px;display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+    <span style="color:var(--muted)">🏬 Prazos: <b style="color:var(--green)">Iguatemi 20d</b> · <b style="color:var(--blue)">PKS 15d</b> · <b style="color:var(--purple)">Anália Franco 10d</b></span>
+    <span style="color:var(--muted)">💡 <b style="color:var(--text)">PEDIR</b> = cobre prazo + 30 dias de estoque, arredondado p/ múltiplo de 5</span>
+    <span style="color:var(--muted)">📅 <b style="color:var(--text)">Pedir até</b> = data limite sem correr risco de ruptura</span>
+    <span id="srep-data-ref" style="margin-left:auto;color:var(--accent);font-size:11px"></span>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:11px;color:var(--muted);margin-right:4px">LOJA:</span>
+    <button onclick="srepFiltrar('todas',this)" class="nb active" style="padding:4px 12px;font-size:12px">Todas</button>
+    <button onclick="srepFiltrar(3,this)" class="nb" style="padding:4px 12px;font-size:12px">Iguatemi</button>
+    <button onclick="srepFiltrar(6,this)" class="nb" style="padding:4px 12px;font-size:12px">PKS</button>
+    <button onclick="srepFiltrar(7,this)" class="nb" style="padding:4px 12px;font-size:12px">Anália Franco</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:10px">STATUS:</span>
+    <button onclick="srepFiltrarSt(null,this)" class="nb active" id="srep-st-all" style="padding:4px 12px;font-size:12px">Todos</button>
+    <button onclick="srepFiltrarSt('critico',this)" class="nb" style="padding:4px 12px;font-size:12px">🔴 Urgente</button>
+    <button onclick="srepFiltrarSt('atencao',this)" class="nb" style="padding:4px 12px;font-size:12px">🟡 Atenção</button>
+    <button onclick="srepFiltrarSt('revisar',this)" class="nb" style="padding:4px 12px;font-size:12px">⚪ Revisar</button>
+    <button onclick="srepExportar()" style="margin-left:auto;background:var(--accent);border:none;border-radius:9px;padding:6px 16px;color:#fff;font-size:12px;font-weight:600;cursor:pointer">⬇ Exportar CSV</button>
+  </div>
+  <div id="srep-lojas"></div>
+</div>
+
+<section id="sec-usuarios" class="sec">
       <div class="ph" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div><h1>Gestão de Usuários</h1><p>Crie, edite e remova acessos ao sistema.</p></div>
         <button class="btn bp" onclick="openUserModal(null)">+ Novo Usuário</button>
@@ -2273,9 +2302,9 @@ const AN = {
 ]
 };
 const AN_MONTHLY_DIST = {
-  3: [5833/19241,3856/19241,4129/19241,3198/19241,2225/19241],
-  6: [2467/9205,1851/9205,1883/9205,1905/9205,1099/9205],
-  7: [1440/5904,1411/5904,1363/5904,1016/5904,674/5904],
+  3:[6358/21176,4174/21176,4372/21176,3398/21176,2874/21176],
+  6:[2625/9927,1965/9927,2009/9927,1985/9927,1343/9927],
+  7:[1572/6453,1548/6453,1430/6453,1063/6453,840/6453]
 };
 
 const AN_MONTH_DATES = [
@@ -2464,7 +2493,7 @@ window.addEventListener('resize',checkMobileLayout);
 function showSec(id,el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('on');
+  const secEl=document.getElementById('sec-'+id);if(secEl)secEl.classList.add('on');
   el.classList.add('active');
   if(id==='gestao')renderGestao();
   if(id==='usuarios')renderUsers();
@@ -5273,6 +5302,250 @@ function aplicarMesAtualAoAN() {
   }
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SUGESTÃO DE REPOSIÇÃO — Calculado dinamicamente de AN.skus
+   Atualiza junto com o workflow diário
+   ═══════════════════════════════════════════════════════════════════════ */
+const SREP_LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
+const SREP_LOJA_COLOR = {3:'var(--green)', 6:'var(--blue)', 7:'var(--purple)'};
+let _srepCache = null;
+
+function srepCalc(){
+  if(_srepCache) return _srepCache;
+
+  const LEAD = {3:20, 6:15, 7:10};     // dias de abastecimento: F3=Iguatemi(20d), F6=PKS(15d), F7=Anália(10d)
+  const CICLO = 30;                      // ciclo de reposição (dias)
+
+  const meses      = AN.months;
+  const n          = meses.length;
+  const nCompletos = n - 1;
+  const ultIdx     = n - 1;
+
+  const ultDate = AN_MONTH_DATES[ultIdx];
+  const diaFim  = ultDate ? parseInt(ultDate.end.split('/')[0]) : 19;
+
+  const hoje = new Date();
+
+  const result = [];
+  const _seen = new Set();
+  AN.skus.forEach(r => {
+    const fid      = r[0];
+    const _key = fid + '|' + r[1] + '|' + r[2] + '|' + r[3];
+    if(_seen.has(_key)) return; // pular duplicatas
+    _seen.add(_key);
+    const dist     = AN_MONTHLY_DIST[fid];
+    if(!dist) return;
+
+    const qtdTotal = r[4];
+    const valTotal = r[5];
+    const cat      = r[1];
+    const ref      = [r[2], r[3]].filter(Boolean).join(' / ') || r[2] || r[3] || '—';
+
+    // Qtd estimada por mês
+    const qtdMes   = dist.map(d => Math.round(qtdTotal * d));
+    const somaBase = qtdMes.slice(0, nCompletos).reduce((a,v)=>a+v, 0);
+    const base     = nCompletos > 0 ? somaBase / nCompletos : 0;
+    const qtdAtual = qtdMes[ultIdx];
+    const projecao = diaFim > 0 ? Math.round(qtdAtual / diaFim * CICLO) : base;
+
+    // Taxa diária e lead time
+    const demanda   = Math.max(projecao, base);             // melhor estimativa
+    const taxaDia   = demanda / CICLO;                       // unidades/dia
+    const lead      = LEAD[fid] || 15;
+
+    // Quantidade a pedir: cobre o lead time + 1 ciclo completo
+    // Arredondado para múltiplos de 5
+    const qtdBruta  = taxaDia * (lead + CICLO);
+    const pedido    = Math.ceil(qtdBruta / 5) * 5;
+
+    // Frequência: com este pedido, estoque dura (pedido / taxaDia) dias
+    const duracaoDias = taxaDia > 0 ? Math.round(pedido / taxaDia) : 999;
+
+    // Frequência recomendada de pedido
+    let freq, freqDias;
+    if(duracaoDias <= 20)      { freq = 'Semanal';    freqDias = 7;  }
+    else if(duracaoDias <= 40) { freq = 'Quinzenal';  freqDias = 15; }
+    else if(duracaoDias <= 60) { freq = 'Mensal';     freqDias = 30; }
+    else                       { freq = 'Bimestral';  freqDias = 60; }
+
+    // Data limite para fazer o pedido (hoje + dias de ciclo - lead time)
+    // Supondo que o estoque atual = 0 (conservador)
+    const diasParaPedir = Math.max(0, freqDias - lead);
+    const dataPedido = new Date(hoje);
+    dataPedido.setDate(dataPedido.getDate() + diasParaPedir);
+    const dataPedidoStr = diasParaPedir === 0 ? '🔴 Hoje!' :
+      dataPedido.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+
+    // Status de urgência
+    let status;
+    if(base === 0)                      status = 'novo';
+    else if(projecao >= base * 1.5)     status = 'critico';
+    else if(diasParaPedir <= 3)         status = 'urgente';
+    else if(projecao >= base * 1.1)     status = 'atencao';
+    else if(qtdAtual === 0 && base>=15) status = 'revisar';
+    else                                status = 'ok';
+
+    const tend    = projecao >= base*1.1 ? '↗' : projecao <= base*0.7 ? '↘' : '→';
+    const tendCor = tend==='↗' ? 'var(--red)' : tend==='↘' ? 'var(--muted)' : 'var(--text)';
+
+    result.push({
+      fid, cat, ref, valTotal,
+      taxaDia: Math.round(taxaDia*10)/10,
+      pedido, lead, freq, freqDias,
+      dataPedido: dataPedidoStr, diasParaPedir,
+      base: Math.round(base*10)/10, projecao, qtdAtual,
+      tend, tendCor, status, duracaoDias
+    });
+  });
+
+  const ord = {critico:0, urgente:1, atencao:2, ok:3, revisar:4, novo:5};
+  result.sort((a,b) => (ord[a.status]??9)-(ord[b.status]??9) || b.valTotal-a.valTotal);
+
+  _srepCache = result;
+  return result;
+}
+
+function srepRender(fidFiltro='todas', stFiltro=null){
+  const tudo = srepCalc();
+  const LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
+  const LOJA_COLOR = {3:'var(--green)', 6:'var(--blue)', 7:'var(--purple)'};
+  const LEAD = {3:20, 6:15, 7:10};
+
+  const rows = tudo.filter(r => {
+    if(fidFiltro !== 'todas' && r.fid !== fidFiltro) return false;
+    if(stFiltro && r.status !== stFiltro) return false;
+    return true;
+  });
+
+  // Cards de resumo
+  const counts = {critico:0, urgente:0, atencao:0, ok:0, revisar:0};
+  tudo.forEach(r => { if(counts[r.status]!==undefined) counts[r.status]++; });
+
+  const sumEl = document.getElementById('srep-summary');
+  if(sumEl) sumEl.innerHTML = [
+    {l:'Total SKUs', v:tudo.length, s:'em todas as lojas', c:'var(--text)'},
+    {l:'🔴 Pedir hoje/urgente', v:(counts.critico+counts.urgente), s:'sem esperar', c:'var(--red)'},
+    {l:'🟡 Atenção', v:counts.atencao, s:'pedir em breve', c:'var(--gold)'},
+    {l:'🟢 Normal', v:counts.ok, s:'no ciclo regular', c:'var(--green)'},
+  ].map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${m.l}</div>
+    <div style="font-size:26px;font-weight:700;color:${m.c}">${m.v}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px">${m.s}</div>
+  </div>`).join('');
+
+  // Data ref
+  const refEl = document.getElementById('srep-data-ref');
+  if(refEl && AN_MONTH_DATES){
+    const ul = AN_MONTH_DATES[AN_MONTH_DATES.length-1];
+    refEl.textContent = `Dados: Jan–${AN.months[AN.months.length-2]} + ${AN.months[AN.months.length-1]} até ${ul?.end||'?'}`;
+  }
+
+  // Tabelas por loja
+  const lojaEl = document.getElementById('srep-lojas');
+  if(!lojaEl) return;
+
+  const STATUS_CFG = {
+    critico: {label:'🔴 Pedir hoje!', cor:'var(--red)'},
+    urgente: {label:'🔴 Urgente',     cor:'var(--red)'},
+    atencao: {label:'🟡 Atenção',     cor:'var(--gold)'},
+    ok:      {label:'🟢 Normal',      cor:'var(--green)'},
+    revisar: {label:'⚪ Revisar',     cor:'var(--muted)'},
+    novo:    {label:'🔵 Novo',        cor:'var(--accent)'},
+  };
+
+  const lojas = fidFiltro==='todas' ? [3,6,7] : [fidFiltro];
+  lojaEl.innerHTML = lojas.map(fid => {
+    const lojaRows = rows.filter(r => r.fid===fid).slice(0, 25);
+    if(!lojaRows.length) return '';
+    const lead = LEAD[fid];
+
+    const tableRows = lojaRows.map(r => {
+      const cfg = STATUS_CFG[r.status]||STATUS_CFG.ok;
+      const pedidoCor = r.diasParaPedir===0 ? 'var(--red)' :
+                        r.diasParaPedir<=5  ? 'var(--gold)' : 'var(--green)';
+      return `<tr class="srep-row" data-status="${r.status}" style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.ref}">${r.ref}</td>
+        <td style="padding:8px 12px"><span style="background:rgba(79,126,255,.1);border-radius:5px;padding:2px 7px;font-size:10px">${r.cat}</span></td>
+        <td style="padding:8px 12px;text-align:right;color:var(--muted);font-size:11px">${r.taxaDia}/dia</td>
+        <td style="padding:8px 12px;text-align:center;font-size:22px;font-weight:700;color:var(--accent)">${r.pedido}</td>
+        <td style="padding:8px 12px;text-align:center;font-weight:600;color:var(--text)">${r.freq}</td>
+        <td style="padding:8px 12px;text-align:center;font-weight:700;color:${pedidoCor}">${r.dataPedido}</td>
+        <td style="padding:8px 12px;text-align:left"><span style="color:${cfg.cor};font-size:11px;font-weight:600">${cfg.label}</span></td>
+      </tr>`;
+    }).join('');
+
+    const totalPedido = lojaRows.reduce((a,r)=>a+r.pedido, 0);
+
+    return `<div class="srep-loja-block" data-fid="${fid}" style="margin-bottom:28px">
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:${LOJA_COLOR[fid]}">🏬 ${LOJA_NAMES[fid]}</span>
+        <span style="font-size:11px;color:var(--muted)">Prazo de abastecimento: <b>${lead} dias</b></span>
+        <span style="font-size:11px;color:var(--muted);margin-left:auto">Total estimado do pedido: <b style="color:var(--text)">${totalPedido} unidades</b></span>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:var(--surface)">
+              <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Produto</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Categoria</th>
+              <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)" title="Consumo médio diário">Taxa diária</th>
+              <th style="padding:8px 12px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border)" title="Quantidade a pedir agora (cobre prazo + ciclo)">💡 PEDIR</th>
+              <th style="padding:8px 12px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)" title="Com que frequência repetir o pedido">Frequência</th>
+              <th style="padding:8px 12px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)" title="Até quando fazer o próximo pedido">📅 Pedir até</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);padding:0 4px">
+        ℹ️ Quantidade cobre: ${lead} dias de prazo + 30 dias de estoque. Coluna <b>Pedir até</b> = data limite para não ficar sem estoque.
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function srepFiltrar(fid, btn){
+  _srepLojaFiltro = fid;
+  _srepStFiltro   = null;
+  document.querySelectorAll('[onclick^="srepFiltrar"]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[onclick^="srepFiltrarSt"]').forEach(b=>b.classList.remove('active'));
+  const allBtn = document.getElementById('srep-st-all');
+  if(allBtn) allBtn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  srepRender(fid, null);
+}
+
+function srepFiltrarSt(st, btn){
+  document.querySelectorAll('[onclick^="srepFiltrarSt"]').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  srepRender(_srepLojaFiltro||'todas', st);
+}
+
+function srepExportar(){
+  const rows = [['Loja','Produto','Categoria','Mês Atual','Base Histórica','Projeção 30d','Sugestão 45d','Status','Tendência']];
+  srepCalc().forEach(r => {
+    const ST = {critico:'Urgente',atencao:'Atenção',ok:'Normal',revisar:'Revisar',novo:'Novo'};
+    rows.push([SREP_LOJA_NAMES[r.fid]||r.fid, r.ref, r.cat, r.qtdAtual, r.base, r.projecao, r.sugestao, ST[r.status]||r.status, r.tend]);
+  });
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sugestao-reposicao-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+let _srepLojaFiltro = 'todas';
+let _srepStFiltro   = null;
+
+function srepInit(){
+  _srepCache = null; // Limpar cache ao entrar na aba
+  srepRender();
+}
+
 /* navClick com callbacks está no bloco 2 */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -5467,6 +5740,7 @@ function navClick(id,el){
   showSec(id,el);
   if(isMobile())closeNav();
   if(id==='analise')setTimeout(anUpdate,80);
+  if(id==='sugestao')setTimeout(srepInit,50);
   if(id==='desempenho')setTimeout(dpRender,80);
 }
 
@@ -5493,7 +5767,7 @@ window.addEventListener('resize',checkMobileLayout);
 function showSec(id,el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('on');
+  const secEl=document.getElementById('sec-'+id);if(secEl)secEl.classList.add('on');
   el.classList.add('active');
   if(id==='gestao')renderGestao();
   if(id==='usuarios')renderUsers();
@@ -7350,5 +7624,3 @@ function dpRenderOperadores() {
 
 
 </script>
-</body>
-</html>
