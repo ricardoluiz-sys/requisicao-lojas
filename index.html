@@ -5312,6 +5312,105 @@ const SREP_LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
 const SREP_LOJA_COLOR = {3:'var(--green)', 6:'var(--blue)', 7:'var(--purple)'};
 let _srepCache = null;
 
+
+/* ═══ SUGESTÃO × PEDIDOS — cruzamento de dados ══════════════════════════
+   Carrega pedidos pendentes e ajusta as sugestões de reposição
+   ════════════════════════════════════════════════════════════════════════ */
+let _srepPedidosMap = null;  // {chave} → {pendente, itens:[]}
+
+function _normStr(s){
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/\p{Diacritic}/gu,'')  // remove acentos
+    .replace(/[^a-z0-9 ]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+function _lojaKey(destino){
+  const d = _normStr(destino);
+  if(d.includes('iguatemi')) return 'iguatemi';
+  if(d.includes('pks') || d.includes('parkshopping') || d.includes('brasilia')) return 'pks';
+  if(d.includes('analia') || d.includes('franco')) return 'analia';
+  return _normStr(destino);
+}
+
+const _FID_KEY = {3:'iguatemi', 6:'pks', 7:'analia'};
+
+async function srepCarregarPedidos(){
+  if(_srepPedidosMap) return _srepPedidosMap;
+  try {
+    // Usar dados já carregados da aba Pedidos se disponíveis
+    let data = (typeof _pedidosAll !== 'undefined' && _pedidosAll && _pedidosAll.length > 0)
+      ? _pedidosAll
+      : null;
+
+    // Se não tiver, tentar carregar (pode falhar por CORS/quota)
+    if(!data){
+      try {
+        const r = await fetch(PROXY + '?tipo=pedidos&ano=' + new Date().getFullYear());
+        if(r.ok) data = await r.json();
+      } catch(fetchErr){
+        console.warn('Fetch de pedidos falhou, usando dados locais:', fetchErr.message);
+      }
+    }
+
+    if(!Array.isArray(data) || !data.length){
+      _srepPedidosMap = {};
+      return _srepPedidosMap;
+    }
+
+    _srepPedidosMap = {};
+
+    data.forEach(p => {
+      // Só considerar pedidos pendentes (não concluídos/cancelados)
+      const st = _normStr(p.status || '');
+      if(st.includes('conclu') || st.includes('cancel') || st.includes('receb')) return;
+
+      const pend = parseInt(String(p.pendente||'0').replace(/\D/g,'')) || 0;
+      if(pend <= 0) return;
+
+      const lojaK  = _lojaKey(p.destino || '');
+      const itemK  = _normStr(p.item || '');
+      const chave  = itemK + '|' + lojaK;
+
+      if(!_srepPedidosMap[chave]){
+        _srepPedidosMap[chave] = {pendente:0, pedidos:[]};
+      }
+      _srepPedidosMap[chave].pendente += pend;
+      _srepPedidosMap[chave].pedidos.push({
+        num: p.pedido, pend, prazo: p.prazo||'', status: p.status||''
+      });
+    });
+
+    return _srepPedidosMap;
+  } catch(e){
+    console.warn('srepCarregarPedidos falhou:', e);
+    _srepPedidosMap = {};
+    return _srepPedidosMap;
+  }
+}
+
+function srepBuscarPendente(ref, fid){
+  if(!_srepPedidosMap) return null;
+  const lojaK = _FID_KEY[fid] || '';
+  // Tentar match com o ref completo e partes dele
+  const refK  = _normStr(ref);
+  const refPartes = refK.split(' ').filter(w => w.length > 3);
+
+  // 1. Match exato
+  const exato = _srepPedidosMap[refK + '|' + lojaK];
+  if(exato) return exato;
+
+  // 2. Match parcial: buscar chave que contenha as partes principais do produto
+  for(const [chave, val] of Object.entries(_srepPedidosMap)){
+    if(!chave.endsWith('|' + lojaK)) continue;
+    const chaveProd = chave.replace('|' + lojaK, '');
+    const match = refPartes.length >= 2 &&
+      refPartes.filter(p => chaveProd.includes(p)).length >= Math.ceil(refPartes.length * 0.6);
+    if(match) return val;
+  }
+  return null;
+}
+
 function srepCalc(){
   if(_srepCache) return _srepCache;
 
@@ -5390,13 +5489,21 @@ function srepCalc(){
     const tend    = projecao >= base*1.1 ? '↗' : projecao <= base*0.7 ? '↘' : '→';
     const tendCor = tend==='↗' ? 'var(--red)' : tend==='↘' ? 'var(--muted)' : 'var(--text)';
 
+    // Cruzar com pedidos pendentes
+    const pedInfo = srepBuscarPendente(ref, fid);
+    const pendente = pedInfo ? pedInfo.pendente : 0;
+    const pedidoAjustado = Math.max(0, pedido - pendente);
+    const temPedido = pendente > 0;
+
     result.push({
       fid, cat, ref, valTotal,
       taxaDia: Math.round(taxaDia*10)/10,
-      pedido, lead, freq, freqDias,
+      pedido: pedidoAjustado, pedidoBruto: pedido, lead, freq, freqDias,
       dataPedido: dataPedidoStr, diasParaPedir,
       base: Math.round(base*10)/10, projecao, qtdAtual,
-      tend, tendCor, status, duracaoDias
+      tend, tendCor, status, duracaoDias,
+      temPedido, pendente,
+      pedidoInfo: pedInfo ? pedInfo.pedidos : []
     });
   });
 
@@ -5469,7 +5576,12 @@ function srepRender(fidFiltro='todas', stFiltro=null){
         <td style="padding:8px 12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.ref}">${r.ref}</td>
         <td style="padding:8px 12px"><span style="background:rgba(79,126,255,.1);border-radius:5px;padding:2px 7px;font-size:10px">${r.cat}</span></td>
         <td style="padding:8px 12px;text-align:right;color:var(--muted);font-size:11px">${r.taxaDia}/dia</td>
-        <td style="padding:8px 12px;text-align:center;font-size:22px;font-weight:700;color:var(--accent)">${r.pedido}</td>
+        <td style="padding:8px 12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:${r.pedido===0?'var(--green)':' var(--accent)'}">
+            ${r.pedido===0 ? '✅' : r.pedido}
+          </div>
+          ${r.temPedido ? `<div style="font-size:9px;color:var(--gold);margin-top:2px" title="Já há ${r.pendente} un. em pedido aberto">📦 ${r.pendente} em pedido</div>` : ''}
+        </td>
         <td style="padding:8px 12px;text-align:center;font-weight:600;color:var(--text)">${r.freq}</td>
         <td style="padding:8px 12px;text-align:center;font-weight:700;color:${pedidoCor}">${r.dataPedido}</td>
         <td style="padding:8px 12px;text-align:left"><span style="color:${cfg.cor};font-size:11px;font-weight:600">${cfg.label}</span></td>
@@ -5541,8 +5653,21 @@ function srepExportar(){
 let _srepLojaFiltro = 'todas';
 let _srepStFiltro   = null;
 
-function srepInit(){
-  _srepCache = null; // Limpar cache ao entrar na aba
+async function srepInit(){
+  _srepCache = null;
+  _srepPedidosMap = null;
+  const lojaEl = document.getElementById('srep-lojas');
+
+  // Verificar se dados de pedidos estão disponíveis
+  const temPedidos = typeof _pedidosAll !== 'undefined' && _pedidosAll && _pedidosAll.length > 0;
+
+  if(lojaEl){
+    lojaEl.innerHTML = temPedidos
+      ? '<div style="padding:20px;text-align:center;color:var(--muted)">⏳ Cruzando com ' + _pedidosAll.length + ' pedidos em aberto...</div>'
+      : '<div style="padding:20px;text-align:center;color:var(--muted)">⏳ Calculando sugestões...<br><small style=\'color:var(--gold)\'>Dica: visite a aba Pedidos primeiro para cruzar com pedidos em aberto.</small></div>';
+  }
+
+  await srepCarregarPedidos();
   srepRender();
 }
 
