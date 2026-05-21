@@ -1320,11 +1320,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     Calculado em tempo real a partir do consumo dos últimos meses · Atualiza junto com o dashboard
   </p>
   <div id="srep-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-bottom:16px;font-size:12px;display:flex;flex-wrap:wrap;gap:16px;align-items:center">
-    <span style="color:var(--muted)">🏬 Prazos: <b style="color:var(--green)">Iguatemi 20d</b> · <b style="color:var(--blue)">PKS 15d</b> · <b style="color:var(--purple)">Anália Franco 10d</b></span>
-    <span style="color:var(--muted)">💡 <b style="color:var(--text)">PEDIR</b> = cobre prazo + 30 dias de estoque, arredondado p/ múltiplo de 5</span>
-    <span style="color:var(--muted)">📅 <b style="color:var(--text)">Pedir até</b> = data limite sem correr risco de ruptura</span>
-    <span id="srep-data-ref" style="margin-left:auto;color:var(--accent);font-size:11px"></span>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-bottom:16px;font-size:12px">
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:10px">
+      <span style="color:var(--muted)">📅 Frequência: <b style="color:var(--text)">Quinzenal</b></span>
+      <span style="color:var(--muted)">💡 <b style="color:var(--text)">PEDIR</b> = taxa diária × (prazo entrega + cobertura), arredondado p/ múltiplo de 5</span>
+      <span id="srep-data-ref" style="margin-left:auto;color:var(--accent);font-size:11px"></span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+      <span style="font-size:11px;color:var(--muted);font-weight:600">COBERTURA DE ESTOQUE:</span>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px">
+        <span style="color:var(--green);font-weight:600">🏬 Iguatemi</span>
+        <input type="number" id="srep-cob-3" value="60" min="7" max="365" step="5"
+          onchange="srepSalvarCobertura(3,this.value)"
+          style="width:60px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;text-align:center">
+        <span style="color:var(--muted)">dias</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px">
+        <span style="color:var(--blue);font-weight:600">🏬 PKS</span>
+        <input type="number" id="srep-cob-6" value="45" min="7" max="365" step="5"
+          onchange="srepSalvarCobertura(6,this.value)"
+          style="width:60px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;text-align:center">
+        <span style="color:var(--muted)">dias</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px">
+        <span style="color:var(--purple);font-weight:600">🏬 Anália Franco</span>
+        <input type="number" id="srep-cob-7" value="30" min="7" max="365" step="5"
+          onchange="srepSalvarCobertura(7,this.value)"
+          style="width:60px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;text-align:center">
+        <span style="color:var(--muted)">dias</span>
+      </label>
+    </div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
     <span style="font-size:11px;color:var(--muted);margin-right:4px">LOJA:</span>
@@ -5316,6 +5341,17 @@ function aplicarMesAtualAoAN() {
 const SREP_LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
 const SREP_LOJA_COLOR = {3:'var(--green)', 6:'var(--blue)', 7:'var(--purple)'};
 let _srepCache = null;
+let _srepCobertura = {3:60, 6:45, 7:30}; // dias de cobertura: F3=Iguatemi, F6=PKS, F7=Anália
+
+function srepGetCobertura(){ return _srepCobertura; }
+
+function srepSalvarCobertura(fid, dias){
+  const d = parseInt(dias);
+  if(isNaN(d) || d < 1 || d > 365) return;
+  _srepCobertura[parseInt(fid)] = d;
+  _srepCache = null;
+  srepRender();
+}
 
 
 /* ═══ SUGESTÃO × PEDIDOS — cruzamento de dados ══════════════════════════
@@ -5423,8 +5459,9 @@ function srepBuscarPendente(ref, fid){
 function srepCalc(){
   if(_srepCache) return _srepCache;
 
-  const LEAD = {3:20, 6:15, 7:10};     // dias de abastecimento: F3=Iguatemi(20d), F6=PKS(15d), F7=Anália(10d)
-  const CICLO = 30;                      // ciclo de reposição (dias)
+  const LEAD     = {3:20, 6:15, 7:10};  // prazo de entrega por fábrica (dias)
+  const COBERTURA= srepGetCobertura();   // dias de cobertura configuráveis
+  const CICLO    = 15;                   // ciclo de reposição: quinzenal
 
   const meses      = AN.months;
   const n          = meses.length;
@@ -5458,28 +5495,23 @@ function srepCalc(){
     const qtdAtual = qtdMes[ultIdx];
     const projecao = diaFim > 0 ? Math.round(qtdAtual / diaFim * CICLO) : base;
 
-    // Taxa diária e lead time
-    const demanda   = Math.max(projecao, base);             // melhor estimativa
-    const taxaDia   = demanda / CICLO;                       // unidades/dia
+    // Taxa diária e cobertura configurável
+    const demanda   = Math.max(projecao, base);
+    const taxaDia   = demanda / CICLO;
     const lead      = LEAD[fid] || 15;
+    const cob       = COBERTURA[fid] || 45;   // dias de cobertura desta loja
 
-    // Quantidade a pedir: cobre o lead time + 1 ciclo completo
+    // Quantidade: cobre o prazo de entrega + cobertura configurada
     // Arredondado para múltiplos de 5
-    const qtdBruta  = taxaDia * (lead + CICLO);
+    const qtdBruta  = taxaDia * (lead + cob);
     const pedido    = Math.ceil(qtdBruta / 5) * 5;
 
-    // Frequência: com este pedido, estoque dura (pedido / taxaDia) dias
     const duracaoDias = taxaDia > 0 ? Math.round(pedido / taxaDia) : 999;
 
-    // Frequência recomendada de pedido
-    let freq, freqDias;
-    if(duracaoDias <= 20)      { freq = 'Semanal';    freqDias = 7;  }
-    else if(duracaoDias <= 40) { freq = 'Quinzenal';  freqDias = 15; }
-    else if(duracaoDias <= 60) { freq = 'Mensal';     freqDias = 30; }
-    else                       { freq = 'Bimestral';  freqDias = 60; }
+    // Frequência: quinzenal (padrão conforme regra de negócio)
+    const freq = 'Quinzenal'; const freqDias = 15;
 
-    // Data limite para fazer o pedido (hoje + dias de ciclo - lead time)
-    // Supondo que o estoque atual = 0 (conservador)
+    // Data limite para o próximo pedido
     const diasParaPedir = Math.max(0, freqDias - lead);
     const dataPedido = new Date(hoje);
     dataPedido.setDate(dataPedido.getDate() + diasParaPedir);
@@ -5602,7 +5634,7 @@ function srepRender(fidFiltro='todas', stFiltro=null){
     return `<div class="srep-loja-block" data-fid="${fid}" style="margin-bottom:28px">
       <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px">
         <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:${LOJA_COLOR[fid]}">🏬 ${LOJA_NAMES[fid]}</span>
-        <span style="font-size:11px;color:var(--muted)">Prazo de abastecimento: <b>${lead} dias</b></span>
+        <span style="font-size:11px;color:var(--muted)">Entrega: <b>${lead} dias</b> · Cobertura: <b>${COBERTURA[fid]||45} dias</b> · Requisição: <b>Quinzenal</b></span>
         <span style="font-size:11px;color:var(--muted);margin-left:auto">Total estimado do pedido: <b style="color:var(--text)">${totalPedido} unidades</b></span>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
