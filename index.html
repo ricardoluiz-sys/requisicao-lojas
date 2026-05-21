@@ -5361,9 +5361,13 @@ async function srepCarregarPedidos(){
     _srepPedidosMap = {};
 
     data.forEach(p => {
-      // Só considerar pedidos pendentes (não concluídos/cancelados)
+      // Considerar apenas os status: concluído, ag.coleta, aguardando nf, aguardando
       const st = _normStr(p.status || '');
-      if(st.includes('conclu') || st.includes('cancel') || st.includes('receb')) return;
+      const stOk = st.includes('conclu') ||
+                   st.includes('ag.coleta') || st.includes('agcoleta') ||
+                   st.includes('aguardando nf') || st.includes('aguardandonf') ||
+                   st.includes('aguardando');
+      if(!stOk) return;
 
       const pend = parseInt(String(p.pendente||'0').replace(/\D/g,'')) || 0;
       if(pend <= 0) return;
