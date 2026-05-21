@@ -300,7 +300,9 @@ def gerar_dp_raw(rows: list[dict]) -> str:
             v = r.get(c)
             if v is None:
                 vals.append("null")
-            elif c in ("dia", "loja"):
+            elif c == "dia":
+                vals.append(f"'{str(v)[:10]}'")
+            elif c == "loja":
                 vals.append(f"'{v}'")
             else:
                 vals.append(str(v) if v is not None else "0")
