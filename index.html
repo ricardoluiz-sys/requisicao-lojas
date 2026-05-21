@@ -1337,7 +1337,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button onclick="srepFiltrarSt('critico',this)" class="nb" style="padding:4px 12px;font-size:12px">🔴 Urgente</button>
     <button onclick="srepFiltrarSt('atencao',this)" class="nb" style="padding:4px 12px;font-size:12px">🟡 Atenção</button>
     <button onclick="srepFiltrarSt('revisar',this)" class="nb" style="padding:4px 12px;font-size:12px">⚪ Revisar</button>
-    <button onclick="srepExportar()" style="margin-left:auto;background:var(--accent);border:none;border-radius:9px;padding:6px 16px;color:#fff;font-size:12px;font-weight:600;cursor:pointer">⬇ Exportar CSV</button>
+    <button onclick="srepFiltrarNecessarios(this)" class="nb" id="srep-btn-nec" style="padding:4px 14px;font-size:12px;font-weight:700;margin-left:8px;background:rgba(255,92,92,.15);border-color:rgba(255,92,92,.4);color:var(--red)">🛒 Precisa pedir</button>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="srepAbrirRequisicao()" style="background:var(--green);border:none;border-radius:9px;padding:6px 16px;color:#fff;font-size:12px;font-weight:600;cursor:pointer">📋 Gerar Requisição</button>
+      <button onclick="srepExportar()" style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:6px 14px;color:var(--muted);font-size:12px;cursor:pointer">⬇ CSV</button>
+    </div>
   </div>
   <div id="srep-lojas"></div>
 </div>
