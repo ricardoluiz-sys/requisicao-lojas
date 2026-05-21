@@ -5559,7 +5559,8 @@ function srepRender(fidFiltro='todas', stFiltro=null){
   const tudo = srepCalc();
   const LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
   const LOJA_COLOR = {3:'var(--green)', 6:'var(--blue)', 7:'var(--purple)'};
-  const LEAD = {3:20, 6:15, 7:10};
+  const LEAD      = {3:20, 6:15, 7:10};
+  const COBERTURA = srepGetCobertura();
 
   const rows = tudo.filter(r => {
     if(fidFiltro !== 'todas' && r.fid !== fidFiltro) return false;
@@ -5709,7 +5710,13 @@ async function srepInit(){
   }
 
   await srepCarregarPedidos();
-  srepRender();
+  try {
+    srepRender();
+  } catch(err) {
+    console.error('srepRender falhou:', err);
+    const el = document.getElementById('srep-lojas');
+    if(el) el.innerHTML = '<div style="padding:20px;color:var(--red)">⚠ Erro ao renderizar: ' + err.message + '</div>';
+  }
 }
 
 /* navClick com callbacks está no bloco 2 */
