@@ -756,6 +756,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .ped-chip{font-size:11px;padding:5px 8px;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.mini.min.js"></script>
 </head>
 <body onload="init()">
 <div id="mb-toast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;
@@ -5094,7 +5095,7 @@ function planExportarResumo(){
     rows.push(row);
   });
   // Exportar como CSV
-  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const esc2=s=>String(s).split('"').join('""');const csv=rows.map(r=>r.map(v=>'"'+esc2(v)+'"').join(',')).join('\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -7753,3 +7754,207 @@ function dpRenderOperadores() {
 
 
 </script>
+
+<!-- ═══ Modal Gerar Requisição ═══════════════════════════════════════════ -->
+<div id="srep-modal-overlay" onclick="srepFecharRequisicao()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000"></div>
+<div id="srep-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(92vw,900px);max-height:88vh;background:var(--surface);border:1px solid var(--border);border-radius:14px;z-index:2001;flex-direction:column;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div>
+      <div style="font-family:'DM Serif Display',serif;font-size:1.4rem">📋 Gerar Requisição</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">Clique no produto ou quantidade para editar · Remova itens desnecessários</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="srepAdicionarLinha()" style="background:rgba(79,126,255,.15);border:1px solid rgba(79,126,255,.3);border-radius:7px;padding:6px 12px;color:var(--accent);font-size:12px;cursor:pointer">+ Adicionar</button>
+      <button onclick="srepExportarRequisicao()" style="background:var(--green);border:none;border-radius:9px;padding:7px 18px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">⬇ Exportar XLSX</button>
+      <button onclick="srepFecharRequisicao()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:12px;cursor:pointer">✕ Fechar</button>
+    </div>
+  </div>
+  <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--muted);align-self:center">LOJA:</span>
+    <button onclick="srepModalFiltrar('todas',this)" class="nb active" style="padding:3px 10px;font-size:11px" id="srep-mod-todas">Todas</button>
+    <button onclick="srepModalFiltrar(3,this)" class="nb" style="padding:3px 10px;font-size:11px">Iguatemi</button>
+    <button onclick="srepModalFiltrar(6,this)" class="nb" style="padding:3px 10px;font-size:11px">PKS</button>
+    <button onclick="srepModalFiltrar(7,this)" class="nb" style="padding:3px 10px;font-size:11px">Anália Franco</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--muted);align-self:center" id="srep-mod-total"></span>
+  </div>
+  <div style="overflow-y:auto;flex:1">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead style="position:sticky;top:0;z-index:1">
+        <tr style="background:var(--surface)">
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">#</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Loja</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Produto</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Categoria</th>
+          <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border)">💡 Qtd</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Frequência</th>
+          <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Remover</th>
+        </tr>
+      </thead>
+      <tbody id="srep-req-body"></tbody>
+    </table>
+  </div>
+  <div id="srep-req-footer" style="padding:10px 20px;border-top:1px solid var(--border);font-size:12px;background:var(--surface);flex-shrink:0;display:flex;gap:20px"></div>
+</div>
+
+<script>
+/* ═══ MODAL GERAR REQUISIÇÃO ═══════════════════════════════════════════════ */
+let _srepReqItens = [];
+let _srepModalFiltroFid = 'todas';
+
+function srepFiltrarNecessarios(btn){
+  document.querySelectorAll('.srep-loja-block').forEach(b=>b.style.display='');
+  document.querySelectorAll('[onclick^="srepFiltrar"],[onclick^="srepFiltrarSt"]').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.toggle('active');
+  const ativo = btn && btn.classList.contains('active');
+  document.querySelectorAll('.srep-row').forEach(row=>{
+    if(!ativo){ row.style.display=''; return; }
+    const qtdEl = row.querySelectorAll('td')[3];
+    const txt = qtdEl ? qtdEl.textContent.trim() : '';
+    row.style.display = txt.includes('✅') ? 'none' : '';
+  });
+}
+
+function srepAbrirRequisicao(){
+  const tudo = srepCalc();
+  const LOJA_NAMES = {3:'Iguatemi', 6:'PKS', 7:'Anália Franco'};
+  _srepReqItens = tudo.filter(r=>r.pedido>0).map((r,i)=>({
+    id:i, fid:r.fid, loja:LOJA_NAMES[r.fid]||('F'+r.fid),
+    produto:r.ref, categoria:r.cat, qtd:r.pedido, freq:r.freq, visivel:true
+  }));
+  _srepModalFiltroFid='todas';
+  srepRenderReqTable();
+  const ov=document.getElementById('srep-modal-overlay');
+  const md=document.getElementById('srep-modal');
+  if(ov)ov.style.display='block';
+  if(md)md.style.display='flex';
+  document.body.style.overflow='hidden';
+  const todBtn=document.getElementById('srep-mod-todas');
+  if(todBtn){document.querySelectorAll('#srep-modal .nb').forEach(b=>b.classList.remove('active'));todBtn.classList.add('active');}
+}
+
+function srepFecharRequisicao(){
+  const ov=document.getElementById('srep-modal-overlay');
+  const md=document.getElementById('srep-modal');
+  if(ov)ov.style.display='none';
+  if(md)md.style.display='none';
+  document.body.style.overflow='';
+}
+
+function srepModalFiltrar(fid,btn){
+  _srepModalFiltroFid=fid;
+  document.querySelectorAll('#srep-modal .nb').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  srepRenderReqTable();
+}
+
+function srepRenderReqTable(){
+  const LC={3:'var(--green)',6:'var(--blue)',7:'var(--purple)'};
+  const fil=_srepReqItens.filter(r=>r.visivel&&(_srepModalFiltroFid==='todas'||r.fid===_srepModalFiltroFid));
+  const tbody=document.getElementById('srep-req-body');
+  if(!tbody)return;
+  tbody.innerHTML=fil.map((r,i)=>`
+    <tr id="srep-row-${r.id}" style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:7px 10px"><span style="font-size:11px;font-weight:600;color:${LC[r.fid]||'var(--text)'}">${r.loja}</span></td>
+      <td style="padding:7px 10px;max-width:220px">
+        <span onclick="srepEditarCampo(${r.id},'produto',this)" style="cursor:pointer;display:inline-block;width:100%" title="Clique para editar">${r.produto} <span style="color:var(--muted);font-size:10px">✏️</span></span>
+      </td>
+      <td style="padding:7px 10px"><span style="background:rgba(79,126,255,.1);border-radius:5px;padding:2px 7px;font-size:10px">${r.categoria}</span></td>
+      <td style="padding:7px 10px;text-align:center">
+        <span onclick="srepEditarCampo(${r.id},'qtd',this)" style="font-size:18px;font-weight:700;color:var(--accent);cursor:pointer" title="Clique para editar">${r.qtd}</span>
+      </td>
+      <td style="padding:7px 10px;color:var(--muted);font-size:11px">${r.freq}</td>
+      <td style="padding:7px 10px;text-align:center">
+        <button onclick="srepRemoverItem(${r.id})" style="background:rgba(255,92,92,.15);border:1px solid rgba(255,92,92,.3);border-radius:6px;padding:3px 8px;color:var(--red);font-size:12px;cursor:pointer">🗑️</button>
+      </td>
+    </tr>`).join('');
+  const totQtd=fil.reduce((a,r)=>a+r.qtd,0);
+  const totAll=_srepReqItens.filter(r=>r.visivel).reduce((a,r)=>a+r.qtd,0);
+  const foot=document.getElementById('srep-req-footer');
+  if(foot)foot.innerHTML=`<span><b style="color:var(--text)">${fil.length}</b> <span style="color:var(--muted)">itens</span></span><span><b style="color:var(--accent)">${totQtd}</b> <span style="color:var(--muted)">unidades</span></span><span style="color:var(--muted)">|</span><span style="color:var(--muted)">Total geral: <b style="color:var(--text)">${totAll} un.</b> em ${_srepReqItens.filter(r=>r.visivel).length} itens</span>`;
+  const totEl=document.getElementById('srep-mod-total');
+  if(totEl)totEl.textContent=fil.length+' itens';
+}
+
+function srepEditarCampo(id,campo,el){
+  const item=_srepReqItens.find(r=>r.id===id);
+  if(!item)return;
+  const isQtd=campo==='qtd';
+  const inp=document.createElement('input');
+  inp.type=isQtd?'number':'text';
+  inp.value=item[campo];
+  if(isQtd)inp.min=1;
+  inp.style.cssText=isQtd
+    ?'width:70px;text-align:center;font-size:16px;font-weight:700;background:var(--card);border:2px solid var(--accent);border-radius:6px;padding:3px 6px;color:var(--accent)'
+    :'width:100%;min-width:160px;font-size:12px;background:var(--card);border:2px solid var(--accent);border-radius:6px;padding:3px 8px;color:var(--text)';
+  const ok=()=>{item[campo]=isQtd?Math.max(1,parseInt(inp.value)||1):inp.value.trim()||item[campo];srepRenderReqTable();};
+  inp.addEventListener('blur',ok);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')ok();if(e.key==='Escape')srepRenderReqTable();});
+  el.replaceWith(inp);inp.focus();inp.select();
+}
+
+function srepRemoverItem(id){
+  const item=_srepReqItens.find(r=>r.id===id);
+  if(item){item.visivel=false;srepRenderReqTable();}
+}
+
+function srepAdicionarLinha(){
+  const LOJA_NAMES={3:'Iguatemi',6:'PKS',7:'Anália Franco'};
+  const fid=_srepModalFiltroFid!=='todas'?_srepModalFiltroFid:3;
+  _srepReqItens.push({id:Date.now(),fid,loja:LOJA_NAMES[fid]||'Iguatemi',produto:'Novo produto',categoria:'—',qtd:1,freq:'Mensal',visivel:true});
+  srepRenderReqTable();
+}
+
+function srepExportarRequisicao(){
+  const LOJA_NAMES={3:'Iguatemi',6:'PKS',7:'Anália Franco'};
+  const LEAD={3:20,6:15,7:10};
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const itensFil=_srepReqItens.filter(r=>r.visivel&&(_srepModalFiltroFid==='todas'||r.fid===_srepModalFiltroFid));
+
+  if(typeof XLSX==='undefined'){
+    alert('Exportando como CSV (SheetJS nao disponivel)');
+    const linhas=[['Loja','Produto','Categoria','Qtd','Frequencia']].concat(itensFil.map(function(r){return[r.loja,r.produto,r.categoria,r.qtd,r.freq];}));
+    const txt=linhas.map(function(r){return r.map(function(v){return String(v);}).join(';');}).join('\n');
+    const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(txt);
+    a.download='requisicao.csv';a.click();return;
+  }
+
+  const wb=XLSX.utils.book_new();
+  // Aba por loja
+  [3,6,7].forEach(fid=>{
+    const itens=itensFil.filter(r=>r.fid===fid);
+    if(!itens.length)return;
+    const rows=[
+      ['REQUISIÇÃO DE PRODUTOS — '+LOJA_NAMES[fid].toUpperCase()],
+      ['Data: '+hoje,'','Prazo de entrega: '+LEAD[fid]+' dias'],
+      [],
+      ['Produto','Categoria','Quantidade','Frequência','Observação'],
+      ...itens.map(r=>[r.produto,r.categoria,r.qtd,r.freq,'']),
+      [],
+      ['TOTAL','',itens.reduce((a,r)=>a+r.qtd,0),'','']
+    ];
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:42},{wch:18},{wch:12},{wch:14},{wch:22}];
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}}];
+    XLSX.utils.book_append_sheet(wb,ws,LOJA_NAMES[fid].substring(0,31));
+  });
+  // Aba resumo
+  const ws2=XLSX.utils.aoa_to_sheet([
+    ['RESUMO GERAL — REQUISIÇÃO DE PRODUTOS'],
+    ['Data: '+hoje],
+    [],
+    ['Loja','Produto','Categoria','Quantidade','Frequência','Prazo (dias)'],
+    ...itensFil.map(r=>[r.loja,r.produto,r.categoria,r.qtd,r.freq,LEAD[r.fid]||15]),
+    [],
+    ['','TOTAL GERAL','',itensFil.reduce((a,r)=>a+r.qtd,0),'','']
+  ]);
+  ws2['!cols']=[{wch:18},{wch:42},{wch:18},{wch:12},{wch:14},{wch:14}];
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Resumo');
+  XLSX.writeFile(wb,'requisicao-'+hoje.split('/').join('-')+'.xlsx');
+}
+</script>
+
+</div>
+</body>
+</html>
