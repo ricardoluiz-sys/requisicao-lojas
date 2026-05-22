@@ -259,8 +259,8 @@ FROM orders o
 JOIN batches  b  ON b.id  = o.batch_id  AND b.factory_id IN (3,6,7)
 JOIN line_items li ON li.order_id = o.id AND li.deleted_at IS NULL AND li.price > 0
 WHERE o.deleted_at IS NULL
-  AND o.created_at >= '{ano}-{mes:02d}-01'
-  AND o.created_at <  '{prox_mes}'
+  AND o.created_at >= '{ini}'
+  AND o.created_at <  '{fim}'
 GROUP BY b.factory_id, li.material_id, mes
 ORDER BY b.factory_id, val DESC
 LIMIT 500
@@ -282,7 +282,7 @@ JOIN material_categories mc ON mc.id = m.material_category_id
                            AND mc.name <> 'Ebook'
 WHERE o.deleted_at IS NULL
   AND o.created_at >= '2026-01-01'
-  AND o.created_at <  '{fim}'
+  AND o.created_at <  '{{fim}}'
 GROUP BY b.factory_id, mes
 ORDER BY b.factory_id, mes
 """
@@ -644,7 +644,7 @@ def main():
             mes_atual = mes_fim
         log(f"  ↳ {len(consumo_acc)} entradas de consumo")
 
-        rows_vol = mb_query(token, SQL_VOL_MENSAL, limit=100, retries=2)
+        rows_vol = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=2)
         for r in rows_vol:
             fid = r.get('factory_id')
             mes = r.get('mes')
