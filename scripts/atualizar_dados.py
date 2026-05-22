@@ -452,8 +452,38 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
     i_e = html.find(END, i_s) + len(END)
 
     # Se AN não disponível, extrair do HTML existente
-    an_final = an if an else _extrair_bloco_entre(html, '/* @@AN_START@@ */', '/* @@AN_END@@ */')
-    an_dist_final = an_dist if an_dist else _extrair_bloco_entre(html, '/* @@AN_DIST_START@@ */', '/* @@AN_DIST_END@@ */')
+    def _extrair_an_existente(h):
+        """Extrai const AN e AN_MONTHLY_DIST do HTML existente."""
+        via_marker = _extrair_bloco_entre(h, '/* @@AN_START@@ */', '/* @@AN_END@@ */')
+        if via_marker:
+            return via_marker
+        s = h.find('const AN = ')
+        if s < 0:
+            return None
+        e = h.find('\nconst AN_MONTHLY_DIST', s)
+        if e < 0:
+            e = h.find('\nconst AN_MONTH', s)
+        return h[s:e].strip() if e > s else None
+
+    def _extrair_dist_existente(h):
+        via_marker = _extrair_bloco_entre(h, '/* @@AN_DIST_START@@ */', '/* @@AN_DIST_END@@ */')
+        if via_marker:
+            return via_marker
+        s = h.find('const AN_MONTHLY_DIST = ')
+        if s < 0:
+            return None
+        e = h.find('\nconst AN_MONTH_DATES', s)
+        if e < 0:
+            e = h.find('\n// ', s)
+        return h[s:e].strip() if e > s else None
+
+    an_final = an if an else _extrair_an_existente(html)
+    an_dist_final = an_dist if an_dist else _extrair_dist_existente(html)
+
+    if not an_final:
+        log("  ⚠ AN não disponível e não encontrado no HTML existente!")
+    if not an_dist_final:
+        log("  ⚠ AN_MONTHLY_DIST não disponível e não encontrado no HTML existente!")
 
     novo = (
         f'{START}\n'
@@ -671,6 +701,10 @@ def main():
         log("  ⚠ Sem dados de consumo — AN preservado do HTML existente")
 
     # ── Atualizar HTML ───────────────────────────────────────────────────────
+    if not dp_raw_rows:
+        log("⚠ DP_RAW vazio — abortando atualização para não zerar o HTML")
+        sys.exit(0)
+
     log("Atualizando HTML...")
     with open(HTML_FILE, encoding='utf-8') as f:
         html = f.read()
