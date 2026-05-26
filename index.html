@@ -4347,6 +4347,7 @@ function dpGetFiltered(){
   const loja = document.getElementById('dp-loja')?.value || 'todas';
   const base = DP_RAW.filter(r => r.dia >= ini && r.dia <= fim && (loja==='todas' || r.loja===loja));
   // Se visão "del", substituir campos de tempo pelos _del
+  console.log('[dpGetFiltered] window._dpVisao=', window._dpVisao);
   if(window._dpVisao==='del'){
     return base.map(r => ({
       ...r,
@@ -4365,6 +4366,7 @@ function dpGetFiltered(){
   return base;
 }
 function dpRender(){
+  console.log('[dpRender] chamado, window._dpVisao=', window._dpVisao);
   const rows=dpGetFiltered();if(!rows.length)return;
   // Atualizar labels de filtro
   const ini = document.getElementById('dp-data-ini')?.value||'2026-05-01';
@@ -7741,6 +7743,7 @@ function dpGetFiltered(){
   const loja = document.getElementById('dp-loja')?.value || 'todas';
   const base = DP_RAW.filter(r => r.dia >= ini && r.dia <= fim && (loja==='todas' || r.loja===loja));
   // Se visão "del", substituir campos de tempo pelos _del
+  console.log('[dpGetFiltered] window._dpVisao=', window._dpVisao);
   if(window._dpVisao==='del'){
     return base.map(r => ({
       ...r,
@@ -7759,6 +7762,7 @@ function dpGetFiltered(){
   return base;
 }
 function dpRender(){
+  console.log('[dpRender] chamado, window._dpVisao=', window._dpVisao);
   const rows=dpGetFiltered();if(!rows.length)return;
   // Atualizar labels de filtro
   const ini = document.getElementById('dp-data-ini')?.value||'2026-05-01';
