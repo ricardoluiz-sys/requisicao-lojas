@@ -5849,70 +5849,141 @@ function dpGetPm(r){
 /* ═══════════════════════════════════════════════════════════════════════
    ANÁLISE IA — OPERADORES DESEMPENHO
    ═══════════════════════════════════════════════════════════════════════ */
-async function dpAnalisarIA(){
+function dpAnalisarIA(){
   const oprs = dpGetOprFiltered();
-  if(!oprs.length){ alert('Sem dados de operadores para o período selecionado.'); return; }
+  if(!oprs.length){ return; }
 
-  const card = document.getElementById('dp-ia-analise');
-  const content = document.getElementById('dp-ia-content');
-  const periodo = document.getElementById('dp-ia-periodo');
+  const card    = document.getElementById('dp-ia-analise');
+  const el      = document.getElementById('dp-ia-content');
+  const periodoEl = document.getElementById('dp-ia-periodo');
   const ini = document.getElementById('dp-data-ini')?.value || '';
   const fim = document.getElementById('dp-data-fim')?.value || '';
+  const fmtD = d => d.substring(5).split('-').reverse().join('/');
 
   if(card) card.style.display = 'block';
-  if(periodo) periodo.textContent = `${ini} a ${fim}`;
-  if(content){
-    content.innerHTML = '<div style="display:flex;align-items:center;gap:8px;color:var(--muted)"><span style="animation:spin 1s linear infinite;display:inline-block">⏳</span> Gerando análise...</div>';
-  }
+  if(periodoEl) periodoEl.textContent = `${fmtD(ini)} a ${fmtD(fim)}`;
+  if(!el) return;
 
-  // Montar resumo dos dados para o prompt
-  const total_pedidos = oprs.reduce((a,o)=>a+o.pedidos,0);
-  const lojas = [...new Set(oprs.map(o=>o.loja))].join(', ');
-  const visao = (typeof _dpVisao!=='undefined'&&_dpVisao==='del') ? 'via delivered_at (experiência do cliente)' : 'via log de produção';
+  // ── Calcular métricas ────────────────────────────────────────────────
+  const humanos = oprs.filter(o => o.uid !== 0 && o.uid !== '0');
+  const sistema = oprs.find(o => o.uid === 0 || o.uid === '0');
+  const total   = oprs.reduce((a,o) => a + o.pedidos, 0);
+  const lojas   = [...new Set(oprs.map(o => o.loja))];
 
-  const resumo = oprs.slice(0,15).map((o,i) =>
-    `${i+1}. ${o.nome} (${o.loja}) — ${o.pedidos} pedidos, ${o.pct_prontos}% prontos, SLA: ${o.sla_pct!=null?o.sla_pct+'%':'—'}, ${o.dias_ativos} dias ativos`
-  ).join('\n');
+  // Top e bottom performers (só humanos)
+  const ranked = [...humanos].sort((a,b) => b.pedidos - a.pedidos);
+  const topVol  = ranked[0];
+  const topSla  = [...humanos].filter(o=>o.sla_pct!=null).sort((a,b)=>b.sla_pct-a.sla_pct)[0];
+  const piorSla = [...humanos].filter(o=>o.sla_pct!=null).sort((a,b)=>a.sla_pct-b.sla_pct)[0];
+  const maisAtivo = [...humanos].sort((a,b)=>b.dias_ativos-a.dias_ativos)[0];
 
-  const prompt = `Você é um especialista em gestão operacional de lojas de personalização de produtos (totens de impressão). Analise o desempenho dos operadores abaixo para o período ${ini} a ${fim} nas lojas: ${lojas}. Métrica de tempo: ${visao}.
+  // Médias gerais (humanos)
+  const mediaSla = humanos.length ? Math.round(humanos.filter(o=>o.sla_pct!=null).reduce((a,o)=>a+o.sla_pct,0)/humanos.filter(o=>o.sla_pct!=null).length) : 0;
+  const mediaPron = humanos.length ? Math.round(humanos.reduce((a,o)=>a+o.pct_prontos,0)/humanos.length) : 0;
 
-DADOS DOS OPERADORES:
-${resumo}
+  // Por loja
+  const porLoja = lojas.map(l => {
+    const ops = humanos.filter(o=>o.loja===l);
+    return {
+      loja: l,
+      n: ops.length,
+      ped: ops.reduce((a,o)=>a+o.pedidos,0),
+      sla: ops.filter(o=>o.sla_pct!=null).length
+        ? Math.round(ops.filter(o=>o.sla_pct!=null).reduce((a,o)=>a+o.sla_pct,0)/ops.filter(o=>o.sla_pct!=null).length)
+        : null
+    };
+  }).filter(l=>l.ped>0).sort((a,b)=>b.sla-a.sla);
 
-Total de pedidos no período: ${total_pedidos}
+  const melhorLoja = porLoja[0];
+  const piorLoja   = porLoja[porLoja.length-1];
 
-Forneça uma análise concisa (máximo 5 parágrafos) cobrindo:
-1. Destaque positivo: quem se destacou e por quê
-2. Pontos de atenção: operadores ou padrões preocupantes
-3. Comparativo entre lojas
-4. Recomendação prática e objetiva para a gestão
+  // Operadores com atenção (SLA < 50% ou poucos pedidos)
+  const atencao = humanos.filter(o => o.sla_pct !== null && o.sla_pct < 50 && o.pedidos >= 10);
+  const semSla  = humanos.filter(o => o.sla_pct === null && o.pedidos > 5);
 
-Use linguagem direta e profissional. Evite rodeios. Formate com parágrafos curtos.`;
+  // Sistema vs humanos
+  const pctSistema = sistema && total > 0 ? Math.round(sistema.pedidos/total*100) : 0;
 
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{role:'user', content: prompt}]
-      })
+  // ── Construir insights ────────────────────────────────────────────────
+  const insights = [];
+
+  // 1. Destaque de volume/performance
+  if(topVol){
+    const extra = topVol.nome === topSla?.nome
+      ? ` Além do volume, lidera o SLA com <strong>${topSla.sla_pct}%</strong>.`
+      : topSla ? ` Melhor SLA: <strong>${topSla.nome} (${topSla.sla_pct}%)</strong>.` : '';
+    insights.push({
+      icon:'🏆', cor:'var(--green)',
+      titulo:'Destaque do período',
+      texto:`<strong>${topVol.nome}</strong> (${topVol.loja}) liderou com <strong>${topVol.pedidos} pedidos</strong> e <strong>${topVol.pct_prontos}% de conclusão</strong> em ${topVol.dias_ativos} dias ativos.${extra}`
     });
-    const data = await resp.json();
-    const text = data?.content?.[0]?.text || 'Sem resposta da IA.';
-    if(content){
-      // Converter parágrafos em HTML
-      content.innerHTML = text.split('\n').filter(p=>p.trim()).map(p =>
-        p.startsWith('**')||p.match(/^\d\./)
-          ? `<p style="margin:0 0 8px;font-weight:600">${p.replace(/\*\*/g,'')}</p>`
-          : `<p style="margin:0 0 10px">${p}</p>`
-      ).join('');
-    }
-  } catch(err){
-    if(content) content.innerHTML = `<p style="color:var(--red)">⚠ Erro ao gerar análise: ${err.message}</p>`;
   }
+
+  // 2. Ponto de atenção
+  if(atencao.length > 0){
+    const nomes = atencao.map(o=>`<strong>${o.nome}</strong> (${o.sla_pct}%)`).join(', ');
+    insights.push({
+      icon:'⚠️', cor:'var(--red)',
+      titulo:`${atencao.length > 1 ? atencao.length+' operadores' : 'Atenção'} abaixo de 50% de SLA`,
+      texto:`${nomes} ficaram abaixo do mínimo recomendado de 50% no SLA ≤120min. Verificar distribuição de pedidos complexos ou necessidade de treinamento.`
+    });
+  } else if(piorSla && piorSla.sla_pct < mediaSla - 15){
+    insights.push({
+      icon:'⚠️', cor:'var(--gold)',
+      titulo:'Operador com SLA abaixo da média',
+      texto:`<strong>${piorSla.nome}</strong> (${piorSla.loja}) registrou <strong>${piorSla.sla_pct}% de SLA</strong> contra média de <strong>${mediaSla}%</strong> do grupo. Acompanhar tipos de pedido atribuídos.`
+    });
+  } else {
+    insights.push({
+      icon:'✅', cor:'var(--green)',
+      titulo:'Equipe dentro do padrão',
+      texto:`Todos os operadores com volume relevante mantiveram SLA acima de 50%. Média do grupo: <strong>${mediaSla}% de SLA</strong> e <strong>${mediaPron}% de conclusão</strong>.`
+    });
+  }
+
+  // 3. Comparativo entre lojas
+  if(porLoja.length >= 2){
+    const tabela = porLoja.map(l=>`<strong>${l.loja}</strong> ${l.sla!=null?l.sla+'% SLA':'-'} · ${l.ped} ped.`).join(' &nbsp;|&nbsp; ');
+    const diff = melhorLoja && piorLoja && melhorLoja.sla!=null && piorLoja.sla!=null ? melhorLoja.sla - piorLoja.sla : null;
+    insights.push({
+      icon:'🏬', cor:'var(--accent)',
+      titulo:'Comparativo entre lojas',
+      texto:`${tabela}. ${diff!==null && diff>15 ? `Diferença de <strong>${diff} pp</strong> de SLA entre lojas — investigar causas estruturais (volume, equipe, tipo de produto).` : 'Desempenho equilibrado entre as lojas.'}`
+    });
+  }
+
+  // 4. Automação e recomendação
+  const recomendacao = (() => {
+    if(!topSla) return 'Coletar mais dados de tempo de produção para análise completa.';
+    if(topSla.sla_pct >= 90) return `Replicar a metodologia de <strong>${topSla.nome}</strong> com os demais: SLA de ${topSla.sla_pct}% é referência de excelência.`;
+    if(mediaSla >= 80) return `Equipe sólida. Foco em consistência — ${piorSla?.nome ? `acompanhar <strong>${piorSla.nome}</strong> de perto` : 'manter cadência'}.`;
+    if(mediaSla >= 60) return `SLA médio de ${mediaSla}% está aceitável mas com espaço de melhoria. Priorizar redução de pedidos acima de 120min.`;
+    return `SLA médio de ${mediaSla}% requer atenção imediata. Revisar capacidade operacional e distribuição de pedidos.`;
+  })();
+
+  const sistemaNote = sistema && pctSistema > 10
+    ? ` Sistema automatizado respondeu por <strong>${pctSistema}%</strong> dos pedidos (${sistema.pedidos} total).`
+    : '';
+
+  insights.push({
+    icon:'💡', cor:'var(--gold)',
+    titulo:'Recomendação',
+    texto: recomendacao + sistemaNote
+  });
+
+  // ── Renderizar ───────────────────────────────────────────────────────
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">` +
+    insights.map(i => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${i.cor};border-radius:9px;padding:12px 14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:16px">${i.icon}</span>
+          <span style="font-size:11px;font-weight:600;color:var(--text)">${i.titulo}</span>
+        </div>
+        <p style="margin:0;font-size:12px;color:var(--muted);line-height:1.6">${i.texto}</p>
+      </div>`).join('') +
+    `</div>`;
 }
+
 
 function dpLimparAnaliseIA(){
   const card = document.getElementById('dp-ia-analise');
@@ -8022,6 +8093,9 @@ function dpRenderOperadores() {
   // Mostrar botão de análise IA
   const _iaBtn = document.getElementById('dp-ia-btn');
   if (_iaBtn) _iaBtn.style.display = oprs && oprs.length ? 'inline-block' : 'none';
+  // Re-analisar automaticamente se card já estiver aberto
+  const _iaCard = document.getElementById('dp-ia-analise');
+  if (_iaCard && _iaCard.style.display !== 'none' && oprs.length) dpAnalisarIA();
 }
 
 
