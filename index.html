@@ -4381,6 +4381,7 @@ function dpRender(){
   if(subEl)   subEl.textContent   = loja==='todas'?'Todas as lojas':loja;
   const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
   const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('d30'),d120=s('d120'),ac=s('acima120');
+  console.log('[dpRender] TOTAIS:', {d120, ac, sla: d120+ac>0?Math.round(d120/(d120+ac)*100)+'%':'—', rows:rows.length, visao:window._dpVisao});
   const pctSla=d120+ac>0?Math.round(d120/(d120+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
   const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op>2&&r.mediana_op<1440).map(r=>r.mediana_op).sort((a,b)=>a-b);
   const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
@@ -7779,6 +7780,7 @@ function dpRender(){
   if(subEl)   subEl.textContent   = loja==='todas'?'Todas as lojas':loja;
   const s=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
   const tot=s('pedidos'),pron=s('prontos'),em=s('em_producao'),d30=s('d30'),d120=s('d120'),ac=s('acima120');
+  console.log('[dpRender] TOTAIS:', {d120, ac, sla: d120+ac>0?Math.round(d120/(d120+ac)*100)+'%':'—', rows:rows.length, visao:window._dpVisao});
   const pctSla=d120+ac>0?Math.round(d120/(d120+ac)*100):0,pctP=tot>0?Math.round(pron/tot*100):0;
   const meds=rows.filter(r=>r.mediana_op!=null&&r.mediana_op>2&&r.mediana_op<1440).map(r=>r.mediana_op).sort((a,b)=>a-b);
   const medG=meds.length?meds[Math.floor(meds.length/2)]:null;
@@ -8016,6 +8018,10 @@ function dpRenderOperadores() {
       }
     }
   });
+
+  // Mostrar botão de análise IA
+  const _iaBtn = document.getElementById('dp-ia-btn');
+  if (_iaBtn) _iaBtn.style.display = oprs && oprs.length ? 'inline-block' : 'none';
 }
 
 
