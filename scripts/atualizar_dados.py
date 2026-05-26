@@ -124,6 +124,7 @@ WITH fac AS (
 ),
 base AS (
   SELECT o.id oid, o.aasm_state, o.created_at,
+    o.delivered_at,
     (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
     fc.loja
   FROM orders o JOIN fac fc ON fc.cid=o.company_id
@@ -150,14 +151,19 @@ rp AS (
   GROUP BY li.order_id
 ),
 calc AS (
-  SELECT b.dia, b.loja,
+  SELECT b.dia, b.loja, b.created_at,
     CASE WHEN b.aasm_state='canceled' THEN 'cancelado'
          WHEN b.aasm_state='waiting' THEN 'aguardando'
          WHEN b.aasm_state='delivered' OR rp.t1 IS NOT NULL THEN 'pronto'
          ELSE 'em_producao' END status,
+    -- Via log de produção (tempo interno)
     CASE WHEN rp.t1 IS NOT NULL THEN
       GREATEST(0, EXTRACT(EPOCH FROM(rp.t1 - COALESCE(fp.t0, b.created_at)))/60.0)
-    END pm
+    END pm,
+    -- Via delivered_at (experiência do cliente)
+    CASE WHEN b.delivered_at IS NOT NULL THEN
+      GREATEST(0, EXTRACT(EPOCH FROM(b.delivered_at - b.created_at))/60.0)
+    END pm_del
   FROM base b
   LEFT JOIN fp ON fp.order_id=b.oid
   LEFT JOIN rp ON rp.order_id=b.oid
@@ -179,7 +185,19 @@ SELECT dia::text, loja,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>240) f240_mais,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)
     FILTER(WHERE pm IS NOT NULL AND pm>=2 AND pm<1440)::numeric, 1) mediana_op,
-  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric, 1) mediana_total
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric, 1) mediana_total,
+  -- Métricas via delivered_at (experiência do cliente)
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del<=30) d30_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del<=120) d120_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>120) acima120_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del BETWEEN 0 AND 15) f0_15_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>15 AND pm_del<=30) f15_30_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>30 AND pm_del<=60) f30_60_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>60 AND pm_del<=120) f60_120_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>120 AND pm_del<=240) f120_240_del,
+  COUNT(*) FILTER(WHERE pm_del IS NOT NULL AND pm_del>240) f240_mais_del,
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm_del)
+    FILTER(WHERE pm_del IS NOT NULL AND pm_del>=2 AND pm_del<1440)::numeric, 1) mediana_del
 FROM calc
 GROUP BY dia, loja
 ORDER BY dia, loja
@@ -292,7 +310,10 @@ def gerar_dp_raw(rows: list[dict]) -> str:
     """Gera o array JS let DP_RAW=[...]."""
     campos = ["dia","loja","pedidos","prontos","em_producao","cancelados","aguardando",
               "d30","d120","acima120","f0_15","f15_30","f30_60",
-              "f60_120","f120_240","f240_mais","mediana_op","mediana_total"]
+              "f60_120","f120_240","f240_mais","mediana_op","mediana_total",
+              "d30_del","d120_del","acima120_del",
+              "f0_15_del","f15_30_del","f30_60_del","f60_120_del","f120_240_del","f240_mais_del",
+              "mediana_del"]
     linhas = []
     for r in rows:
         vals = []
