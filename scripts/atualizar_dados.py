@@ -281,7 +281,6 @@ WHERE o.deleted_at IS NULL
   AND o.created_at <  '{fim}'
 GROUP BY b.factory_id, li.material_id, mes
 ORDER BY b.factory_id, val DESC
-LIMIT 500
 """
 
 
@@ -692,7 +691,7 @@ def main():
                 qtd = r.get('qtd', 0) or 0
                 if fid and mid and mes:
                     v = float(r.get('val') or 0)
-            consumo_acc[(int(fid), int(mid), int(mes))] = (int(qtd), v)
+                    consumo_acc[(int(fid), int(mid), int(mes))] = (int(qtd), v)
             mes_atual = mes_fim
         log(f"  ↳ {len(consumo_acc)} entradas de consumo")
 
