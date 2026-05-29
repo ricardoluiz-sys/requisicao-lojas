@@ -691,7 +691,8 @@ def main():
                 mes = r.get('mes')
                 qtd = r.get('qtd', 0) or 0
                 if fid and mid and mes:
-                    consumo_acc[(int(fid), int(mid), int(mes))] = int(qtd)
+                    v = float(r.get('val') or 0)
+            consumo_acc[(int(fid), int(mid), int(mes))] = (int(qtd), v)
             mes_atual = mes_fim
         log(f"  ↳ {len(consumo_acc)} entradas de consumo")
 
@@ -714,12 +715,35 @@ def main():
     an_dist_js = None
     if consumo_acc and mat_map:
         try:
-            an_js, an_dist_js = gerar_an(consumo_acc, vol_acc, mat_map, hoje)
-            log("  ↳ AN gerado com sucesso")
+            # Montar skus_rows: join consumo_acc × mat_map
+            from collections import defaultdict
+            skus_agg = defaultdict(lambda: {'qtd_total': 0, 'val_total': 0.0,
+                                             'factory_id': 0, 'categoria': '',
+                                             'variacao_cor': '', 'modelo': ''})
+            for (fid, mid, mes), (qtd, val) in consumo_acc.items():
+                if mid not in mat_map:
+                    continue
+                key = (fid, mid)
+                skus_agg[key]['factory_id']   = fid
+                skus_agg[key]['categoria']    = mat_map[mid].get('categoria', '')
+                skus_agg[key]['variacao_cor'] = mat_map[mid].get('variacao_cor', '')
+                skus_agg[key]['modelo']       = mat_map[mid].get('modelo', '')
+                skus_agg[key]['qtd_total']   += qtd
+                skus_agg[key]['val_total']   += val
+
+            skus_rows = sorted(skus_agg.values(),
+                               key=lambda r: -r['qtd_total'])
+            vol_rows = [{'factory_id': k[0], 'mes': k[1], 'volume': v[0], 'receita': v[1]}
+                        for k, v in vol_acc.items()]
+
+            an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
+            log(f"  ↳ AN gerado com sucesso — {len(skus_rows)} SKUs")
         except Exception as e:
             log(f"  ⚠ gerar_an falhou: {e}")
+            an_js, an_dist_js = None, None
     else:
         log("  ⚠ Sem dados de consumo — AN preservado do HTML existente")
+        an_js, an_dist_js = None, None
 
     # ── Atualizar HTML ───────────────────────────────────────────────────────
     if not dp_raw_rows:
