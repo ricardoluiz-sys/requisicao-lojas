@@ -1164,7 +1164,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:13px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
-              <div style="font-size:11px;font-weight:700;color:var(--text)">29/05/2026</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">30/05/2026</div>
             </div>
           </div>
         </div>
@@ -1418,7 +1418,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 29/05/2026 · atualizado 29/05</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 30/05/2026 · atualizado 30/05</div>
             </div>
           </div>
 
@@ -1433,19 +1433,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
           <div style="display:flex;align-items:center;gap:6px">
-            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-29"
+            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-30"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
             <span style="color:var(--muted);font-size:12px">até</span>
-            <input type="date" id="dp-data-fim" value="2026-05-29" min="2026-05-01" max="2026-05-29"
+            <input type="date" id="dp-data-fim" value="2026-05-30" min="2026-05-01" max="2026-05-30"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
           </div>
           <!-- Presets rápidos -->
           <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap">
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-29')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-30')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
             <button onclick="dpSetPeriod('2026-05-08','2026-05-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-29')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
+            <button onclick="dpSetPeriod('2026-05-01','2026-05-30')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
           </div>
         </div>
 
@@ -1465,7 +1465,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Resumo -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 29/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 30/05/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="dp-filter-sub">Todas as lojas</div>
         </div>
       </div>
@@ -1632,7 +1632,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">29/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">30/05/2026</div>
             </div>
           </div>
           <!-- Badge cobertura -->
@@ -1640,7 +1640,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 29/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 30/05/2026</div>
             </div>
           </div>
           <!-- Lojas -->
@@ -1659,7 +1659,7 @@ Desempenho por Operador</div>
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
             Período
-            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 29/05/2026</span>
+            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 30/05/2026</span>
           </div>
           <!-- Meses individuais -->
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
@@ -1727,7 +1727,7 @@ Desempenho por Operador</div>
 
         <!-- Resumo do filtro -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 29/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 30/05/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
@@ -2017,7 +2017,7 @@ Desempenho por Operador</div>
 </style>
 
 <script id="dados-metabase">
-/* === DADOS METABASE — atualizado 29/05/2026 === */
+/* === DADOS METABASE — atualizado 30/05/2026 === */
 let DP_RAW=[
 {dia:'2026-05-01',loja:'Anália Franco',pedidos:26,prontos:26,em_producao:0,cancelados:0,aguardando:0,d30:6,d120:8,acima120:6,f0_15:4,f15_30:2,f30_60:0,f60_120:2,f120_240:1,f240_mais:5,mediana_op:84.9,mediana_total:84.9,d30_del:6,d120_del:13,acima120_del:12,f0_15_del:4,f15_30_del:2,f30_60_del:2,f60_120_del:5,f120_240_del:2,f240_mais_del:10,mediana_del:110.2},
 {dia:'2026-05-01',loja:'Iguatemi',pedidos:3,prontos:2,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:1,acima120:1,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:1,mediana_op:null,mediana_total:7449.9,d30_del:1,d120_del:1,acima120_del:1,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:1,mediana_del:null},
@@ -2035,7 +2035,7 @@ let DP_RAW=[
 {dia:'2026-05-05',loja:'Iguatemi',pedidos:78,prontos:63,em_producao:15,cancelados:0,aguardando:0,d30:20,d120:23,acima120:3,f0_15:19,f15_30:1,f30_60:1,f60_120:2,f120_240:1,f240_mais:2,mediana_op:21.4,mediana_total:1.6,d30_del:20,d120_del:36,acima120_del:27,f0_15_del:19,f15_30_del:1,f30_60_del:3,f60_120_del:13,f120_240_del:7,f240_mais_del:20,mediana_del:108.3},
 {dia:'2026-05-05',loja:'PKS',pedidos:51,prontos:51,em_producao:0,cancelados:0,aguardando:0,d30:25,d120:30,acima120:5,f0_15:23,f15_30:2,f30_60:0,f60_120:5,f120_240:1,f240_mais:4,mediana_op:96.1,mediana_total:1.2,d30_del:26,d120_del:40,acima120_del:11,f0_15_del:24,f15_30_del:2,f30_60_del:1,f60_120_del:13,f120_240_del:5,f240_mais_del:6,mediana_del:96.1},
 {dia:'2026-05-06',loja:'Anália Franco',pedidos:18,prontos:13,em_producao:5,cancelados:0,aguardando:0,d30:2,d120:5,acima120:3,f0_15:2,f15_30:0,f30_60:1,f60_120:2,f120_240:0,f240_mais:3,mediana_op:73.2,mediana_total:77.0,d30_del:2,d120_del:7,acima120_del:6,f0_15_del:2,f15_30_del:0,f30_60_del:2,f60_120_del:3,f120_240_del:1,f240_mais_del:5,mediana_del:109.1},
-{dia:'2026-05-06',loja:'Iguatemi',pedidos:98,prontos:73,em_producao:24,cancelados:1,aguardando:0,d30:23,d120:30,acima120:9,f0_15:21,f15_30:2,f30_60:1,f60_120:6,f120_240:1,f240_mais:8,mediana_op:105.5,mediana_total:2.4,d30_del:21,d120_del:36,acima120_del:37,f0_15_del:21,f15_30_del:0,f30_60_del:1,f60_120_del:14,f120_240_del:9,f240_mais_del:28,mediana_del:173.4},
+{dia:'2026-05-06',loja:'Iguatemi',pedidos:98,prontos:74,em_producao:23,cancelados:1,aguardando:0,d30:23,d120:30,acima120:10,f0_15:21,f15_30:2,f30_60:1,f60_120:6,f120_240:1,f240_mais:9,mediana_op:105.5,mediana_total:2.6,d30_del:21,d120_del:36,acima120_del:38,f0_15_del:21,f15_30_del:0,f30_60_del:1,f60_120_del:14,f120_240_del:9,f240_mais_del:29,mediana_del:173.4},
 {dia:'2026-05-06',loja:'PKS',pedidos:31,prontos:31,em_producao:0,cancelados:0,aguardando:0,d30:6,d120:8,acima120:12,f0_15:6,f15_30:0,f30_60:2,f60_120:0,f120_240:1,f240_mais:11,mediana_op:59.2,mediana_total:1327.1,d30_del:6,d120_del:11,acima120_del:20,f0_15_del:6,f15_30_del:0,f30_60_del:4,f60_120_del:1,f120_240_del:5,f240_mais_del:15,mediana_del:145.9},
 {dia:'2026-05-07',loja:'Anália Franco',pedidos:28,prontos:22,em_producao:6,cancelados:0,aguardando:0,d30:3,d120:4,acima120:5,f0_15:1,f15_30:2,f30_60:1,f60_120:0,f120_240:1,f240_mais:4,mediana_op:32.7,mediana_total:194.7,d30_del:3,d120_del:5,acima120_del:17,f0_15_del:1,f15_30_del:2,f30_60_del:1,f60_120_del:1,f120_240_del:3,f240_mais_del:14,mediana_del:185.8},
 {dia:'2026-05-07',loja:'Iguatemi',pedidos:99,prontos:74,em_producao:24,cancelados:1,aguardando:0,d30:23,d120:28,acima120:7,f0_15:22,f15_30:1,f30_60:1,f60_120:4,f120_240:2,f240_mais:5,mediana_op:80.8,mediana_total:1.5,d30_del:21,d120_del:38,acima120_del:36,f0_15_del:21,f15_30_del:0,f30_60_del:3,f60_120_del:14,f120_240_del:11,f240_mais_del:25,mediana_del:120.5},
@@ -2080,7 +2080,7 @@ let DP_RAW=[
 {dia:'2026-05-20',loja:'Iguatemi',pedidos:47,prontos:23,em_producao:24,cancelados:0,aguardando:0,d30:13,d120:13,acima120:3,f0_15:12,f15_30:1,f30_60:0,f60_120:0,f120_240:0,f240_mais:3,mediana_op:17.3,mediana_total:0.3,d30_del:10,d120_del:18,acima120_del:5,f0_15_del:10,f15_30_del:0,f30_60_del:1,f60_120_del:7,f120_240_del:1,f240_mais_del:4,mediana_del:97.7},
 {dia:'2026-05-20',loja:'PKS',pedidos:25,prontos:25,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:2,acima120:13,f0_15:1,f15_30:0,f30_60:1,f60_120:0,f120_240:1,f240_mais:12,mediana_op:369.7,mediana_total:1347.5,d30_del:1,d120_del:3,acima120_del:22,f0_15_del:1,f15_30_del:0,f30_60_del:1,f60_120_del:1,f120_240_del:2,f240_mais_del:20,mediana_del:727.1},
 {dia:'2026-05-21',loja:'Anália Franco',pedidos:12,prontos:10,em_producao:2,cancelados:0,aguardando:0,d30:1,d120:2,acima120:3,f0_15:1,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:3,mediana_op:268.2,mediana_total:268.2,d30_del:0,d120_del:5,acima120_del:5,f0_15_del:0,f15_30_del:0,f30_60_del:1,f60_120_del:4,f120_240_del:1,f240_mais_del:4,mediana_del:93.6},
-{dia:'2026-05-21',loja:'Iguatemi',pedidos:72,prontos:53,em_producao:17,cancelados:2,aguardando:0,d30:12,d120:15,acima120:8,f0_15:12,f15_30:0,f30_60:0,f60_120:3,f120_240:1,f240_mais:7,mediana_op:141.1,mediana_total:7.5,d30_del:10,d120_del:22,acima120_del:31,f0_15_del:10,f15_30_del:0,f30_60_del:1,f60_120_del:11,f120_240_del:6,f240_mais_del:25,mediana_del:145.0},
+{dia:'2026-05-21',loja:'Iguatemi',pedidos:72,prontos:54,em_producao:16,cancelados:2,aguardando:0,d30:12,d120:15,acima120:8,f0_15:12,f15_30:0,f30_60:0,f60_120:3,f120_240:1,f240_mais:7,mediana_op:141.1,mediana_total:7.5,d30_del:10,d120_del:22,acima120_del:32,f0_15_del:10,f15_30_del:0,f30_60_del:1,f60_120_del:11,f120_240_del:6,f240_mais_del:26,mediana_del:145.0},
 {dia:'2026-05-21',loja:'PKS',pedidos:27,prontos:27,em_producao:0,cancelados:0,aguardando:0,d30:6,d120:9,acima120:5,f0_15:6,f15_30:0,f30_60:2,f60_120:1,f120_240:1,f240_mais:4,mediana_op:172.3,mediana_total:49.0,d30_del:6,d120_del:10,acima120_del:17,f0_15_del:6,f15_30_del:0,f30_60_del:2,f60_120_del:2,f120_240_del:2,f240_mais_del:15,mediana_del:1076.7},
 {dia:'2026-05-22',loja:'Anália Franco',pedidos:9,prontos:9,em_producao:0,cancelados:0,aguardando:0,d30:0,d120:1,acima120:3,f0_15:0,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:3,mediana_op:694.5,mediana_total:694.5,d30_del:1,d120_del:3,acima120_del:5,f0_15_del:1,f15_30_del:0,f30_60_del:1,f60_120_del:1,f120_240_del:4,f240_mais_del:1,mediana_del:139.8},
 {dia:'2026-05-22',loja:'Iguatemi',pedidos:75,prontos:49,em_producao:17,cancelados:9,aguardando:0,d30:16,d120:21,acima120:4,f0_15:15,f15_30:1,f30_60:3,f60_120:2,f120_240:1,f240_mais:3,mediana_op:44.3,mediana_total:3.6,d30_del:16,d120_del:30,acima120_del:19,f0_15_del:16,f15_30_del:0,f30_60_del:3,f60_120_del:11,f120_240_del:8,f240_mais_del:11,mediana_del:108.8},
@@ -2095,17 +2095,19 @@ let DP_RAW=[
 {dia:'2026-05-25',loja:'Iguatemi',pedidos:47,prontos:33,em_producao:14,cancelados:0,aguardando:0,d30:12,d120:14,acima120:0,f0_15:12,f15_30:0,f30_60:1,f60_120:1,f120_240:0,f240_mais:0,mediana_op:52.3,mediana_total:0.2,d30_del:12,d120_del:19,acima120_del:14,f0_15_del:12,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:5,f240_mais_del:9,mediana_del:129.1},
 {dia:'2026-05-25',loja:'PKS',pedidos:23,prontos:22,em_producao:1,cancelados:0,aguardando:0,d30:7,d120:10,acima120:6,f0_15:7,f15_30:0,f30_60:1,f60_120:2,f120_240:0,f240_mais:6,mediana_op:175.0,mediana_total:66.2,d30_del:7,d120_del:12,acima120_del:10,f0_15_del:7,f15_30_del:0,f30_60_del:1,f60_120_del:4,f120_240_del:1,f240_mais_del:9,mediana_del:110.0},
 {dia:'2026-05-26',loja:'Anália Franco',pedidos:12,prontos:11,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:2,acima120:2,f0_15:1,f15_30:0,f30_60:1,f60_120:0,f120_240:2,f240_mais:0,mediana_op:136.1,mediana_total:85.0,d30_del:1,d120_del:8,acima120_del:2,f0_15_del:1,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:1,f240_mais_del:1,mediana_del:84.8},
-{dia:'2026-05-26',loja:'Iguatemi',pedidos:40,prontos:33,em_producao:7,cancelados:0,aguardando:0,d30:13,d120:17,acima120:2,f0_15:13,f15_30:0,f30_60:3,f60_120:1,f120_240:1,f240_mais:1,mediana_op:44.6,mediana_total:0.4,d30_del:14,d120_del:21,acima120_del:12,f0_15_del:14,f15_30_del:0,f30_60_del:1,f60_120_del:6,f120_240_del:5,f240_mais_del:7,mediana_del:117.4},
+{dia:'2026-05-26',loja:'Iguatemi',pedidos:40,prontos:35,em_producao:5,cancelados:0,aguardando:0,d30:13,d120:17,acima120:3,f0_15:13,f15_30:0,f30_60:3,f60_120:1,f120_240:1,f240_mais:2,mediana_op:44.6,mediana_total:0.4,d30_del:14,d120_del:21,acima120_del:14,f0_15_del:14,f15_30_del:0,f30_60_del:1,f60_120_del:6,f120_240_del:5,f240_mais_del:9,mediana_del:117.4},
 {dia:'2026-05-26',loja:'PKS',pedidos:14,prontos:13,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:4,acima120:5,f0_15:1,f15_30:0,f30_60:1,f60_120:2,f120_240:2,f240_mais:3,mediana_op:158.8,mediana_total:158.8,d30_del:1,d120_del:6,acima120_del:7,f0_15_del:1,f15_30_del:0,f30_60_del:2,f60_120_del:3,f120_240_del:3,f240_mais_del:4,mediana_del:158.8},
 {dia:'2026-05-27',loja:'Anália Franco',pedidos:22,prontos:19,em_producao:3,cancelados:0,aguardando:0,d30:2,d120:4,acima120:7,f0_15:2,f15_30:0,f30_60:1,f60_120:1,f120_240:1,f240_mais:6,mediana_op:218.4,mediana_total:264.9,d30_del:4,d120_del:5,acima120_del:13,f0_15_del:2,f15_30_del:2,f30_60_del:0,f60_120_del:1,f120_240_del:2,f240_mais_del:11,mediana_del:303.8},
-{dia:'2026-05-27',loja:'Iguatemi',pedidos:51,prontos:38,em_producao:13,cancelados:0,aguardando:0,d30:10,d120:12,acima120:3,f0_15:6,f15_30:4,f30_60:1,f60_120:1,f120_240:1,f240_mais:2,mediana_op:19.3,mediana_total:18.0,d30_del:10,d120_del:18,acima120_del:20,f0_15_del:8,f15_30_del:2,f30_60_del:1,f60_120_del:7,f120_240_del:5,f240_mais_del:15,mediana_del:117.1},
+{dia:'2026-05-27',loja:'Iguatemi',pedidos:51,prontos:39,em_producao:12,cancelados:0,aguardando:0,d30:10,d120:12,acima120:3,f0_15:6,f15_30:4,f30_60:1,f60_120:1,f120_240:1,f240_mais:2,mediana_op:19.3,mediana_total:18.0,d30_del:10,d120_del:18,acima120_del:21,f0_15_del:8,f15_30_del:2,f30_60_del:1,f60_120_del:7,f120_240_del:5,f240_mais_del:16,mediana_del:117.1},
 {dia:'2026-05-27',loja:'PKS',pedidos:19,prontos:16,em_producao:3,cancelados:0,aguardando:0,d30:5,d120:5,acima120:4,f0_15:5,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:4,mediana_op:1214.0,mediana_total:0.3,d30_del:5,d120_del:8,acima120_del:8,f0_15_del:5,f15_30_del:0,f30_60_del:2,f60_120_del:1,f120_240_del:3,f240_mais_del:5,mediana_del:182.1},
 {dia:'2026-05-28',loja:'Anália Franco',pedidos:14,prontos:11,em_producao:3,cancelados:0,aguardando:0,d30:1,d120:3,acima120:1,f0_15:1,f15_30:0,f30_60:2,f60_120:0,f120_240:1,f240_mais:0,mediana_op:46.8,mediana_total:46.8,d30_del:0,d120_del:9,acima120_del:1,f0_15_del:0,f15_30_del:0,f30_60_del:2,f60_120_del:7,f120_240_del:1,f240_mais_del:0,mediana_del:71.1},
-{dia:'2026-05-28',loja:'Iguatemi',pedidos:81,prontos:63,em_producao:18,cancelados:0,aguardando:0,d30:18,d120:23,acima120:4,f0_15:17,f15_30:1,f30_60:4,f60_120:1,f120_240:0,f240_mais:4,mediana_op:58.3,mediana_total:1.8,d30_del:18,d120_del:41,acima120_del:22,f0_15_del:17,f15_30_del:1,f30_60_del:5,f60_120_del:18,f120_240_del:11,f240_mais_del:11,mediana_del:108.8},
-{dia:'2026-05-28',loja:'PKS',pedidos:25,prontos:21,em_producao:4,cancelados:0,aguardando:0,d30:5,d120:9,acima120:4,f0_15:5,f15_30:0,f30_60:0,f60_120:4,f120_240:0,f240_mais:4,mediana_op:97.2,mediana_total:68.8,d30_del:5,d120_del:13,acima120_del:8,f0_15_del:5,f15_30_del:0,f30_60_del:0,f60_120_del:8,f120_240_del:2,f240_mais_del:6,mediana_del:115.7},
-{dia:'2026-05-29',loja:'Anália Franco',pedidos:2,prontos:1,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:1,acima120:0,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:7.6,mediana_total:7.6,d30_del:1,d120_del:1,acima120_del:0,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:0,mediana_del:7.6},
-{dia:'2026-05-29',loja:'Iguatemi',pedidos:34,prontos:16,em_producao:17,cancelados:0,aguardando:1,d30:10,d120:11,acima120:0,f0_15:10,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:0,mediana_op:30.1,mediana_total:0.2,d30_del:10,d120_del:14,acima120_del:2,f0_15_del:10,f15_30_del:0,f30_60_del:0,f60_120_del:4,f120_240_del:1,f240_mais_del:1,mediana_del:111.0},
-{dia:'2026-05-29',loja:'PKS',pedidos:19,prontos:13,em_producao:6,cancelados:0,aguardando:0,d30:9,d120:9,acima120:0,f0_15:9,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:7.8,mediana_total:0.4,d30_del:9,d120_del:12,acima120_del:1,f0_15_del:9,f15_30_del:0,f30_60_del:2,f60_120_del:1,f120_240_del:1,f240_mais_del:0,mediana_del:63.1}
+{dia:'2026-05-28',loja:'Iguatemi',pedidos:81,prontos:64,em_producao:17,cancelados:0,aguardando:0,d30:18,d120:23,acima120:4,f0_15:17,f15_30:1,f30_60:4,f60_120:1,f120_240:0,f240_mais:4,mediana_op:58.3,mediana_total:1.8,d30_del:18,d120_del:41,acima120_del:23,f0_15_del:17,f15_30_del:1,f30_60_del:5,f60_120_del:18,f120_240_del:11,f240_mais_del:12,mediana_del:109.0},
+{dia:'2026-05-28',loja:'PKS',pedidos:25,prontos:21,em_producao:4,cancelados:0,aguardando:0,d30:4,d120:8,acima120:5,f0_15:4,f15_30:0,f30_60:0,f60_120:4,f120_240:0,f240_mais:5,mediana_op:106.0,mediana_total:88.3,d30_del:4,d120_del:12,acima120_del:9,f0_15_del:4,f15_30_del:0,f30_60_del:0,f60_120_del:8,f120_240_del:2,f240_mais_del:7,mediana_del:115.7},
+{dia:'2026-05-29',loja:'Anália Franco',pedidos:11,prontos:6,em_producao:5,cancelados:0,aguardando:0,d30:2,d120:3,acima120:0,f0_15:2,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:0,mediana_op:7.6,mediana_total:7.6,d30_del:2,d120_del:4,acima120_del:2,f0_15_del:2,f15_30_del:0,f30_60_del:1,f60_120_del:1,f120_240_del:1,f240_mais_del:1,mediana_del:52.1},
+{dia:'2026-05-29',loja:'Iguatemi',pedidos:83,prontos:55,em_producao:27,cancelados:0,aguardando:1,d30:19,d120:27,acima120:1,f0_15:18,f15_30:1,f30_60:2,f60_120:6,f120_240:1,f240_mais:0,mediana_op:61.9,mediana_total:0.4,d30_del:21,d120_del:42,acima120_del:13,f0_15_del:21,f15_30_del:0,f30_60_del:1,f60_120_del:20,f120_240_del:8,f240_mais_del:5,mediana_del:105.3},
+{dia:'2026-05-29',loja:'PKS',pedidos:36,prontos:27,em_producao:9,cancelados:0,aguardando:0,d30:7,d120:9,acima120:6,f0_15:7,f15_30:0,f30_60:2,f60_120:0,f120_240:5,f240_mais:1,mediana_op:132.6,mediana_total:40.0,d30_del:7,d120_del:15,acima120_del:12,f0_15_del:7,f15_30_del:0,f30_60_del:4,f60_120_del:4,f120_240_del:11,f240_mais_del:1,mediana_del:134.9},
+{dia:'2026-05-30',loja:'Anália Franco',pedidos:3,prontos:1,em_producao:1,cancelados:0,aguardando:1,d30:0,d120:0,acima120:0,f0_15:0,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:null,mediana_total:null,d30_del:0,d120_del:1,acima120_del:0,f0_15_del:0,f15_30_del:0,f30_60_del:1,f60_120_del:0,f120_240_del:0,f240_mais_del:0,mediana_del:36.6},
+{dia:'2026-05-30',loja:'Iguatemi',pedidos:2,prontos:1,em_producao:0,cancelados:0,aguardando:1,d30:1,d120:1,acima120:0,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:null,mediana_total:1.1,d30_del:1,d120_del:1,acima120_del:0,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:0,mediana_del:null}
 ];
 const DP_OPR_DAILY=[
 {dia:'2026-05-01',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:17,prontos:17,em_producao:0,d30:0,d120:1,acima120:4,mediana:0.0},
@@ -2151,7 +2153,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-05',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:8,prontos:8,em_producao:0,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-05-06',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:16,prontos:11,em_producao:5,d30:0,d120:3,acima120:3,mediana:0.0},
 {dia:'2026-05-06',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:2,d120:2,acima120:0,mediana:6.8},
-{dia:'2026-05-06',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:38,prontos:28,em_producao:10,d30:1,d120:7,acima120:6,mediana:0.0},
+{dia:'2026-05-06',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:38,prontos:29,em_producao:9,d30:1,d120:7,acima120:7,mediana:0.0},
 {dia:'2026-05-06',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:29,prontos:22,em_producao:6,d30:21,d120:21,acima120:1,mediana:0.3},
 {dia:'2026-05-06',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:29,prontos:21,em_producao:8,d30:1,d120:2,acima120:2,mediana:0.0},
 {dia:'2026-05-06',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:2,prontos:2,em_producao:0,d30:0,d120:0,acima120:0,mediana:0.0},
@@ -2285,7 +2287,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-20',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:8,prontos:8,em_producao:0,d30:0,d120:1,acima120:4,mediana:560.8},
 {dia:'2026-05-21',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:11,prontos:9,em_producao:2,d30:1,d120:2,acima120:2,mediana:0.0},
 {dia:'2026-05-21',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:0,d120:0,acima120:1,mediana:820.5},
-{dia:'2026-05-21',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:40,prontos:31,em_producao:9,d30:2,d120:3,acima120:5,mediana:0.0},
+{dia:'2026-05-21',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:40,prontos:32,em_producao:8,d30:2,d120:3,acima120:5,mediana:0.0},
 {dia:'2026-05-21',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:17,prontos:13,em_producao:2,d30:10,d120:10,acima120:3,mediana:0.2},
 {dia:'2026-05-21',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:10,prontos:8,em_producao:2,d30:0,d120:2,acima120:0,mediana:0.0},
 {dia:'2026-05-21',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:5,prontos:1,em_producao:4,d30:0,d120:0,acima120:0,mediana:0.0},
@@ -2321,8 +2323,8 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-25',loja:'PKS',uid:0,nome:'Sistema',pedidos:8,prontos:8,em_producao:0,d30:6,d120:8,acima120:0,mediana:0.6},
 {dia:'2026-05-26',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:10,prontos:9,em_producao:1,d30:0,d120:1,acima120:1,mediana:0.0},
 {dia:'2026-05-26',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:1,d120:1,acima120:1,mediana:68.8},
-{dia:'2026-05-26',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:17,prontos:15,em_producao:2,d30:13,d120:14,acima120:1,mediana:0.2},
-{dia:'2026-05-26',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:12,prontos:8,em_producao:4,d30:0,d120:2,acima120:0,mediana:0.0},
+{dia:'2026-05-26',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:17,prontos:16,em_producao:1,d30:13,d120:14,acima120:2,mediana:0.3},
+{dia:'2026-05-26',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:12,prontos:9,em_producao:3,d30:0,d120:2,acima120:0,mediana:0.0},
 {dia:'2026-05-26',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:11,prontos:10,em_producao:1,d30:0,d120:1,acima120:1,mediana:0.0},
 {dia:'2026-05-26',loja:'PKS',uid:0,nome:'Sistema',pedidos:8,prontos:8,em_producao:0,d30:1,d120:3,acima120:5,mediana:167.7},
 {dia:'2026-05-26',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:3,prontos:2,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
@@ -2331,7 +2333,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-27',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:5,prontos:5,em_producao:0,d30:2,d120:2,acima120:3,mediana:824.5},
 {dia:'2026-05-27',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:2,prontos:2,em_producao:0,d30:0,d120:0,acima120:1,mediana:132.4},
 {dia:'2026-05-27',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:19,prontos:13,em_producao:6,d30:1,d120:1,acima120:2,mediana:0.0},
-{dia:'2026-05-27',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:18,prontos:15,em_producao:3,d30:0,d120:2,acima120:1,mediana:0.0},
+{dia:'2026-05-27',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:18,prontos:16,em_producao:2,d30:0,d120:2,acima120:1,mediana:0.0},
 {dia:'2026-05-27',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:11,prontos:9,em_producao:2,d30:9,d120:9,acima120:0,mediana:2.1},
 {dia:'2026-05-27',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:3,prontos:1,em_producao:2,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-05-27',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:13,prontos:10,em_producao:3,d30:0,d120:0,acima120:3,mediana:0.0},
@@ -2339,74 +2341,79 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-28',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:9,prontos:7,em_producao:2,d30:0,d120:1,acima120:0,mediana:0.0},
 {dia:'2026-05-28',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:3,prontos:3,em_producao:0,d30:1,d120:2,acima120:0,mediana:10.4},
 {dia:'2026-05-28',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:1,em_producao:1,d30:0,d120:0,acima120:1,mediana:67.7},
-{dia:'2026-05-28',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:39,prontos:28,em_producao:11,d30:0,d120:4,acima120:2,mediana:0.0},
+{dia:'2026-05-28',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:39,prontos:29,em_producao:10,d30:0,d120:4,acima120:2,mediana:0.0},
 {dia:'2026-05-28',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:25,prontos:21,em_producao:4,d30:18,d120:19,acima120:2,mediana:0.2},
 {dia:'2026-05-28',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:17,prontos:14,em_producao:3,d30:0,d120:0,acima120:0,mediana:0.0},
-{dia:'2026-05-28',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:17,prontos:13,em_producao:4,d30:1,d120:2,acima120:3,mediana:0.0},
+{dia:'2026-05-28',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:17,prontos:13,em_producao:4,d30:0,d120:1,acima120:4,mediana:0.0},
 {dia:'2026-05-28',loja:'PKS',uid:0,nome:'Sistema',pedidos:8,prontos:8,em_producao:0,d30:4,d120:7,acima120:1,mediana:35.8},
-{dia:'2026-05-29',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:1,d120:1,acima120:0,mediana:7.6},
-{dia:'2026-05-29',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:1,prontos:0,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
-{dia:'2026-05-29',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:18,prontos:10,em_producao:8,d30:10,d120:10,acima120:0,mediana:0.1},
-{dia:'2026-05-29',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:17,prontos:6,em_producao:11,d30:0,d120:1,acima120:0,mediana:0.0},
-{dia:'2026-05-29',loja:'PKS',uid:0,nome:'Sistema',pedidos:9,prontos:9,em_producao:0,d30:9,d120:9,acima120:0,mediana:0.4},
-{dia:'2026-05-29',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:7,prontos:4,em_producao:3,d30:0,d120:0,acima120:0,mediana:0.0},
-{dia:'2026-05-29',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:3,prontos:0,em_producao:3,d30:0,d120:0,acima120:0,mediana:0.0}
+{dia:'2026-05-29',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:7,prontos:3,em_producao:4,d30:0,d120:1,acima120:0,mediana:0.0},
+{dia:'2026-05-29',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:2,prontos:1,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
+{dia:'2026-05-29',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:2,d120:2,acima120:0,mediana:6.4},
+{dia:'2026-05-29',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:31,prontos:21,em_producao:10,d30:17,d120:20,acima120:1,mediana:0.2},
+{dia:'2026-05-29',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:29,prontos:18,em_producao:11,d30:1,d120:4,acima120:0,mediana:0.0},
+{dia:'2026-05-29',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:23,prontos:16,em_producao:7,d30:1,d120:3,acima120:0,mediana:0.0},
+{dia:'2026-05-29',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:19,prontos:12,em_producao:7,d30:0,d120:2,acima120:3,mediana:0.0},
+{dia:'2026-05-29',loja:'PKS',uid:0,nome:'Sistema',pedidos:10,prontos:10,em_producao:0,d30:7,d120:7,acima120:3,mediana:0.4},
+{dia:'2026-05-29',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:7,prontos:5,em_producao:2,d30:0,d120:0,acima120:0,mediana:0.0},
+{dia:'2026-05-30',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:2,prontos:1,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
+{dia:'2026-05-30',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:0,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
+{dia:'2026-05-30',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:2,prontos:1,em_producao:1,d30:1,d120:1,acima120:0,mediana:0.5}
 ];
 const AN = {
   months:["Jan", "Fev", "Mar", "Abr", "Mai"],
   vol:{3:[0, 0, 0, 0, 0],6:[0, 0, 0, 0, 0],7:[0, 0, 0, 0, 0]},
   rev:{3:[0.0, 0.0, 0.0, 0.0, 0.0],6:[0.0, 0.0, 0.0, 0.0, 0.0],7:[0.0, 0.0, 0.0, 0.0, 0.0]},
   skus:[
-[3,'Case','Infinite Air','iPhone 17 Pro Max',540,62265.3],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 15',478,41642.4],
-[3,'Tote Bag CD','Tote Bag Preta','',429,107919.3],
+[3,'Case','Infinite Air','iPhone 17 Pro Max',548,63224.5],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 15',481,41912.1],
+[3,'Tote Bag CD','Tote Bag Preta','',431,108379.1],
 [3,'Bags','Bolsa Moove Preta','',401,87151.0],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 16',380,36685.1],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 16',382,36874.9],
 [3,'Tote Bag CD','Mini Tote Preta','Tote Bag',372,83223.9],
-[3,'Mala Joy CD','Mala Joy Sarja Preto CD','',359,99865.1],
+[3,'Mala Joy CD','Mala Joy Sarja Preto CD','',360,100115.0],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro Max',335,30529.6],
 [3,'BackpackCD','Mochila Casual Pro','Casual Preta',305,49839.8],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',303,33200.8],
-[3,'Ventosa de Silicone','Ventosa de Silicone Azul','',285,5671.5],
-[3,'Tote Bag CD','Mini Tote Off White','Tote Bag',249,55685.1],
-[3,'Case','Impact Slim Standard iPhone 11','',240,15705.3],
+[3,'Ventosa de Silicone','Ventosa de Silicone Azul','',288,5731.2],
+[3,'Tote Bag CD','Mini Tote Off White','Tote Bag',250,55935.0],
+[3,'Case','Impact Slim Standard iPhone 11','',242,15835.1],
 [3,'Tote Bag CD','Tote Bag Rosa','',237,54156.3],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',235,23225.6],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 13',219,14207.4],
-[3,'NecessaireCD','Necessaire Makeup Double - Preta','',198,22640.2],
+[3,'NecessaireCD','Necessaire Makeup Double - Preta','',199,22760.1],
 [3,'Mochila BTS','Mochila BTS Preta','',195,43860.5],
 [3,'NecessaireCD','Necessaire Trip Off White','',191,9650.9],
-[3,'Tote Bag CD','Mini Tote Marrom','Tote Bag',179,42942.1],
+[3,'Tote Bag CD','Mini Tote Marrom','Tote Bag',180,43202.0],
 [3,'Lancheira BTS','Lancheira Play Preta','',176,22452.4],
 [3,'NecessaireCD','Necessaire Preta','Necessaire Trip',176,9362.4],
-[3,'Tote Bag CD','Tote Bag Off White','',173,40582.7],
+[3,'Tote Bag CD','Tote Bag Off White','',175,40972.5],
+[3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit G',162,6723.8],
 [3,'Case','Infinite Air','iPhone 17 Pro',160,16733.1],
-[3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit G',158,6564.2],
 [3,'Necessaire','Necessaire Makeup Double - Stitch','',158,15394.2],
-[3,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',152,63246.5],
-[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',152,12249.9],
+[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',154,12369.7],
+[3,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',153,63646.4],
 [3,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',147,32045.3],
-[3,'Case','Anti Impacto Slim Standard iPhone 12','',141,9421.9],
-[3,'Case','Infinite Air','iPhone 13',141,9495.9],
+[3,'Case','Anti Impacto Slim Standard iPhone 12','',143,9581.7],
+[3,'Case','Infinite Air','iPhone 13',142,9545.8],
+[3,'Case','Infinite Air','iPhone 17',140,13872.0],
 [3,'Lunch Bag CD','Lancheira Midi - Poeira das Estrelas CH','',137,12316.3],
 [3,'Base Garrafa CD','Base Garrafa Urban Azul 500','',136,4066.4],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14',135,10065.6],
-[3,'Case','Infinite Air','iPhone 17',134,13362.6],
-[3,'Case','Anti Impacto Slim Air','iPhone 16 SE',126,12041.6],
+[3,'Case','Anti Impacto Slim Air','iPhone 16 SE',127,12161.5],
+[3,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',127,50333.5],
+[3,'Placa Mala','Placa Preta Mala de Bordo 20"','',127,2649.8],
 [3,'NecessaireCD','Necessaire Rosa','Necessaire Trip',126,6587.4],
-[3,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',126,49953.6],
-[3,'Placa Mala','Placa Preta Mala de Bordo 20"','',126,2629.8],
 [3,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',125,27167.5],
-[3,'Tote Bag CD','Mini Tote Cinza','Tote Bag',120,26508.0],
+[3,'Tote Bag CD','Mini Tote Cinza','Tote Bag',121,26747.9],
 [3,'Skin Gocase','Película Gocase','Privacidade',118,11788.2],
 [3,'Tote Bag CD','Tote Bag Amora','Tote Daily',116,32128.4],
 [3,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',115,25408.5],
+[3,'Tampa CD','Tampa Azul Fresh Checkbox','',114,4548.6],
 [3,'Mala Joy CD','Mala Joy Sarja Rosa CH','',113,35448.7],
-[3,'Tampa CD','Tampa Azul Fresh Checkbox','',113,4508.7],
 [3,'BackpackCD','Mochila Voyage Preta','',112,45808.8],
 [3,'Tote Bag CD','Tote Puff Marrom','Tote Bag',109,32689.1],
 [3,'Tote Bag CD','Organizador Tote Cinza','',108,4309.2],
-[3,'Base Travel Case CD','Capa Transparente Base Mala Trip','',105,5569.5],
+[3,'Base Travel Case CD','Capa Transparente Base Mala Trip','',106,5619.4],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',103,10953.7],
 [3,'BackpackCD','Mochila Voyage Off White','',102,43249.8],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',96,7566.5],
@@ -2415,31 +2422,31 @@ const AN = {
 [3,'Garrafa','Garrafa Térmica Urban 360','Branca 500ml',94,6216.42],
 [3,'NecessaireCD','Necessaire Preta','Necessaire CRM',93,2780.7],
 [3,'Base Garrafa CD','Base Fit Glitter Salmão','Base Fit G',93,3710.7],
-[3,'Tote Bag CD','Mini Tote Vinho','Tote Bag',91,21150.9],
+[3,'Tote Bag CD','Mini Tote Vinho','Tote Bag',92,21390.8],
 [3,'Tote Bag CD','Tote Bag Marrom','Tote Bag',89,23831.1],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',88,8860.3],
 [3,'Case','Infinite Air','iPhone 14',88,6233.2],
+[3,'Case','Infinite Air','Samsung Galaxy S25 FE',87,6313.3],
 [3,'Acessorios Termicos','Marmita Up Preta','Marmita Up',86,3001.4],
-[3,'Case','Infinite Air','Samsung Galaxy S25 FE',86,6223.4],
 [3,'Accessories Tech','Lipstick Black','Lipbalman Holder - Sticker',83,1236.7],
-[3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',80,14612.0],
-[3,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',80,34032.0],
-[3,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',80,10228.4],
+[3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',81,14781.9],
+[3,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',81,34431.9],
+[3,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',81,10347.33],
 [3,'Mala Joy CD','Mala Joy - WaitList -','',80,24692.0],
 [3,'Acessorios Termicos','Marmita Up Azul Claro','Marmita Up',79,2757.1],
 [3,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',79,24322.1],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',77,13492.3],
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',77,9444.61],
 [3,'Case','Anti Impacto Slim Standard','iPhone 12 Pro Max',75,5066.5],
+[3,'Copo','Copo Life Preto 880ml','',72,9197.98],
 [3,'Mala Joy CD','Mala Joy - Marrom','',72,23392.8],
-[3,'Copo','Copo Life Preto 880ml','',71,9058.05],
 [3,'Skin Gocase','Película Gocase','Nano Tech',71,6382.9],
+[3,'Copo Ebook','Copo Life Preto','Copo Life 880mL + Ebook',70,12763.0],
 [3,'Tote Bag CD','Tote Puff Preto','Tote Bag',70,21143.0],
 [3,'Acessorios Termicos','Marmita Up Melancia','Marmita Up',70,2433.0],
-[3,'Copo Ebook','Copo Life Preto','Copo Life 880mL + Ebook',69,12563.1],
+[3,'Placa Mala','Placa Off White - Mala de Bordo','',70,14941.5],
+[3,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',70,14941.5],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung S23 FE',69,3862.2],
-[3,'Placa Mala','Placa Off White - Mala de Bordo','',69,14741.55],
-[3,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',69,14741.55],
 [3,'Necessaire','Necessaire Makeup Double - Patches','',69,8273.1],
 [3,'Copo Ebook','Copo Life Preto','Copo Life 1180mL + Ebook',67,12333.3],
 [3,'Copo','Copo Life Preto','Copo Life 1180mL',67,8633.31],
@@ -2451,10 +2458,10 @@ const AN = {
 [3,'Copo Ebook','Copo Life Off White 600ml','Copo Life 600mL + Ebook',64,7673.6],
 [3,'Lancheira BTS','Lancheira BTS Azul','',64,11353.6],
 [3,'Copo','Copo Life Off White 600','Copo Life 600ml',64,5371.52],
+[3,'Tote Shopper','Tote Shopper - Vinho','',64,18073.6],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',64,4978.9],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',64,6005.6],
 [3,'BackpackCD','Mochila Pop','Pop Preta',63,12443.7],
-[3,'Tote Shopper','Tote Shopper - Vinho','',63,17803.7],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',63,4919.0],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',62,5557.8],
 [3,'Tote Bag CD','Organizador Tote Preta','',60,2394.0],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung A54 5G',60,3352.2],
@@ -2468,35 +2475,35 @@ const AN = {
 [3,'Estojo BTS','Estojo BTS Azul','',54,6364.6],
 [3,'Copo Ebook','Copo Life Preto 600ml','Copo Life 600mL + Ebook',54,6174.6],
 [3,'Copo','Copo Life Preto 600','Copo Life 600ml',54,4322.22],
+[3,'Lunch Bag CD','Lancheira Mix - Corações Flutuantes All Black CH','',54,9474.6],
 [3,'Travel Case CD','Mala de Bordo Trip 20" - Rosa','',53,22270.7],
 [3,'Tote Bag CD','Tote Puff Off White','Tote Puff',53,15884.7],
 [3,'Copo Ebook','Copo Life Lilás','Copo Life 880mL + Ebook',53,9894.7],
 [3,'Copo','Copo Life Lilás','Copo Life 880mL',53,6926.29],
 [3,'Clutch CD','Capa para Notebook 15.6\'\' Sleeve - Preta','',53,5294.7],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy A36',53,3780.7],
-[3,'Lunch Bag CD','Lancheira Mix - Corações Flutuantes All Black CH','',53,9234.7],
 [3,'Estojo BTS','Estojo Fun Azul Marinho','',51,6484.9],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy A15',51,2578.9],
 [3,'Copo Ebook','Copo Life Glitter Vinho 1180ml - Ebook','',51,11694.9],
 [3,'Mala Joy CD','Mala Joy - Azul','',50,13185.0],
-[3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',48,3277.2],
-[3,'Ventosa de Silicone','Ventosa de Silicone Lilás','',48,955.2],
+[3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',49,3357.1],
+[3,'Ventosa de Silicone','Ventosa de Silicone Lilás','',49,975.1],
+[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro',49,3473.3],
 [3,'Lancheira BTS','Lancheira Play Off White','',47,5365.3],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',47,2915.3],
-[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro',47,3313.5],
 [3,'Case','Infinite Air','Iphone 13 Pro Max',47,164.8],
 [3,'Bolsa de Garrafa','Bolsa de Garrafa Off White','',46,8715.4],
 [3,'Lunch Bag CD','Lancheira Fruit - Rosa','',45,9105.5],
 [3,'Tote Shopper','Tote Shopper - Preta','',44,11626.7],
+[3,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Azul','',44,4395.6],
 [3,'Clutch CD','Capa para Notebook 15.6\'\' Sleeve - Rosa','',44,4395.6],
 [3,'Lancheira BTS','Lancheira Azul Marinho Play','',43,5255.7],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Plus',43,3761.7],
-[3,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Azul','',43,4295.7],
 [3,'Ventosa de Silicone','Ventosa Preta','',43,855.7],
+[3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','Flip Pro 750ml - Ebook',42,7985.8],
+[3,'Garrafa','Garrafa Térmica Pro Preta','Garrafa Térmica Pro 750ml',42,5590.06],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S23 Ultra',42,2413.8],
 [3,'Mochila BTS','Mochila BTS Melancia','',41,10025.9],
-[3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','Flip Pro 750ml - Ebook',41,7805.9],
-[3,'Garrafa','Garrafa Térmica Pro Preta','Garrafa Térmica Pro 750ml',41,5464.13],
 [3,'Acessório CD','Charm - Pink Dog Version','',41,2045.9],
 [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit P',40,1946.0],
 [3,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',40,3796.0],
@@ -2507,6 +2514,7 @@ const AN = {
 [3,'Lunch Bag CD','Bolsa Térmica Fruit Azul Lavanda','Fruit PRO',39,4298.1],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 Plus',39,2796.1],
 [3,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Rosa','',38,3796.2],
+[3,'NecessaireCD','Necessaire Makeup Double - Rosa','',38,4696.2],
 [3,'Tote Bag CD','Organizador Tote Marrom','',38,1486.2],
 [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit M',38,1856.2],
 [3,'Base Garrafa CD','Base Fit Branca','Base Fit G',38,1526.2],
@@ -2514,7 +2522,6 @@ const AN = {
 [3,'Copo Ebook','Copo Life Rosa Claro','Copo Life 880mL + Ebook',37,7276.3],
 [3,'Copo','Copo Life Rosa Claro','Copo Life 880mL',37,5093.41],
 [3,'Case','Anti Impacto Slim Standard  iPhone 12 Pro','',37,2470.3],
-[3,'NecessaireCD','Necessaire Makeup Double - Rosa','',37,4576.3],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Vinho 650ml - Ebook',35,6586.5],
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Vinho 650ml',35,4610.55],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Plus',33,3306.7],
@@ -2527,6 +2534,7 @@ const AN = {
 [3,'Case','Slim Guard Pro Magsafe + Frame Transparente','iPhone 17 Pro Max',30,5267.0],
 [3,'Case','Slim Guard Pro Magsafe','iPhone 17 Pro Max',30,3686.9],
 [3,'Frame Case','Frame Slim Guard Pro Transparente','iPhone 17 Pro Max',30,1580.1],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 16 Plus',29,2837.1],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 - Glitter','Salmão 650ml - Ebook',29,5177.1],
 [3,'Garrafa','Garrafa Térmica Fresh 360 - Glitter','Salmão 650ml',29,3623.97],
 [3,'Base Travel Case CD','Base Rosa - Mala de Bordo Trip 20"','',29,11834.1],
@@ -2539,7 +2547,6 @@ const AN = {
 [3,'Necessaire','Necessaire Makeup Double - Minnie','',28,3637.2],
 [3,'Copo Ebook','Copo Life Pink','Copo Life 880mL + Ebook',27,4647.3],
 [3,'Copo','Copo Térmico Life 880ml - Pink','',27,3253.11],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 16 Plus',27,2617.3],
 [3,'Powerbank Fast Charge','Fast Charge Preto','Powerbank 10000Mah',27,4527.3],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy A35',27,1517.3],
 [3,'Mochila BTS','Mochila BTS Azul','',26,7887.4],
@@ -2557,21 +2564,21 @@ const AN = {
 [3,'Case','Case Anti Impacto Slim Standard','Samsung A34 5G',25,1526.6],
 [3,'Copo Ebook','Copo Life Off White','Copo Térmico 1180ml + Ebook',23,4827.7],
 [3,'Copo','Copo Life Off White','Copo Life 1180mL',23,3379.39],
-[6,'Case','Infinite Air','iPhone 17 Pro Max',404,45825.8],
-[6,'Case','Case Anti Impacto Slim Air','iPhone 15',372,33264.1],
+[6,'Case','Infinite Air','iPhone 17 Pro Max',406,46005.6],
+[6,'Case','Case Anti Impacto Slim Air','iPhone 15',374,33463.9],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 16',264,25525.7],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',250,27298.7],
-[6,'Tote Bag CD','Tote Bag Preta','',228,60457.2],
-[6,'Tote Bag CD','Mini Tote Preta','Tote Bag',222,51587.8],
+[6,'Tote Bag CD','Tote Bag Preta','',231,61166.9],
+[6,'Tote Bag CD','Mini Tote Preta','Tote Bag',223,51807.7],
 [6,'Case','Infinite Air','iPhone 17',177,17915.8],
 [6,'Case','Infinite Air','iPhone 17 Pro',174,17802.8],
 [6,'Bags','Bolsa Moove Preta','',150,33325.0],
 [6,'Mala Joy CD','Mala Joy Sarja Preto CD','',140,40676.0],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',134,13247.7],
-[6,'Case','Infinite Air','iPhone 13',113,7556.0],
-[6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',111,9801.3],
-[6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',110,11185.0],
-[6,'Case','Infinite Air','iPhone 14',108,7480.3],
+[6,'Case','Infinite Air','iPhone 13',114,7605.9],
+[6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',112,11424.8],
+[6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',112,9871.2],
+[6,'Case','Infinite Air','iPhone 14',112,7709.9],
 [6,'Case','Anti Impacto Slim Air','iPhone 16 SE',103,10215.7],
 [6,'Tote Bag CD','Mini Tote Off White','Tote Bag',103,24209.7],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',97,6735.4],
@@ -2579,9 +2586,9 @@ const AN = {
 [6,'Tote Bag CD','Mini Tote Cinza','Tote Bag',94,21390.6],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',89,5750.2],
 [6,'Mochila BTS','Mochila BTS Preta','',75,16582.5],
+[6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',75,7556.5],
 [6,'Case','Infinite Air','Samsung Galaxy S25 FE',75,5855.8],
 [6,'Tote Bag CD','Mini Tote Vinho','Tote Bag',74,17992.6],
-[6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',73,7346.7],
 [6,'Estojo BTS','Estojo BTS Preto','',71,9002.9],
 [6,'Case','Case Infinite Air','Samsung Galaxy A17',71,3562.9],
 [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',69,12443.1],
@@ -2593,17 +2600,17 @@ const AN = {
 [6,'Garrafa','Garrafa Flow Azul 500ml','',63,1943.7],
 [6,'NecessaireCD','Necessaire Makeup Double - Preta','',63,7503.7],
 [6,'Case','Case Anti Impacto Slim Standard - Samsung Galaxy S20 FE','',62,3435.8],
-[6,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',60,25434.0],
+[6,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',61,25833.9],
 [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',60,4244.0],
-[6,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',59,12954.1],
-[6,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',59,13254.1],
+[6,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',60,13194.0],
+[6,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',60,13494.0],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',59,6093.2],
 [6,'Ventosa de Silicone','Ventosa de Silicone Azul','',58,1154.2],
 [6,'Lancheira BTS','Lancheira BTS Preta','',57,12644.3],
 [6,'Tote Bag CD','Tote Bag Amora','Tote Daily',56,15484.4],
 [6,'Tote Bag CD','Mini Tote Marrom','Tote Bag',56,13554.4],
 [6,'Skin Gocase','Película Gocase','Nano Tech',54,4854.6],
-[6,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',53,4125.8],
+[6,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',54,4215.7],
 [6,'Necessaire','Necessaire Holografica','',53,1584.7],
 [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',52,9044.8],
 [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',52,6331.36],
@@ -2623,11 +2630,11 @@ const AN = {
 [6,'Case','Case Anti Impacto Slim Standard','Samsung S23 FE',43,2344.8],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S21 FE',42,2410.0],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',40,2986.2],
+[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',40,2283.1],
 [6,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',39,8776.1],
 [6,'BackpackCD','Mochila Casual Pro','Casual Preta',39,7406.1],
 [6,'Tote Bag CD','Tote Bag Rosa','',38,9076.2],
 [6,'NecessaireCD','Necessaire Voyage Off White','',38,6816.2],
-[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',38,2163.3],
 [6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro Max',37,2826.3],
 [6,'BackpackCD','Mochila Voyage Preta','',36,14776.4],
 [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Marrom','',36,2516.4],
@@ -2636,16 +2643,16 @@ const AN = {
 [6,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',32,13526.8],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S23',32,1961.0],
 [6,'Frame Case','Frame Slim Guard Pro Transparente','iPhone 17 Pro Max',32,1457.04],
-[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro',30,2233.0],
+[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro',31,2282.9],
 [6,'Mala Joy CD','Mala Joy Sarja Rosa CH','',30,9117.0],
+[6,'Skin Gocase','Película Gocase','Fosca HD',30,2697.0],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy A36',30,2199.0],
-[6,'Skin Gocase','Película Gocase','Fosca HD',29,2607.1],
+[6,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',30,12356.5],
+[6,'Placa Mala','Placa Preta Mala de Bordo 20"','',30,650.5],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy A15',29,1457.1],
-[6,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',29,11976.6],
-[6,'Placa Mala','Placa Preta Mala de Bordo 20"','',29,630.5],
+[6,'Estojo BTS','Estojo BTS Azul','',28,3337.2],
 [6,'Lunch Bag CD','Lancheira Midi - Melancia CH','',28,2517.2],
 [6,'Bags','Bolsa Moove Off White','',27,5787.3],
-[6,'Estojo BTS','Estojo BTS Azul','',27,3237.3],
 [6,'Bolsa de Garrafa','Bolsa de Garrafa Off White','',27,5057.3],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy S23 Plus',26,1596.5],
 [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',25,12877.5],
@@ -2657,7 +2664,7 @@ const AN = {
 [6,'Tote Shopper','Tote Shopper - Preta','',23,6137.7],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S22 Plus',23,1147.7],
 [6,'Mochila BTS','Mochila BTS Azul','',22,5377.8],
-[7,'Case','Infinite Air','iPhone 17 Pro Max',231,26419.1],
+[7,'Case','Infinite Air','iPhone 17 Pro Max',232,26539.0],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 16',219,22052.5],
 [7,'Tote Bag CD','Tote Bag Preta','',156,40884.4],
 [7,'Tote Bag CD','Mini Tote Preta','Tote Bag',152,35124.8],
@@ -2666,7 +2673,7 @@ const AN = {
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15',118,9967.3],
 [7,'Mala Joy CD','Mala Joy Sarja Preto CD','',117,34408.3],
 [7,'Tote Bag CD','Mini Tote Off White','Tote Bag',110,25049.0],
-[7,'Case','Infinite Air','iPhone 17',108,10930.3],
+[7,'Case','Infinite Air','iPhone 17',110,11090.1],
 [7,'Case','Infinite Air','iPhone 17 Pro',100,10334.0],
 [7,'Case','Infinite Air','iPhone 17 Air',63,6323.7],
 [7,'Case','Anti Impacto Slim Standard iPhone 12','',59,3936.1],
@@ -2678,12 +2685,12 @@ const AN = {
 [7,'Lancheira BTS','Lancheira BTS Preta','',46,10335.4],
 [7,'Copo Ebook','Copo Life Preto','Copo Life 1180mL + Ebook',46,8555.4],
 [7,'Copo','Copo Life Preto','Copo Life 1180mL',46,5988.78],
+[7,'Case','Infinite Air','Samsung Galaxy S25 FE',46,3638.5],
 [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',45,4075.5],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',45,3131.5],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',45,3205.5],
 [7,'Necessaire','Necessaire Makeup Double - Stitch','',45,4315.5],
 [7,'Acessorios Termicos','Escovinha Preta CRM','',43,1285.7],
-[7,'Case','Infinite Air','Samsung Galaxy S25 FE',43,3398.8],
 [7,'Tote Bag CD','Mini Tote Cinza','Tote Bag',41,9115.9],
 [7,'Mala Joy CD','Mala Joy - WaitList -','',40,12516.0],
 [7,'Case','Inifnite Air','Samsung Galaxy S26 Ultra',40,3796.0],
@@ -2692,22 +2699,22 @@ const AN = {
 [7,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',37,2454.41],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',37,3578.3],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',36,3628.4],
+[7,'Tote Bag CD','Tote Bag Off White','',34,7966.6],
 [7,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',34,10696.6],
 [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Marrom','',34,3456.6],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',34,2675.7],
-[7,'Tote Bag CD','Tote Bag Off White','',33,7756.7],
 [7,'Tote Bag CD','Tote Bag Rosa','',33,7846.7],
 [7,'Case','Case Anti Impacto Slim Standard','Samsung S23 FE',33,1866.7],
 [7,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',32,13562.5],
 [7,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',31,5426.9],
 [7,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',31,3798.83],
+[7,'BackpackCD','Mochila Executiva Preta','',31,8306.9],
 [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',30,17617.0],
 [7,'Mala Joy CD','Mala Joy - Marrom','',30,9727.0],
-[7,'BackpackCD','Mochila Executiva Preta','',30,8037.0],
+[7,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',29,12057.1],
 [7,'Tote Bag CD','Tote Bag Amora','Tote Daily',28,7297.2],
 [7,'Estojo BTS','Estojo BTS Preto','',28,3537.2],
 [7,'Lancheira BTS','Lancheira Azul Marinho Play','',28,3457.2],
-[7,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',28,11657.2],
 [7,'Bags','Bolsa Moove Off White','',28,6677.2],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 13',28,1991.2],
 [7,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',27,4897.3],
@@ -2718,14 +2725,14 @@ const AN = {
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',26,2537.6],
 [7,'Skin Gocase','Película Gocase','Privacidade',26,2597.4],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro Max',26,2286.5],
+[7,'Powerbank Fast Charge','Fast Charge Branco','Powerbank 20000Mah',25,6017.5],
 [7,'Tote Shopper','Tote Shopper - Preta','',24,6537.6],
-[7,'Powerbank Fast Charge','Fast Charge Branco','Powerbank 20000Mah',24,5757.6],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S23',24,1428.7],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 14',24,1739.6],
+[7,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',24,9459.6],
+[7,'Placa Mala','Placa Preta Mala de Bordo 20"','',24,498.0],
 [7,'Bolsa de Garrafa','Bolsa de Garrafa Preta','',24,4217.6],
 [7,'Lunch Bag CD','Bolsa Térmica Daily Preta','',23,3447.7],
-[7,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',23,9079.7],
-[7,'Placa Mala','Placa Preta Mala de Bordo 20"','',23,478.0],
 [7,'Lancheira BTS','Lancheira Play Preta','',22,2757.8],
 [7,'Acessorios Termicos','Marmita Up Preta','Marmita Up',22,872.8],
 [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Rosa','',22,2397.8],
@@ -2736,6 +2743,7 @@ const AN = {
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',21,1137.9],
 [7,'Tote Bag CD','Mini Tote Marrom','Tote Bag',21,5017.9],
 [7,'NecessaireCD','Necessaire Preta','Necessaire Trip',20,1038.0],
+[7,'Case','Case Anti Impacto Slim Air','iPhone 15 Plus',20,1820.0],
 [7,'Lunch Bag CD','Bolsa Térmica Daily Rosa','',20,2998.0],
 [7,'Lancheira BTS','Lancheira BTS Azul','',19,3298.1],
 [7,'Tote Shopper','Tote Shopper - Marrom','',18,5148.2],
@@ -2743,13 +2751,12 @@ const AN = {
 [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Off White','',18,1638.2],
 [7,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S21 FE',18,1041.3],
 [7,'Mala Joy CD','Mala Joy Sarja Rosa CH','',18,5648.2],
-[7,'Case','Case Anti Impacto Slim Air','iPhone 15 Plus',18,1650.2],
+[7,'Case','Impact Slim Standart iPhone XR','',18,1098.2],
 [7,'Tote Bag CD','Mini Tote Preto com Caramelo','Tote Bag',18,5068.2],
 [7,'Mochila BTS','Mochila BTS Melancia','',17,4338.3],
 [7,'BackpackCD','Mochila Casual Pro','Casual Preta',17,3068.3],
 [7,'Lancheira BTS','Lancheira Play Azul Claro','',17,2558.3],
 [7,'Base Travel Case CD','Capa Transparente Base Mala Trip','',17,948.3],
-[7,'Case','Impact Slim Standart iPhone XR','',17,1028.3],
 [7,'Lunch Bag CD','Lancheira Mix - Corações Flutuantes All Black CH','',17,2828.3],
 [7,'Case','Inifnite Air','Samsung Galaxy S26 Plus',17,1828.3],
 [7,'Mochila BTS','Mochila Fun Azul Marinho','',16,5108.4],
@@ -2769,7 +2776,7 @@ const AN_MONTH_DATES = [
   {start:'01/02', end:'28/02'},
   {start:'01/03', end:'31/03'},
   {start:'01/04', end:'30/04'},
-  {start:'01/05', end:'29/05'} /* ← dados até 29/05 */
+  {start:'01/05', end:'30/05'} /* ← dados até 30/05 */
 ];
 </script>
 <script>
