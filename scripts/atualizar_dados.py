@@ -504,6 +504,20 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
             e = h.find('\n// ', s)
         return h[s:e].strip() if e > s else None
 
+    # Preservar DP_RAW/DP_OPR existentes quando novo for None
+    dp_raw_final = dp_raw
+    if dp_raw_final is None:
+        s_dp = html.find('let DP_RAW=[')
+        e_dp = html.find('\nconst DP_OPR_DAILY=', s_dp) if s_dp >= 0 else -1
+        dp_raw_final = html[s_dp:e_dp].strip() if s_dp >= 0 and e_dp > s_dp else None
+        log(f"  ↳ DP_RAW: {'preservado do HTML existente' if dp_raw_final else 'nao encontrado'}")
+
+    dp_opr_final = dp_opr
+    if dp_opr_final is None:
+        s_op = html.find('const DP_OPR_DAILY=[')
+        e_op = html.find('\nconst AN', s_op) if s_op >= 0 else -1
+        dp_opr_final = html[s_op:e_op].strip() if s_op >= 0 and e_op > s_op else None
+
     # Prioridade fallback: 1) novo dado, 2) an_cache.js, 3) HTML existente
     an_final = an or None
     log(f"  substituir_bloco_dados: an={'OK' if an else 'None'}, an_dist={'OK' if an_dist else 'None'}")
@@ -538,12 +552,12 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
     novo = (
         f'{START}\n'
         f'/* === DADOS METABASE — atualizado {datetime.date.today().strftime("%d/%m/%Y")} === */\n'
-        f'{dp_raw}\n'
-        f'{dp_opr}\n'
+        f'{dp_raw_final}\n'
+        + (f'{dp_opr_final}\n' if dp_opr_final else '')
         + (f'{an_final}\n' if an_final else '')
         + (f'{an_dist_final}\n' if an_dist_final else '')
         + (f'{an_month_dates}\n' if an_month_dates else '')
-                + f'{END}'
+        + f'{END}'
     )
     return html[:i_s] + novo + html[i_e:]
 
@@ -748,8 +762,14 @@ def main():
         log(f"  ⚠ Volume mensal falhou: {e}")
 
     # ── Gerar JS ─────────────────────────────────────────────────────────────
-    dp_raw_js      = gerar_dp_raw(dp_raw_rows)
-    dp_opr_daily_js= gerar_dp_opr_daily(dp_opr_rows)
+    if dp_raw_rows:
+        dp_raw_js       = gerar_dp_raw(dp_raw_rows)
+        dp_opr_daily_js = gerar_dp_opr_daily(dp_opr_rows)
+        log(f"  ↳ DP_RAW gerado: {len(dp_raw_rows)} linhas")
+    else:
+        dp_raw_js       = None   # preservar existente
+        dp_opr_daily_js = None
+        log("  ↳ DP_RAW vazio — preservando dados existentes no HTML")
 
     an_js      = None
     an_dist_js = None
@@ -798,9 +818,12 @@ def main():
         an_js, an_dist_js = None, None
 
     # ── Atualizar HTML ───────────────────────────────────────────────────────
-    if not dp_raw_rows:
-        log("⚠ DP_RAW vazio — abortando atualização para não zerar o HTML")
+    # Só abortar se não há NADA novo para salvar
+    if not dp_raw_rows and an_js is None:
+        log("⚠ DP_RAW e AN ambos vazios — abortando para não zerar o HTML")
         sys.exit(0)
+    if not dp_raw_rows:
+        log("⚠ DP_RAW vazio — atualizando só o AN (preservando Desempenho)")
 
     log("Atualizando HTML...")
     with open(HTML_FILE, encoding='utf-8') as f:
