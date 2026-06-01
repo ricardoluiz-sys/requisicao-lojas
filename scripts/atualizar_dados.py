@@ -27,13 +27,17 @@ HTML_FILE = Path(__file__).parent.parent / "index.html"
 
 AN_CACHE_FILE = Path(__file__).parent.parent / 'an_cache.js'
 
-# Período: 1º do mês ANTERIOR até hoje (garante dados mesmo no início do mês)
+# Períodos
 hoje  = datetime.date.today()
 fim   = (hoje + datetime.timedelta(days=1)).isoformat()   # exclusive upper bound
 mes_label = hoje.strftime("%b/%Y")
-_primeiro_atual    = hoje.replace(day=1)
-_primeiro_anterior = (_primeiro_atual - datetime.timedelta(days=1)).replace(day=1)
-ini   = _primeiro_anterior.isoformat()   # ex: "2026-05-01" quando hoje=jun
+# Consumo: sempre Jan→hoje (para AN.skus ter histórico completo)
+ini   = datetime.date(hoje.year, 1, 1).isoformat()
+# Desempenho: mês atual; com fallback para mês anterior se for início de mês
+_primeiro_mes      = hoje.replace(day=1)
+_primeiro_anterior = (_primeiro_mes - datetime.timedelta(days=1)).replace(day=1)
+ini_dp = _primeiro_mes.isoformat()        # ex: "2026-06-01"
+ini_dp_fallback = _primeiro_anterior.isoformat()  # ex: "2026-05-01"
 
 MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 
@@ -116,7 +120,7 @@ def mb_query(token: str, sql: str, limit: int = 500, retries: int = 3) -> list[d
 
 
 # ── SQLs ──────────────────────────────────────────────────────────────────────
-SQL_DESEMPENHO_LOJAS = f"""
+SQL_DESEMPENHO_LOJAS = """
 WITH fac AS (
   SELECT c.id cid,
     CASE f.name
@@ -133,7 +137,7 @@ base AS (
     fc.loja
   FROM orders o JOIN fac fc ON fc.cid=o.company_id
   WHERE o.deleted_at IS NULL
-    AND o.created_at >= '{ini}' AND o.created_at < '{fim}'
+    AND o.created_at >= '{ini_dp}' AND o.created_at < '{fim}'
 ),
 fp AS (
   SELECT DISTINCT ON(li.order_id) li.order_id,
@@ -207,7 +211,7 @@ GROUP BY dia, loja
 ORDER BY dia, loja
 """
 
-SQL_DESEMPENHO_OPR = f"""
+SQL_DESEMPENHO_OPR = """
 WITH base AS (
   SELECT o.id oid, o.aasm_state, o.created_at,
     (o.created_at AT TIME ZONE 'America/Sao_Paulo')::date dia,
@@ -219,7 +223,7 @@ WITH base AS (
   JOIN companies c ON c.id=o.company_id
   JOIN factories f ON f.id=c.factory_id
   WHERE f.operation='totem' AND f.id IN(3,6,7) AND o.deleted_at IS NULL
-    AND o.created_at >= '{ini}' AND o.created_at < '{fim}'
+    AND o.created_at >= '{ini_dp}' AND o.created_at < '{fim}'
 ),
 fp AS (
   SELECT DISTINCT ON(li.order_id) li.order_id,
@@ -691,11 +695,16 @@ def main():
 
     # Queries
     log("Consultando Desempenho por loja...")
-    dp_raw_rows = mb_query(token, SQL_DESEMPENHO_LOJAS, limit=500)
+    dp_raw_rows = mb_query(token, SQL_DESEMPENHO_LOJAS.format(ini_dp=ini_dp, fim=fim), limit=500)
     log(f"  ↳ {len(dp_raw_rows)} linhas")
+    if not dp_raw_rows:
+        log(f"  ↳ Sem dados em {ini_dp[:7]} — tentando mês anterior ({ini_dp_fallback[:7]})...")
+        dp_raw_rows = mb_query(token, SQL_DESEMPENHO_LOJAS.format(ini_dp=ini_dp_fallback, fim=fim), limit=500)
+        log(f"  ↳ {len(dp_raw_rows)} linhas (mês anterior)")
 
     log("Consultando Desempenho por operador...")
-    dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR, limit=500)
+    _ini_dp_usado = ini_dp if dp_raw_rows and dp_raw_rows[0].get("dia","").startswith(ini_dp[:7]) else ini_dp_fallback
+    dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR.format(ini_dp=_ini_dp_usado, fim=fim), limit=500)
     log(f"  ↳ {len(dp_opr_rows)} linhas")
 
 
