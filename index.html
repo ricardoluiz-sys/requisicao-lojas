@@ -1164,7 +1164,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:13px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
-              <div style="font-size:11px;font-weight:700;color:var(--text)">31/05/2026</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">01/06/2026</div>
             </div>
           </div>
         </div>
@@ -1418,7 +1418,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 31/05/2026 · atualizado 31/05</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 01/06/2026 · atualizado 01/06</div>
             </div>
           </div>
 
@@ -1433,19 +1433,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
           <div style="display:flex;align-items:center;gap:6px">
-            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-05-31"
+            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-06-01"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
             <span style="color:var(--muted);font-size:12px">até</span>
-            <input type="date" id="dp-data-fim" value="2026-05-31" min="2026-05-01" max="2026-05-31"
+            <input type="date" id="dp-data-fim" value="2026-06-01" min="2026-05-01" max="2026-06-01"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
           </div>
           <!-- Presets rápidos -->
           <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap">
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-31')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
-            <button onclick="dpSetPeriod('2026-05-08','2026-05-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
-            <button onclick="dpSetPeriod('2026-05-01','2026-05-31')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
+            <button onclick="dpSetPeriod('2026-06-01','2026-06-01')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
+            <button onclick="dpSetPeriod('2026-06-08','2026-06-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
+            <button onclick="dpSetPeriod('2026-06-01','2026-06-01')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
           </div>
         </div>
 
@@ -1465,7 +1465,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Resumo -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 31/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 01/06/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="dp-filter-sub">Todas as lojas</div>
         </div>
       </div>
@@ -1632,7 +1632,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">31/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/06/2026</div>
             </div>
           </div>
           <!-- Badge cobertura -->
@@ -1640,7 +1640,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 31/05/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 01/06/2026</div>
             </div>
           </div>
           <!-- Lojas -->
@@ -1659,7 +1659,7 @@ Desempenho por Operador</div>
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
             Período
-            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 31/05/2026</span>
+            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 01/06/2026</span>
           </div>
           <!-- Meses individuais -->
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
@@ -1727,7 +1727,7 @@ Desempenho por Operador</div>
 
         <!-- Resumo do filtro -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 31/05/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 01/06/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
@@ -2017,7 +2017,7 @@ Desempenho por Operador</div>
 </style>
 
 <script id="dados-metabase">
-/* === DADOS METABASE — atualizado 31/05/2026 === */
+/* === DADOS METABASE — atualizado 01/06/2026 === */
 let DP_RAW=[
 {dia:'2026-05-01',loja:'Anália Franco',pedidos:26,prontos:26,em_producao:0,cancelados:0,aguardando:0,d30:6,d120:8,acima120:6,f0_15:4,f15_30:2,f30_60:0,f60_120:2,f120_240:1,f240_mais:5,mediana_op:84.9,mediana_total:84.9,d30_del:6,d120_del:13,acima120_del:12,f0_15_del:4,f15_30_del:2,f30_60_del:2,f60_120_del:5,f120_240_del:2,f240_mais_del:10,mediana_del:110.2},
 {dia:'2026-05-01',loja:'Iguatemi',pedidos:3,prontos:2,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:1,acima120:1,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:1,mediana_op:null,mediana_total:7449.9,d30_del:1,d120_del:1,acima120_del:1,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:1,mediana_del:null},
@@ -2373,92 +2373,94 @@ const DP_OPR_DAILY=[
 {dia:'2026-05-31',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:1,d120:1,acima120:0,mediana:0.4},
 {dia:'2026-05-31',loja:'PKS',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:2,d120:2,acima120:0,mediana:0.5}
 ];
+/* @@AN_START@@ */
 const AN = {
-  months:["Jan", "Fev", "Mar", "Abr", "Mai"],
-  vol:{3:[0, 0, 0, 0, 0],6:[0, 0, 0, 0, 0],7:[0, 0, 0, 0, 0]},
-  rev:{3:[0.0, 0.0, 0.0, 0.0, 0.0],6:[0.0, 0.0, 0.0, 0.0, 0.0],7:[0.0, 0.0, 0.0, 0.0, 0.0]},
+  months:["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
+  meses:["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
+  vol:{3:[0, 0, 0, 0, 0, 0],6:[0, 0, 0, 0, 0, 0],7:[0, 0, 0, 0, 0, 0]},
+  rev:{3:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],6:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],7:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
   skus:[
-[3,'Case','Infinite Air','iPhone 17 Pro Max',558,64362.6],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 15',484,42211.8],
-[3,'Tote Bag CD','Tote Bag Preta','',435,109268.7],
-[3,'Bags','Bolsa Moove Preta','',402,87380.9],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 16',384,37064.7],
-[3,'Tote Bag CD','Mini Tote Preta','Tote Bag',372,83223.9],
-[3,'Mala Joy CD','Mala Joy Sarja Preto CD','',361,100364.9],
+[3,'Case','Infinite Air','iPhone 17 Pro Max',562,64842.2],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 15',487,42481.5],
+[3,'Tote Bag CD','Tote Bag Preta','',437,109698.5],
+[3,'Bags','Bolsa Moove Preta','',403,87610.8],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 16',389,37524.2],
+[3,'Tote Bag CD','Mini Tote Preta','Tote Bag',375,83893.6],
+[3,'Mala Joy CD','Mala Joy Sarja Preto CD','',363,100864.7],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro Max',336,30599.5],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',306,33530.5],
 [3,'BackpackCD','Mochila Casual Pro','Casual Preta',305,49839.8],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',304,33290.7],
 [3,'Ventosa de Silicone','Ventosa de Silicone Azul','',289,5751.1],
 [3,'Tote Bag CD','Mini Tote Off White','Tote Bag',251,56184.9],
-[3,'Case','Impact Slim Standard iPhone 11','',244,15994.9],
-[3,'Tote Bag CD','Tote Bag Rosa','',238,54406.2],
-[3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',235,23225.6],
+[3,'Case','Impact Slim Standard iPhone 11','',245,16074.8],
+[3,'Tote Bag CD','Tote Bag Rosa','',239,54656.1],
+[3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',239,23635.2],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 13',221,14337.2],
 [3,'NecessaireCD','Necessaire Makeup Double - Preta','',201,22999.9],
 [3,'Mochila BTS','Mochila BTS Preta','',195,43860.5],
 [3,'NecessaireCD','Necessaire Trip Off White','',191,9650.9],
 [3,'Tote Bag CD','Mini Tote Marrom','Tote Bag',180,43202.0],
-[3,'Lancheira BTS','Lancheira Play Preta','',178,22682.2],
+[3,'Lancheira BTS','Lancheira Play Preta','',179,22792.1],
+[3,'Tote Bag CD','Tote Bag Off White','',176,41182.4],
 [3,'NecessaireCD','Necessaire Preta','Necessaire Trip',176,9362.4],
-[3,'Tote Bag CD','Tote Bag Off White','',175,40972.5],
 [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit G',166,6883.4],
-[3,'Case','Infinite Air','iPhone 17 Pro',162,16892.9],
+[3,'Case','Infinite Air','iPhone 17 Pro',163,17002.8],
+[3,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',160,66395.7],
 [3,'Necessaire','Necessaire Makeup Double - Stitch','',158,15394.2],
-[3,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',156,64796.1],
-[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',154,12369.7],
+[3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',157,12659.4],
 [3,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',148,32285.2],
-[3,'Case','Infinite Air','iPhone 13',145,9795.5],
-[3,'Case','Anti Impacto Slim Standard iPhone 12','',144,9661.6],
-[3,'Case','Infinite Air','iPhone 17',144,14251.6],
+[3,'Case','Anti Impacto Slim Standard iPhone 12','',147,9811.3],
+[3,'Case','Infinite Air','iPhone 13',147,9925.3],
+[3,'Case','Infinite Air','iPhone 17',145,14361.5],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14',138,10275.3],
+[3,'Base Garrafa CD','Base Garrafa Urban Azul 500','',138,4126.2],
 [3,'Lunch Bag CD','Lancheira Midi - Poeira das Estrelas CH','',137,12316.3],
-[3,'Base Garrafa CD','Base Garrafa Urban Azul 500','',136,4066.4],
-[3,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',130,51425.7],
-[3,'Placa Mala','Placa Preta Mala de Bordo 20"','',130,2707.3],
+[3,'Base Travel Case CD','Base Preta - Mala de Bordo Trip 20"','',134,52945.3],
+[3,'Placa Mala','Placa Preta Mala de Bordo 20"','',134,2787.3],
 [3,'Case','Anti Impacto Slim Air','iPhone 16 SE',127,12161.5],
 [3,'NecessaireCD','Necessaire Rosa','Necessaire Trip',126,6587.4],
 [3,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',125,27167.5],
 [3,'Tote Bag CD','Mini Tote Cinza','Tote Bag',121,26747.9],
-[3,'Skin Gocase','Película Gocase','Privacidade',118,11788.2],
-[3,'Tote Bag CD','Tote Bag Amora','Tote Daily',116,32128.4],
-[3,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',116,25648.4],
-[3,'Tampa CD','Tampa Azul Fresh Checkbox','',114,4548.6],
-[3,'Mala Joy CD','Mala Joy Sarja Rosa CH','',113,35448.7],
+[3,'Skin Gocase','Película Gocase','Privacidade',119,11888.1],
+[3,'Tote Bag CD','Tote Bag Amora','Tote Daily',117,32408.3],
+[3,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',117,25888.3],
+[3,'Tampa CD','Tampa Azul Fresh Checkbox','',115,4588.5],
+[3,'Mala Joy CD','Mala Joy Sarja Rosa CH','',114,35728.6],
 [3,'BackpackCD','Mochila Voyage Preta','',112,45808.8],
-[3,'Tote Bag CD','Tote Puff Marrom','Tote Bag',109,32689.1],
+[3,'Tote Bag CD','Tote Puff Marrom','Tote Bag',110,32989.0],
+[3,'Base Travel Case CD','Capa Transparente Base Mala Trip','',110,5819.0],
 [3,'Tote Bag CD','Organizador Tote Cinza','',108,4309.2],
-[3,'Base Travel Case CD','Capa Transparente Base Mala Trip','',107,5669.3],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',106,11283.4],
 [3,'BackpackCD','Mochila Voyage Off White','',104,44089.6],
+[3,'Tote Bag CD','Mini Tote Vinho','Tote Bag',97,22570.3],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',96,7566.5],
 [3,'Estojo BTS','Estojo BTS Preto','',95,11880.5],
 [3,'Garrafa Ebook','Garrafa Térmica Urban 360','Branca 500ml - Ebook',95,8970.5],
 [3,'Garrafa','Garrafa Térmica Urban 360','Branca 500ml',95,6279.35],
-[3,'Tote Bag CD','Mini Tote Vinho','Tote Bag',95,22090.5],
 [3,'NecessaireCD','Necessaire Preta','Necessaire CRM',93,2780.7],
 [3,'Base Garrafa CD','Base Fit Glitter Salmão','Base Fit G',93,3710.7],
 [3,'Case','Infinite Air','iPhone 14',90,6333.0],
 [3,'Tote Bag CD','Tote Bag Marrom','Tote Bag',89,23831.1],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',89,8950.2],
-[3,'Case','Infinite Air','Samsung Galaxy S25 FE',87,6313.3],
+[3,'Case','Infinite Air','Samsung Galaxy S25 FE',88,6373.2],
 [3,'Acessorios Termicos','Marmita Up Preta','Marmita Up',86,3001.4],
 [3,'Accessories Tech','Lipstick Black','Lipbalman Holder - Sticker',83,1236.7],
 [3,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',82,34831.8],
 [3,'Mala Joy CD','Mala Joy - WaitList -','',82,25261.8],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',81,14781.9],
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',81,10347.33],
-[3,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',80,24602.0],
+[3,'Mala Joy CD','Mala Joy Vinho','Mala Joy CH',81,24881.9],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',79,13812.1],
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',79,9668.47],
 [3,'Acessorios Termicos','Marmita Up Azul Claro','Marmita Up',79,2757.1],
+[3,'Case','Anti Impacto Slim Standard','iPhone 12 Pro Max',77,5166.3],
 [3,'Mala Joy CD','Mala Joy - Marrom','',75,24232.5],
-[3,'Case','Anti Impacto Slim Standard','iPhone 12 Pro Max',75,5066.5],
 [3,'Copo','Copo Life Preto 880ml','',72,9197.98],
+[3,'Tote Bag CD','Tote Puff Preto','Tote Bag',71,21442.9],
 [3,'Skin Gocase','Película Gocase','Nano Tech',71,6382.9],
 [3,'Placa Mala','Placa Off White - Mala de Bordo','',71,15141.45],
 [3,'Base Travel Case CD','Base Off White - Mala de Bordo Trip 20"','',71,15141.45],
 [3,'Copo Ebook','Copo Life Preto','Copo Life 880mL + Ebook',70,12763.0],
-[3,'Tote Bag CD','Tote Puff Preto','Tote Bag',70,21143.0],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung S23 FE',70,3922.1],
 [3,'Acessorios Termicos','Marmita Up Melancia','Marmita Up',70,2433.0],
 [3,'Copo Ebook','Copo Life Preto','Copo Life 1180mL + Ebook',69,12713.1],
@@ -2466,6 +2468,7 @@ const AN = {
 [3,'Necessaire','Necessaire Makeup Double - Patches','',69,8273.1],
 [3,'BackpackCD','Mochila Executiva Preta','',68,17733.2],
 [3,'Estojo BTS','Estojo BTS Melancia','',66,9013.4],
+[3,'BackpackCD','Mochila Pop','Pop Preta',66,13043.4],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',66,5158.7],
 [3,'Lancheira BTS','Lancheira Fun Azul Marinho','',65,12243.5],
 [3,'Tote Shopper','Tote Shopper - Marrom','',65,18373.5],
@@ -2473,19 +2476,19 @@ const AN = {
 [3,'Lunch Bag CD','Bolsa Térmica Daily Preta','',65,9743.5],
 [3,'Copo Ebook','Copo Life Off White 600ml','Copo Life 600mL + Ebook',64,7673.6],
 [3,'Lancheira BTS','Lancheira BTS Azul','',64,11353.6],
-[3,'BackpackCD','Mochila Pop','Pop Preta',64,12643.6],
 [3,'Copo','Copo Life Off White 600','Copo Life 600ml',64,5371.52],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',64,6005.6],
+[3,'Case','Case Anti Impacto Slim Standard','Samsung A54 5G',63,3531.9],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',62,5557.8],
-[3,'Case','Case Anti Impacto Slim Standard','Samsung A54 5G',62,3472.0],
 [3,'Tote Bag CD','Organizador Tote Preta','',60,2394.0],
 [3,'Lunch Bag CD','Lancheira Midi - Melancia CH','',59,5304.1],
 [3,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 950ml - Ebook',58,11654.2],
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 950ml',58,8157.94],
-[3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',56,3074.4],
+[3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',58,3174.2],
 [3,'Bolsa de Garrafa','Bolsa de Garrafa Preta','',56,10584.4],
 [3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Rosa','Flip Pro 750ml - Ebook',55,12224.5],
 [3,'Garrafa','Garrafa Térmica Pro Rosa','Garrafa Térmica Pro 750ml',55,8557.15],
+[3,'Ventosa de Silicone','Ventosa de Silicone Lilás','',55,1094.5],
 [3,'Estojo BTS','Estojo BTS Azul','',54,6364.6],
 [3,'Copo Ebook','Copo Life Preto 600ml','Copo Life 600mL + Ebook',54,6174.6],
 [3,'Copo','Copo Life Preto 600','Copo Life 600ml',54,4322.22],
@@ -2501,7 +2504,6 @@ const AN = {
 [3,'Copo Ebook','Copo Life Glitter Vinho 1180ml - Ebook','',51,11694.9],
 [3,'Mala Joy CD','Mala Joy - Azul','',50,13185.0],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',49,3357.1],
-[3,'Ventosa de Silicone','Ventosa de Silicone Lilás','',49,975.1],
 [3,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro',49,3473.3],
 [3,'Bolsa de Garrafa','Bolsa de Garrafa Off White','',49,9315.1],
 [3,'Lancheira BTS','Lancheira Play Off White','',47,5365.3],
@@ -2513,25 +2515,25 @@ const AN = {
 [3,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Azul','',44,4395.6],
 [3,'Lancheira BTS','Lancheira Azul Marinho Play','',43,5255.7],
 [3,'Case','Case Anti Impacto Slim Air','iPhone 15 Plus',43,3761.7],
+[3,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',43,4035.7],
+[3,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',43,2824.99],
 [3,'Ventosa de Silicone','Ventosa Preta','',43,855.7],
 [3,'Garrafa Flip Pro Ebook','Garrafa Térmica Flip Pro Preta','Flip Pro 750ml - Ebook',42,7985.8],
 [3,'Garrafa','Garrafa Térmica Pro Preta','Garrafa Térmica Pro 750ml',42,5590.06],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S23 Ultra',42,2413.8],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',42,2824.9],
+[3,'Acessório CD','Charm - Pink Dog Version','',42,2095.8],
 [3,'Mochila BTS','Mochila BTS Melancia','',41,10025.9],
-[3,'Acessório CD','Charm - Pink Dog Version','',41,2045.9],
+[3,'Copo Ebook','Copo Térmico Vibe Preto 470ml - Ebook','',41,5335.9],
+[3,'Copo','Copo Térmico Vibe Preto 470ml','',41,3735.13],
 [3,'Copo Ebook','Copo Life Rosa Claro','Copo Life 880mL + Ebook',40,7876.0],
 [3,'Copo','Copo Life Rosa Claro','Copo Life 880mL',40,5513.2],
 [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit P',40,1946.0],
-[3,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',40,3796.0],
-[3,'Copo Ebook','Copo Térmico Vibe Preto 470ml - Ebook','',40,5176.0],
-[3,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',40,2657.2],
-[3,'Copo','Copo Térmico Vibe Preto 470ml','',40,3623.2],
 [3,'Lunch Bag CD','Bolsa Térmica Fruit Azul Lavanda','Fruit PRO',39,4298.1],
+[3,'NecessaireCD','Necessaire Makeup Double - Rosa','',39,4816.1],
 [3,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 Plus',39,2796.1],
 [3,'Clutch CD','Capa para Notebook 14\'\' Sleeve - Rosa','',38,3796.2],
 [3,'Case','Anti Impacto Slim Standard  iPhone 12 Pro','',38,2550.2],
-[3,'NecessaireCD','Necessaire Makeup Double - Rosa','',38,4696.2],
 [3,'Tote Bag CD','Organizador Tote Marrom','',38,1486.2],
 [3,'Base Garrafa CD','Base Fit Azul Claro','Base Fit M',38,1856.2],
 [3,'Base Garrafa CD','Base Fit Branca','Base Fit G',38,1526.2],
@@ -2540,10 +2542,11 @@ const AN = {
 [3,'Garrafa','Garrafa Térmica Fresh 360 v3','Vinho 650ml',35,4610.55],
 [3,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Plus',33,3306.7],
 [3,'BackpackCD','Pop Off White','Mochila Pop',32,6626.8],
+[3,'Cordão de Cases','Waitlist - Cordão de Case Marrom','Cordão de Case',32,2766.8],
 [3,'Case','Case Anti Impacto Slim Standard - Samsung Galaxy S20 FE','',31,1698.9],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S21 FE',31,1726.0],
 [3,'Mochila Rodinhas BTS','Mochila de Rodinhas BTS Melancia','',30,16987.0],
-[3,'Cordão de Cases','Waitlist - Cordão de Case Marrom','Cordão de Case',30,2607.0],
+[3,'Tote Bag CD','Tote Bag Bege Alça Marrom','Tote Daily',30,8367.0],
 [3,'Case','Impact Slim Standart iPhone XR','',30,1777.0],
 [3,'Case','Slim Guard Pro Magsafe + Frame Transparente','iPhone 17 Pro Max',30,5267.0],
 [3,'Case','Slim Guard Pro Magsafe','iPhone 17 Pro Max',30,3686.9],
@@ -2554,7 +2557,6 @@ const AN = {
 [3,'Garrafa','Garrafa Térmica Fresh 360 - Glitter','Salmão 650ml',29,3623.97],
 [3,'Base Travel Case CD','Base Rosa - Mala de Bordo Trip 20"','',29,11834.1],
 [3,'Placa Mala','Placa Rosa Mala de Bordo 20"','',29,623.0],
-[3,'Tote Bag CD','Tote Bag Bege Alça Marrom','Tote Daily',28,7867.2],
 [3,'Clutch CD','Capa para Notebook 15.6\'\' Sleeve - Azul','',28,2797.2],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung A14 5G',28,1407.2],
 [3,'Tote Bag CD','Tote Puff Vinho','Tote Bag',28,9237.2],
@@ -2569,6 +2571,7 @@ const AN = {
 [3,'Mochila BTS','Mochila BTS Azul','',26,7887.4],
 [3,'Lancheira BTS','Lancheira Play Azul Claro','',26,3507.4],
 [3,'Case','Anti Impacto Slim Standard','Iphone 11 Pro Max',26,1707.4],
+[3,'Lunch Bag CD','Lancheira Mix - Mapa Mundi Rosa CH','',26,4677.4],
 [3,'Garrafa Ebook','Garrafa Térmica Mini Off White 350ml - Ebook','',25,3577.5],
 [3,'Mala Joy CD','Bolsa de Viagem Voyage Preta','',25,9807.5],
 [3,'Garrafa','Garrafa Térmica Mini Off White 350ml','',25,2504.25],
@@ -2576,35 +2579,34 @@ const AN = {
 [3,'Garrafa','Garrafa Térmica Pro Branco','Garrafa Térmica Pro 750ml',25,3400.25],
 [3,'Lancheira BTS','Lancheira BTS Preta','',25,5467.5],
 [3,'Case','Case Anti Impacto Slim Standard','Samsung A34 5G',25,1526.6],
-[3,'Lunch Bag CD','Lancheira Mix - Mapa Mundi Rosa CH','',24,4317.6],
 [3,'Copo Ebook','Copo Life Off White','Copo Térmico 1180ml + Ebook',23,4827.7],
-[6,'Case','Infinite Air','iPhone 17 Pro Max',412,46665.0],
+[6,'Case','Infinite Air','iPhone 17 Pro Max',413,46784.9],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 15',377,33733.6],
-[6,'Case','Case Anti Impacto Slim Air','iPhone 16',270,26154.2],
+[6,'Case','Case Anti Impacto Slim Air','iPhone 16',273,26483.9],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',251,27418.6],
-[6,'Tote Bag CD','Tote Bag Preta','',233,61626.7],
+[6,'Tote Bag CD','Tote Bag Preta','',235,62086.5],
 [6,'Tote Bag CD','Mini Tote Preta','Tote Bag',223,51807.7],
 [6,'Case','Infinite Air','iPhone 17 Pro',177,18072.5],
 [6,'Case','Infinite Air','iPhone 17',177,17915.8],
 [6,'Bags','Bolsa Moove Preta','',150,33325.0],
-[6,'Mala Joy CD','Mala Joy Sarja Preto CD','',142,41175.8],
+[6,'Mala Joy CD','Mala Joy Sarja Preto CD','',143,41425.7],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',137,13577.4],
 [6,'Case','Infinite Air','iPhone 13',116,7765.7],
 [6,'Case','Infinite Air','iPhone 14',115,7919.6],
+[6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',113,9971.1],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',112,11424.8],
-[6,'Case','Anti Impacto Slim Air','Samsung Galaxy S25 Ultra',112,9871.2],
-[6,'Case','Anti Impacto Slim Air','iPhone 16 SE',105,10435.5],
-[6,'Tote Bag CD','Mini Tote Off White','Tote Bag',104,24459.6],
+[6,'Case','Anti Impacto Slim Air','iPhone 16 SE',106,10545.4],
+[6,'Tote Bag CD','Mini Tote Off White','Tote Bag',105,24709.5],
+[6,'Lancheira BTS','Lancheira Play Preta','',97,12580.3],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',97,6735.4],
-[6,'Lancheira BTS','Lancheira Play Preta','',95,12360.5],
 [6,'Tote Bag CD','Mini Tote Cinza','Tote Bag',94,21390.6],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',90,5800.1],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro',81,8185.9],
-[6,'Case','Infinite Air','Samsung Galaxy S25 FE',77,6005.6],
+[6,'Case','Infinite Air','Samsung Galaxy S25 FE',80,6215.3],
 [6,'Mochila BTS','Mochila BTS Preta','',75,16582.5],
 [6,'Tote Bag CD','Mini Tote Vinho','Tote Bag',74,17992.6],
+[6,'Case','Case Infinite Air','Samsung Galaxy A17',73,3662.7],
 [6,'Estojo BTS','Estojo BTS Preto','',71,9002.9],
-[6,'Case','Case Infinite Air','Samsung Galaxy A17',71,3562.9],
 [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Branca 650ml - Ebook',69,12443.1],
 [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Branca 650ml',69,8710.17],
 [6,'BackpackCD','Mochila Pop','Pop Preta',67,14053.3],
@@ -2615,23 +2617,23 @@ const AN = {
 [6,'Garrafa','Garrafa Flow Azul 500ml','',64,1973.6],
 [6,'Case','Case Anti Impacto Slim Standard - Samsung Galaxy S20 FE','',62,3435.8],
 [6,'Travel Case CD','Mala de Bordo Trip 20" - Preta','',61,25833.9],
+[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',61,6253.0],
 [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',60,4244.0],
 [6,'Lunch Bag CD','Bolsa Térmica Mix PRO Preta','Mix Pro',60,13194.0],
 [6,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',60,13494.0],
-[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',59,6093.2],
 [6,'Ventosa de Silicone','Ventosa de Silicone Azul','',58,1154.2],
 [6,'Lancheira BTS','Lancheira BTS Preta','',57,12644.3],
 [6,'Tote Bag CD','Tote Bag Amora','Tote Daily',56,15484.4],
 [6,'Tote Bag CD','Mini Tote Marrom','Tote Bag',56,13554.4],
+[6,'Case','Inifnite Air','Samsung Galaxy S26 Ultra',55,5433.6],
 [6,'Skin Gocase','Película Gocase','Nano Tech',54,4854.6],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 14 Pro',54,4215.7],
 [6,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Preta 650ml - Ebook',53,9204.7],
 [6,'Garrafa','Garrafa Térmica Fresh 360 v3','Preta 650ml',53,6443.29],
 [6,'Necessaire','Necessaire Holografica','',53,1584.7],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 Plus',52,4046.8],
-[6,'Case','Inifnite Air','Samsung Galaxy S26 Ultra',52,5153.9],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy A25',51,2556.9],
-[6,'Lancheira BTS','Lancheira BTS Azul','',45,7685.5],
+[6,'Lancheira BTS','Lancheira BTS Azul','',46,7885.4],
 [6,'Mala Joy CD','Mala Joy - WaitList -','',45,13835.5],
 [6,'Garrafa Ebook','Garrafa Térmica Urban 360','Branca 500ml - Ebook',45,4285.5],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',45,3073.7],
@@ -2644,21 +2646,21 @@ const AN = {
 [6,'Case','Case Anti Impacto Slim Standard','Samsung S23 FE',43,2344.8],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S21 FE',42,2410.0],
 [6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',42,2402.9],
+[6,'BackpackCD','Mochila Casual Pro','Casual Preta',40,7596.0],
 [6,'Case','Case Anti Impacto Slim Air','iPhone 14 Plus',40,2986.2],
 [6,'Lunch Bag CD','Bolsa Térmica Mix Off White','Mix PRO',39,8776.1],
-[6,'BackpackCD','Mochila Casual Pro','Casual Preta',39,7406.1],
 [6,'Tote Bag CD','Tote Bag Rosa','',38,9076.2],
+[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro Max',38,2906.2],
 [6,'NecessaireCD','Necessaire Voyage Off White','',38,6816.2],
-[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro Max',37,2826.3],
+[6,'Case','Anti Impacto Slim Standard iPhone 12','',37,2608.3],
 [6,'BackpackCD','Mochila Voyage Preta','',36,14776.4],
 [6,'Bolsa Térmica Urban','Bolsa Térmica Urban Marrom','',36,2516.4],
 [6,'Necessaire','Necessaire Makeup Double - Stitch','',36,3566.4],
-[6,'Case','Anti Impacto Slim Standard iPhone 12','',35,2438.5],
+[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S23',34,2060.8],
 [6,'Travel Case CD','Mala de Bordo Trip 20" - Off White','',33,13926.7],
-[6,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S23',32,1961.0],
+[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro',33,2442.7],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy A15',32,1606.8],
 [6,'Frame Case','Frame Slim Guard Pro Transparente','iPhone 17 Pro Max',32,1457.04],
-[6,'Case','Anti Impacto Slim Standard','Iphone 11 Pro',31,2282.9],
 [6,'Mala Joy CD','Mala Joy Sarja Rosa CH','',30,9117.0],
 [6,'Skin Gocase','Película Gocase','Fosca HD',30,2697.0],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy A36',30,2199.0],
@@ -2668,17 +2670,17 @@ const AN = {
 [6,'Lunch Bag CD','Lancheira Midi - Melancia CH','',28,2517.2],
 [6,'Bags','Bolsa Moove Off White','',27,5787.3],
 [6,'Bolsa de Garrafa','Bolsa de Garrafa Off White','',27,5057.3],
+[6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',26,13357.4],
 [6,'Case','Anti Impacto Slim Air','Samsung Galaxy S23 Plus',26,1596.5],
-[6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Azul','',25,12877.5],
 [6,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',25,16067.5],
 [6,'Case','Impact Slim Standard iPhone 11','',25,1964.6],
 [6,'Tote Bag CD','Tote Bag Marrom','Tote Bag',23,6347.7],
 [6,'Case','Case Anti Impacto Slim Standard','iPhone 13 Pro Max',23,1901.7],
 [6,'BackpackCD','Mochila Executiva Preta','',23,6047.7],
+[6,'NecessaireCD','Necessaire Makeup Double - Rosa','',23,2857.7],
 [6,'Tote Shopper','Tote Shopper - Preta','',23,6137.7],
 [6,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S22 Plus',23,1147.7],
-[6,'Mochila BTS','Mochila BTS Azul','',22,5377.8],
-[7,'Case','Infinite Air','iPhone 17 Pro Max',235,26898.7],
+[7,'Case','Infinite Air','iPhone 17 Pro Max',236,26988.6],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 16',224,22541.1],
 [7,'Tote Bag CD','Tote Bag Preta','',159,41574.1],
 [7,'Tote Bag CD','Mini Tote Preta','Tote Bag',153,35344.7],
@@ -2686,20 +2688,20 @@ const AN = {
 [7,'Bags','Bolsa Moove Preta','',121,30657.9],
 [7,'Mala Joy CD','Mala Joy Sarja Preto CD','',119,34908.1],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15',118,9967.3],
+[7,'Case','Infinite Air','iPhone 17',112,11249.9],
 [7,'Tote Bag CD','Mini Tote Off White','Tote Bag',110,25049.0],
-[7,'Case','Infinite Air','iPhone 17',110,11090.1],
 [7,'Case','Infinite Air','iPhone 17 Pro',101,10413.9],
+[7,'Case','Anti Impacto Slim Standard iPhone 12','',63,4135.7],
 [7,'Case','Infinite Air','iPhone 17 Air',63,6323.7],
-[7,'Case','Anti Impacto Slim Standard iPhone 12','',61,4035.9],
 [7,'Case','Anti Impacto Slim Air','iPhone 16 SE',56,5254.8],
 [7,'Case','Anti Impacto Slim Air','Samsung Galaxy A56',55,3818.5],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro Max',53,5987.8],
+[7,'Case','Infinite Air','Samsung Galaxy S25 FE',50,3997.2],
 [7,'BackpackCD','Mochila Pop','Pop Preta',48,9945.2],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 16 Pro',48,4885.2],
 [7,'Lancheira BTS','Lancheira BTS Preta','',46,10335.4],
 [7,'Copo Ebook','Copo Life Preto','Copo Life 1180mL + Ebook',46,8555.4],
 [7,'Copo','Copo Life Preto','Copo Life 1180mL',46,5988.78],
-[7,'Case','Infinite Air','Samsung Galaxy S25 FE',46,3638.5],
 [7,'Bolsa Térmica Urban','Bolsa Térmica Urban Preta','',45,4075.5],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A55',45,3131.5],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S24 FE',45,3205.5],
@@ -2708,7 +2710,7 @@ const AN = {
 [7,'Tote Bag CD','Mini Tote Cinza','Tote Bag',41,9115.9],
 [7,'Case','Inifnite Air','Samsung Galaxy S26 Ultra',41,3905.9],
 [7,'Mala Joy CD','Mala Joy - WaitList -','',40,12516.0],
-[7,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',38,8536.2],
+[7,'Lunch Bag CD','Lancheira Fruit - Preta PRO','',39,8776.1],
 [7,'Garrafa Ebook','Garrafa Térmica Urban 360','Preta 500ml - Ebook',37,3506.3],
 [7,'Garrafa','Garrafa Térmica Urban 360','Preta 500ml',37,2454.41],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Pro Max',37,3578.3],
@@ -2729,12 +2731,12 @@ const AN = {
 [7,'Mochila Rodinhas BTS','Mochila Rodinha BTS Preta','',30,17617.0],
 [7,'Mala Joy CD','Mala Joy - Marrom','',30,9727.0],
 [7,'Estojo BTS','Estojo BTS Preto','',29,3637.1],
+[7,'Case','Impact Slim Standard iPhone 11','',29,1949.1],
 [7,'Tote Bag CD','Tote Bag Amora','Tote Daily',28,7297.2],
 [7,'Lancheira BTS','Lancheira Azul Marinho Play','',28,3457.2],
 [7,'Bags','Bolsa Moove Off White','',28,6677.2],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 13',28,1991.2],
 [7,'Powerbank Fast Charge','Fast Charge Preto','Powerbank 20000Mah',27,6557.3],
-[7,'Case','Impact Slim Standard iPhone 11','',27,1789.3],
 [7,'Skin Gocase','Película Gocase','Privacidade',27,2697.3],
 [7,'Case','Anti Impacto Slim Air','Samsung Galaxy S23 Ultra',27,1497.3],
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy S25',26,2537.6],
@@ -2758,15 +2760,15 @@ const AN = {
 [7,'Case','Case Anti Impacto Slim Air','Samsung Galaxy A16',21,1137.9],
 [7,'Tote Bag CD','Mini Tote Marrom','Tote Bag',21,5017.9],
 [7,'NecessaireCD','Necessaire Preta','Necessaire Trip',20,1038.0],
+[7,'Case','Impact Slim Standart iPhone XR','',20,1218.0],
 [7,'Case','Case Anti Impacto Slim Air','iPhone 15 Plus',20,1820.0],
 [7,'Lunch Bag CD','Bolsa Térmica Daily Rosa','',20,2998.0],
+[7,'Tote Shopper','Tote Shopper - Marrom','',19,5448.1],
 [7,'Lancheira BTS','Lancheira BTS Azul','',19,3298.1],
-[7,'Tote Shopper','Tote Shopper - Marrom','',18,5148.2],
+[7,'Bolsa Térmica Urban','Bolsa Térmica Urban Off White','',19,1758.1],
 [7,'Bags','Bolsa Moove Rosa','',18,4128.2],
-[7,'Bolsa Térmica Urban','Bolsa Térmica Urban Off White','',18,1638.2],
 [7,'Case','Case Anti Impacto Slim Standard','Samsung Galaxy S21 FE',18,1041.3],
 [7,'Mala Joy CD','Mala Joy Sarja Rosa CH','',18,5648.2],
-[7,'Case','Impact Slim Standart iPhone XR','',18,1098.2],
 [7,'Tote Bag CD','Mini Tote Preto com Caramelo','Tote Bag',18,5068.2],
 [7,'Mochila BTS','Mochila Fun Azul Marinho','',17,5438.3],
 [7,'Mochila BTS','Mochila BTS Melancia','',17,4338.3],
@@ -2780,17 +2782,21 @@ const AN = {
 [7,'Garrafa Ebook','Garrafa Térmica Fresh 360 v3','Vinho 650ml - Ebook',16,3008.4]
 ]
 };
+/* @@AN_END@@ */
+/* @@AN_DIST_START@@ */
 const AN_MONTHLY_DIST = {
-  3:[0/1,0/1,0/1,0/1,0/1],
-  6:[0/1,0/1,0/1,0/1,0/1],
-  7:[0/1,0/1,0/1,0/1,0/1]
+  3:[0/1,0/1,0/1,0/1,0/1,0/1],
+  6:[0/1,0/1,0/1,0/1,0/1,0/1],
+  7:[0/1,0/1,0/1,0/1,0/1,0/1]
 };
+/* @@AN_DIST_END@@ */
 const AN_MONTH_DATES = [
   {start:'01/01', end:'31/01'},
   {start:'01/02', end:'28/02'},
   {start:'01/03', end:'31/03'},
   {start:'01/04', end:'30/04'},
-  {start:'01/05', end:'31/05'} /* ← dados até 31/05 */
+  {start:'01/05', end:'31/05'},
+  {start:'01/06', end:'01/06'} /* ← dados até 01/06 */
 ];
 </script>
 <script>
