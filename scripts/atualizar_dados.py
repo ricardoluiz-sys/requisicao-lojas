@@ -372,6 +372,16 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
             vol[fid].append(int(row["volume"]) if row else 0)
             rev[fid].append(float(row["receita"]) if row else 0.0)
 
+    # Se vol_rows vazio, usar distribuição uniforme para evitar AN_MONTHLY_DIST zerado
+    # (zero causa scale=0 no JS, zerando todos os valores da aba Top Consumo)
+    if not vol_rows:
+        n = len(meses_disponiveis)
+        for fid in [3,6,7]:
+            total = sum(r["qtd_total"] for r in skus_rows if int(r["factory_id"])==fid)
+            base = max(1, total // n)
+            vol[fid] = [base] * n   # distribuição uniforme
+        log("  ↳ vol_rows vazio — AN_MONTHLY_DIST com distribuição uniforme")
+
     # Construir skus: top 200 F3 + 100 F6 + 100 F7
     skus_f3 = [r for r in skus_rows if int(r["factory_id"])==3][:200]
     skus_f6 = [r for r in skus_rows if int(r["factory_id"])==6][:100]
