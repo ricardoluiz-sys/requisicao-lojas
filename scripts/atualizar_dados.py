@@ -25,6 +25,8 @@ MB_PASS = os.getenv("MB_PASS")
 
 HTML_FILE = Path(__file__).parent.parent / "index.html"
 
+AN_CACHE_FILE = Path(__file__).parent.parent / 'an_cache.js'
+
 # Período: 1º do mês atual até hoje
 hoje  = datetime.date.today()
 ini   = hoje.replace(day=1).isoformat()
@@ -299,7 +301,7 @@ JOIN material_categories mc ON mc.id = m.material_category_id
                            AND mc.name <> 'Ebook'
 WHERE o.deleted_at IS NULL
   AND o.created_at >= '2026-01-01'
-  AND o.created_at <  '{{fim}}'
+  AND o.created_at <  '{fim}'
 GROUP BY b.factory_id, mes
 ORDER BY b.factory_id, mes
 """
@@ -390,13 +392,16 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     rev_js = "rev:{" + ",".join(f"{f}:{json.dumps(rev[f])}" for f in [3,6,7]) + "}"
 
     an_js = (
+        "/* @@AN_START@@ */\n"
         "const AN = {\n"
         f"  months:{json.dumps(meses_labels)},\n"
+        f"  meses:{json.dumps(meses_labels)},\n"
         f"  {vol_js},\n"
         f"  {rev_js},\n"
         "  skus:[\n"
         + ",\n".join(sku_lines) + "\n"
         "]\n};"
+        "\n/* @@AN_END@@ */"
     )
 
     # AN_MONTHLY_DIST
@@ -406,7 +411,9 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
         t = totais[f] or 1
         vals = ",".join(f"{v}/{t}" for v in vol[f])
         dist_linhas.append(f"  {f}:[{vals}]")
-    dist_js = "const AN_MONTHLY_DIST = {\n" + ",\n".join(dist_linhas) + "\n};"
+    dist_js = ("/* @@AN_DIST_START@@ */\n"
+               "const AN_MONTHLY_DIST = {\n" + ",\n".join(dist_linhas) + "\n};"
+               "\n/* @@AN_DIST_END@@ */")
 
     return an_js, dist_js
 
@@ -497,14 +504,37 @@ def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist
             e = h.find('\n// ', s)
         return h[s:e].strip() if e > s else None
 
-    an_final = an if an else _extrair_an_existente(html)
-    an_dist_final = an_dist if an_dist else _extrair_dist_existente(html)
+    # Prioridade fallback: 1) novo dado, 2) an_cache.js, 3) HTML existente
+    an_final = an or None
+    log(f"  substituir_bloco_dados: an={'OK' if an else 'None'}, an_dist={'OK' if an_dist else 'None'}")
+    if not an_final:
+        try:
+            cache_txt = AN_CACHE_FILE.read_text(encoding="utf-8")
+            an_final = cache_txt.split("\nconst AN_MONTHLY_DIST")[0].strip()
+            log(f"  ↳ AN: lido de an_cache.js ({len(an_final)} chars)")
+        except Exception as e_cache:
+            log(f"  ↳ an_cache.js não encontrado: {e_cache}")
+            an_final = _extrair_an_existente(html)
+            if an_final:
+                log(f"  ↳ AN: extraído do HTML ({len(an_final)} chars)")
+            else:
+                log("  ⚠ AN não encontrado em nenhuma fonte!")
+
+    an_dist_final = an_dist or None
+    if not an_dist_final:
+        try:
+            cache_txt = AN_CACHE_FILE.read_text(encoding="utf-8")
+            if "\nconst AN_MONTHLY_DIST" in cache_txt:
+                an_dist_final = "const AN_MONTHLY_DIST" + cache_txt.split("\nconst AN_MONTHLY_DIST")[1].strip()
+        except Exception:
+            an_dist_final = _extrair_dist_existente(html)
 
     if not an_final:
         log("  ⚠ AN não disponível e não encontrado no HTML existente!")
     if not an_dist_final:
         log("  ⚠ AN_MONTHLY_DIST não disponível e não encontrado no HTML existente!")
 
+    log(f"  Escrevendo: an_final={'OK '+str(len(an_final))+'chars' if an_final else 'VAZIO'}, an_dist={'OK' if an_dist_final else 'VAZIO'}")
     novo = (
         f'{START}\n'
         f'/* === DADOS METABASE — atualizado {datetime.date.today().strftime("%d/%m/%Y")} === */\n'
@@ -671,17 +701,20 @@ def main():
         log(f"  ⚠ Catálogo falhou: {e}")
         mat_map = {}
 
-    # ── Query 2: consumo mês a mês (leve, sem JOIN categories) ──────────────
+    # ── Query 2: consumo mês a mês — cada mês com try/except isolado ───────
     log("Consultando consumo mensal...")
-    consumo_acc = {}   # {(factory_id, material_id, mes): qtd}
-    vol_acc = {}       # {(factory_id, mes): (qtd, val)}
-    try:
-        primeiro_mes = datetime.date(hoje.year, 1, 1)
-        mes_atual = primeiro_mes
-        while mes_atual <= hoje:
-            mes_ini_iso = mes_atual.isoformat()
-            mes_fim = (mes_atual.replace(day=28) + datetime.timedelta(days=4)).replace(day=1)
-            mes_fim_iso = min(mes_fim, hoje + datetime.timedelta(days=1)).isoformat()
+    consumo_acc = {}   # {(factory_id, material_id, mes): (qtd, val)}
+    vol_acc     = {}   # {(factory_id, mes): (volume, receita)}
+
+    primeiro_mes = datetime.date(hoje.year, 1, 1)
+    mes_atual    = primeiro_mes
+    meses_ok, meses_err = 0, 0
+
+    while mes_atual <= hoje:
+        mes_ini_iso = mes_atual.isoformat()
+        mes_fim     = (mes_atual.replace(day=28) + datetime.timedelta(days=4)).replace(day=1)
+        mes_fim_iso = min(mes_fim, hoje + datetime.timedelta(days=1)).isoformat()
+        try:
             rows_mes = mb_query(token, SQL_CONSUMO_MES.format(
                 ini=mes_ini_iso, fim=mes_fim_iso), limit=5000, retries=2)
             for r in rows_mes:
@@ -691,20 +724,28 @@ def main():
                 qtd = r.get('qtd', 0) or 0
                 if fid and mid and mes:
                     v = float(r.get('val') or 0)
-                    consumo_acc[(int(fid), int(mid), int(mes))] = (int(qtd), v)
-            mes_atual = mes_fim
-        log(f"  ↳ {len(consumo_acc)} entradas de consumo")
+                    k = (int(fid), int(mid), int(mes))
+                    prev = consumo_acc.get(k, (0, 0.0))
+                    consumo_acc[k] = (prev[0] + int(qtd), prev[1] + v)
+            meses_ok += 1
+        except Exception as e:
+            log(f"  ⚠ Consumo {mes_ini_iso[:7]} falhou: {e}")
+            meses_err += 1
+        mes_atual = mes_fim
 
+    log(f"  ↳ {len(consumo_acc)} entradas de consumo ({meses_ok} meses OK, {meses_err} erros)")
+
+    try:
         rows_vol = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=2)
         for r in rows_vol:
             fid = r.get('factory_id')
             mes = r.get('mes')
             if fid and mes:
-                vol_acc[(int(fid), int(mes))] = (int(r.get('volume',0) or 0),
-                                                  float(r.get('receita',0) or 0))
+                vol_acc[(int(fid), int(mes))] = (int(r.get('volume', 0) or 0),
+                                                  float(r.get('receita', 0) or 0))
         log(f"  ↳ {len(vol_acc)} entradas de volume")
     except Exception as e:
-        log(f"  ⚠ Consumo falhou: {e}")
+        log(f"  ⚠ Volume mensal falhou: {e}")
 
     # ── Gerar JS ─────────────────────────────────────────────────────────────
     dp_raw_js      = gerar_dp_raw(dp_raw_rows)
@@ -712,6 +753,7 @@ def main():
 
     an_js      = None
     an_dist_js = None
+    MIN_SKUS = 50  # não substituir AN se tiver menos que isso
     if consumo_acc and mat_map:
         try:
             # Montar skus_rows: join consumo_acc × mat_map
@@ -719,6 +761,7 @@ def main():
             skus_agg = defaultdict(lambda: {'qtd_total': 0, 'val_total': 0.0,
                                              'factory_id': 0, 'categoria': '',
                                              'variacao_cor': '', 'modelo': ''})
+            log(f"  ↳ consumo_acc={len(consumo_acc)} entradas, mat_map={len(mat_map)} materiais")
             for (fid, mid, mes), (qtd, val) in consumo_acc.items():
                 if mid not in mat_map:
                     continue
@@ -734,9 +777,19 @@ def main():
                                key=lambda r: -r['qtd_total'])
             vol_rows = [{'factory_id': k[0], 'mes': k[1], 'volume': v[0], 'receita': v[1]}
                         for k, v in vol_acc.items()]
-
-            an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
-            log(f"  ↳ AN gerado com sucesso — {len(skus_rows)} SKUs")
+            log(f"  ↳ skus_rows={len(skus_rows)}, vol_rows={len(vol_rows)}")
+            if len(skus_rows) < MIN_SKUS:
+                log(f"  ⚠ Apenas {len(skus_rows)} SKUs — abaixo do mínimo ({MIN_SKUS}). AN não atualizado.")
+                an_js, an_dist_js = None, None
+            else:
+                an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
+                log(f"  ↳ AN gerado com sucesso — {len(skus_rows)} SKUs")
+            # Salvar cache persistente — nunca será zerado pelo workflow
+            try:
+                AN_CACHE_FILE.write_text(an_js + "\n" + an_dist_js, encoding="utf-8")
+                log(f"  ↳ an_cache.js salvo ({AN_CACHE_FILE})")
+            except Exception as e_cache:
+                log(f"  ⚠ an_cache.js não salvo: {e_cache}")
         except Exception as e:
             log(f"  ⚠ gerar_an falhou: {e}")
             an_js, an_dist_js = None, None
