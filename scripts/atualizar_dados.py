@@ -367,7 +367,10 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     """
     # Incluir todos os meses de Jan até o mês atual (não só os com dados)
     mes_atual = hoje.month
-    meses_disponiveis = list(range(1, mes_atual + 1))
+    # Incluir apenas meses COMPLETOS no AN para evitar distorção
+    # O mês atual só entra se tiver dados reais de volume
+    n_meses_completos = mes_atual - 1 if not vol_rows else mes_atual
+    meses_disponiveis = list(range(1, n_meses_completos + 1)) or [1]
     meses_labels = [MESES_PT[m-1] for m in meses_disponiveis]
 
     # Construir vol e rev por fábrica por mês
@@ -379,15 +382,18 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
             vol[fid].append(int(row["volume"]) if row else 0)
             rev[fid].append(float(row["receita"]) if row else 0.0)
 
-    # Se vol_rows vazio, usar distribuição uniforme para evitar AN_MONTHLY_DIST zerado
-    # (zero causa scale=0 no JS, zerando todos os valores da aba Top Consumo)
+    # Se vol_rows vazio, estimar volume e receita a partir dos skus_rows
     if not vol_rows:
         n = len(meses_disponiveis)
+        n_completos = n  # meses_disponiveis já excluiu o mês atual incompleto
         for fid in [3,6,7]:
-            total = sum(r["qtd_total"] for r in skus_rows if int(r["factory_id"])==fid)
-            base = max(1, total // n)
-            vol[fid] = [base] * n   # distribuição uniforme
-        log("  ↳ vol_rows vazio — AN_MONTHLY_DIST com distribuição uniforme")
+            total_qtd = sum(int(r["qtd_total"]) for r in skus_rows if int(r["factory_id"])==fid)
+            total_val = sum(float(r["val_total"]) for r in skus_rows if int(r["factory_id"])==fid)
+            base_vol = max(1, total_qtd // n_completos)
+            base_rev = round(total_val / n_completos, 2)
+            vol[fid] = [base_vol] * n_completos
+            rev[fid] = [base_rev] * n_completos
+        log(f"  ↳ vol_rows vazio — vol+receita estimados de {len(skus_rows)} SKUs ({n_completos} meses + 0 atual)")
 
     # Construir skus: top 200 F3 + 100 F6 + 100 F7
     skus_f3 = [r for r in skus_rows if int(r["factory_id"])==3][:200]
