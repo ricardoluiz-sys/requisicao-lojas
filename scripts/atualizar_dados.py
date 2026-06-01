@@ -27,11 +27,13 @@ HTML_FILE = Path(__file__).parent.parent / "index.html"
 
 AN_CACHE_FILE = Path(__file__).parent.parent / 'an_cache.js'
 
-# Período: 1º do mês atual até hoje
+# Período: 1º do mês ANTERIOR até hoje (garante dados mesmo no início do mês)
 hoje  = datetime.date.today()
-ini   = hoje.replace(day=1).isoformat()
 fim   = (hoje + datetime.timedelta(days=1)).isoformat()   # exclusive upper bound
-mes_label = hoje.strftime("%b/%Y")                        # ex: "Mai/2026"
+mes_label = hoje.strftime("%b/%Y")
+_primeiro_atual    = hoje.replace(day=1)
+_primeiro_anterior = (_primeiro_atual - datetime.timedelta(days=1)).replace(day=1)
+ini   = _primeiro_anterior.isoformat()   # ex: "2026-05-01" quando hoje=jun
 
 MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 
