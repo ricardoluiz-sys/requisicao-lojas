@@ -367,11 +367,10 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     """
     # Incluir todos os meses de Jan até o mês atual (não só os com dados)
     mes_atual = hoje.month
-    # Verificar se o mês atual tem dados de consumo reais
+    # Usar apenas meses que realmente têm dados em consumo_acc
     meses_com_dados = sorted(set(mes for (fid, mid, mes) in consumo_acc.keys()))
     if not meses_com_dados:
         meses_com_dados = list(range(1, mes_atual))  # fallback: jan até mês anterior
-    # Usar apenas meses com dados efetivos
     meses_disponiveis = meses_com_dados
     meses_labels = [MESES_PT[m-1] for m in meses_disponiveis]
     log(f"  ↳ Meses com dados: {meses_labels}")
@@ -388,7 +387,7 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     # Se vol_rows vazio, estimar volume e receita a partir dos skus_rows
     if not vol_rows:
         n = len(meses_disponiveis)
-        n_completos = n
+        n_completos = n  # meses_disponiveis já excluiu o mês atual incompleto
         for fid in [3,6,7]:
             total_qtd = sum(int(r["qtd_total"]) for r in skus_rows if int(r["factory_id"])==fid)
             total_val = sum(float(r["val_total"]) for r in skus_rows if int(r["factory_id"])==fid)
