@@ -46,6 +46,7 @@ jobs:
           else
             DATA=$(date +'%d/%m/%Y %H:%M')
             git commit -m "chore: atualizar dados Metabase — $DATA"
+            git pull --rebase origin main
             git push
             echo "✅ Commit e push realizados."
           fi
