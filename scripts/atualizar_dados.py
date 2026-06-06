@@ -359,7 +359,7 @@ def gerar_dp_opr_daily(rows: list[dict]) -> str:
         linhas.append("{" + ",".join(f"{c}:{v}" for c,v in zip(campos, vals)) + "}")
     return "const DP_OPR_DAILY=[\n" + ",\n".join(linhas) + "\n];"
 
-def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
+def gerar_an(skus_rows: list[dict], vol_rows: list[dict], consumo_monthly: dict = None) -> tuple[str, str]:
     """
     Gera const AN={...} e const AN_MONTHLY_DIST={...}.
     Inclui todos os meses de Janeiro até o mês atual automaticamente.
@@ -403,19 +403,59 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
     skus_f7 = [r for r in skus_rows if int(r["factory_id"])==7][:100]
     all_skus = skus_f3 + skus_f6 + skus_f7
 
+    # ── catVal / catQtd: dados mensais por categoria ─────────────────────
+    cat_monthly_agg = {}  # {(fid, cat, mes): (qtd, val)}
+    if consumo_monthly:
+        for (fid, mid), mes_data in consumo_monthly.items():
+            cat_r = mat_map[mid].get('categoria', '') if mid in mat_map else ''
+            if not cat_r:
+                continue
+            for mes, (q, v) in mes_data.items():
+                key_c = (fid, cat_r, mes)
+                prev = cat_monthly_agg.get(key_c, (0, 0.0))
+                cat_monthly_agg[key_c] = (prev[0] + q, prev[1] + v)
+
+    all_cats = sorted(set(k[1] for k in cat_monthly_agg.keys()))
+    catQtd_js = {f: {} for f in [3, 6, 7]}
+    catVal_js  = {f: {} for f in [3, 6, 7]}
+    for fid in [3, 6, 7]:
+        for cat_c in all_cats:
+            qtds = [cat_monthly_agg.get((fid, cat_c, m), (0, 0.0))[0] for m in meses_disponiveis]
+            vals = [round(cat_monthly_agg.get((fid, cat_c, m), (0, 0.0))[1], 2) for m in meses_disponiveis]
+            if any(q > 0 for q in qtds):
+                esc = cat_c.replace("'", "\\'")
+                catQtd_js[fid][esc] = qtds
+                catVal_js[fid][esc] = vals
+
+    def dict_to_js(d):
+        parts = []
+        for fid, cats in d.items():
+            inner = ",".join(f"'{c}':{json.dumps(v)}" for c, v in cats.items())
+            parts.append(f"{fid}:{{{inner}}}")
+        return "{" + ",".join(parts) + "}"
+
+    # ── sku_lines com arrays mensais ──────────────────────────────────────
     sku_lines = []
     for r in all_skus:
         fid = int(r["factory_id"])
+        mid = r.get("material_id")
         cat = str(r["categoria"]).replace("'", "\\'")
         cor = str(r["variacao_cor"]).replace("'", "\\'")
         mod = str(r["modelo"]).replace("'", "\\'") if r["modelo"] else ""
         qtd = int(r["qtd_total"])
         val = round(float(r["val_total"]), 2)
-        sku_lines.append(f"[{fid},'{cat}','{cor}','{mod}',{qtd},{val}]")
+        if consumo_monthly and mid and (fid, mid) in consumo_monthly:
+            mq = [consumo_monthly[(fid, mid)].get(m, (0, 0.0))[0] for m in meses_disponiveis]
+            mv = [round(consumo_monthly[(fid, mid)].get(m, (0, 0.0))[1], 2) for m in meses_disponiveis]
+            sku_lines.append(f"[{fid},'{cat}','{cor}','{mod}',{qtd},{val},{json.dumps(mq)},{json.dumps(mv)}]")
+        else:
+            sku_lines.append(f"[{fid},'{cat}','{cor}','{mod}',{qtd},{val}]")
 
     vol_js = "vol:{" + ",".join(f"{f}:{json.dumps(vol[f])}" for f in [3,6,7]) + "}"
     rev_js = "rev:{" + ",".join(f"{f}:{json.dumps(rev[f])}" for f in [3,6,7]) + "}"
 
+    catQtd_str = dict_to_js(catQtd_js)
+    catVal_str  = dict_to_js(catVal_js)
     an_js = (
         "/* @@AN_START@@ */\n"
         "const AN = {\n"
@@ -423,6 +463,8 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict]) -> tuple[str, str]:
         f"  meses:{json.dumps(meses_labels)},\n"
         f"  {vol_js},\n"
         f"  {rev_js},\n"
+        f"  catQtd:{catQtd_str},\n"
+        f"  catVal:{catVal_str},\n"
         "  skus:[\n"
         + ",\n".join(sku_lines) + "\n"
         "]\n};"
@@ -815,16 +857,22 @@ def main():
                                              'factory_id': 0, 'categoria': '',
                                              'variacao_cor': '', 'modelo': ''})
             log(f"  ↳ consumo_acc={len(consumo_acc)} entradas, mat_map={len(mat_map)} materiais")
+            # consumo_acc_monthly: {(fid, mid): {mes: (qtd, val)}}
+            consumo_acc_monthly = {}
             for (fid, mid, mes), (qtd, val) in consumo_acc.items():
                 if mid not in mat_map:
                     continue
                 key = (fid, mid)
                 skus_agg[key]['factory_id']   = fid
+                skus_agg[key]['material_id']  = mid
                 skus_agg[key]['categoria']    = mat_map[mid].get('categoria', '')
                 skus_agg[key]['variacao_cor'] = mat_map[mid].get('variacao_cor', '')
                 skus_agg[key]['modelo']       = mat_map[mid].get('modelo', '')
                 skus_agg[key]['qtd_total']   += qtd
                 skus_agg[key]['val_total']   += val
+                if key not in consumo_acc_monthly:
+                    consumo_acc_monthly[key] = {}
+                consumo_acc_monthly[key][mes] = (qtd, val)
 
             skus_rows = sorted(skus_agg.values(),
                                key=lambda r: -r['qtd_total'])
@@ -835,7 +883,7 @@ def main():
                 log(f"  ⚠ Apenas {len(skus_rows)} SKUs — abaixo do mínimo ({MIN_SKUS}). AN não atualizado.")
                 an_js, an_dist_js = None, None
             else:
-                an_js, an_dist_js = gerar_an(skus_rows, vol_rows)
+                an_js, an_dist_js = gerar_an(skus_rows, vol_rows, consumo_acc_monthly)
                 log(f"  ↳ AN gerado com sucesso — {len(skus_rows)} SKUs")
             # Salvar cache persistente — nunca será zerado pelo workflow
             try:
