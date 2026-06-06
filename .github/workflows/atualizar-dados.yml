@@ -4,11 +4,7 @@ on:
     # 06:00 horário de Brasília = 09:00 UTC (UTC-3)
     - cron: '0 9 * * *'
   workflow_dispatch:
-    inputs:
-      data_inicio:
-        description: 'Data início (YYYY-MM-DD) — deixe em branco para usar 1º do mês'
-        required: false
-        default: ''
+
 jobs:
   atualizar:
     name: Buscar dados e atualizar dashboard
@@ -27,7 +23,7 @@ jobs:
       - name: Instalar dependências
         run: pip install requests
 
-      - name: Atualizar dados
+      - name: Atualizar dados Metabase
         env:
           MB_URL:  ${{ vars.MB_URL || 'https://metabase.gocase.com.br' }}
           MB_DB:   ${{ vars.MB_DB  || '3' }}
@@ -35,33 +31,36 @@ jobs:
           MB_PASS: ${{ secrets.MB_PASS }}
         run: python scripts/atualizar_dados.py
 
-      - name: Deploy no GoDeploy
+      - name: Publicar no GoDeploy
         env:
-          GODEPLOY_APP_ID: ${{ secrets.GODEPLOY_APP_ID }}
-          GODEPLOY_TOKEN:  ${{ secrets.GODEPLOY_TOKEN }}
+          GODEPLOY_URL: https://requisicao-lojas.devgogroup.com/update
+          DEPLOY_KEY:   ${{ secrets.DEPLOY_KEY }}
         run: |
-          echo "Obtendo token de upload..."
-          UPLOAD_RESP=$(curl -s -X POST \
-            -H "Authorization: Bearer $GODEPLOY_TOKEN" \
-            "https://mcp.devgogroup.com/api/apps/$GODEPLOY_APP_ID/upload-token")
-          UPLOAD_TOKEN=$(echo $UPLOAD_RESP | python3 -c "import sys,json; print(json.load(sys.stdin)['uploadToken'])")
-          UPLOAD_URL=$(echo $UPLOAD_RESP | python3 -c "import sys,json; print(json.load(sys.stdin)['uploadUrl'])")
+          echo "Enviando HTML atualizado para GoDeploy..."
+          HTML=$(cat index.html)
+          STATUS=$(python3 -c "
+          import json, urllib.request, os, sys
+          html  = open('index.html').read()
+          data  = json.dumps({'html': html}).encode()
+          req   = urllib.request.Request(
+              os.environ['GODEPLOY_URL'],
+              data=data,
+              headers={
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + os.environ['DEPLOY_KEY']
+              },
+              method='POST'
+          )
+          try:
+              resp = urllib.request.urlopen(req, timeout=30)
+              print(resp.read().decode())
+          except Exception as e:
+              print('ERRO:', e, file=sys.stderr)
+              sys.exit(1)
+          ")
+          echo "✅ Deploy GoDeploy: $STATUS"
 
-          echo "Enviando index.html..."
-          UPLOAD_ID=$(curl -s -X POST \
-            -H "Authorization: Bearer $UPLOAD_TOKEN" \
-            -F "index.html=@index.html" \
-            "$UPLOAD_URL" | python3 -c "import sys,json; print(json.load(sys.stdin)['uploadId'])")
-
-          echo "Publicando app (uploadId=$UPLOAD_ID)..."
-          curl -s -X POST \
-            -H "Authorization: Bearer $GODEPLOY_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{\"uploadId\":\"$UPLOAD_ID\",\"assets\":[\"index.html\"]}" \
-            "https://mcp.devgogroup.com/api/apps/$GODEPLOY_APP_ID/update"
-          echo "✅ Deploy concluído"
-
-      - name: Salvar an_cache no git
+      - name: Salvar cache no git (backup)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -70,7 +69,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "Sem mudanças para commitar."
           else
-            git commit -m "chore: atualizar cache — $(date +'%d/%m/%Y %H:%M')"
+            git commit -m "chore: cache — $(date +'%d/%m/%Y %H:%M')"
             git pull --rebase origin main
             git push
           fi
