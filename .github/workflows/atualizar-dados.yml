@@ -1,8 +1,7 @@
 name: Atualizar dados Metabase
 on:
   schedule:
-    # 06:00 horário de Brasília = 09:00 UTC (UTC-3)
-    - cron: '0 9 * * *'
+    - cron: '0 9 * * *'   # 06:00 BRT
   workflow_dispatch:
 
 jobs:
@@ -31,45 +30,26 @@ jobs:
           MB_PASS: ${{ secrets.MB_PASS }}
         run: python scripts/atualizar_dados.py
 
-      - name: Publicar no GoDeploy
-        env:
-          GODEPLOY_URL: https://requisicao-lojas.devgogroup.com/update
-          DEPLOY_KEY:   ${{ secrets.DEPLOY_KEY }}
-        run: |
-          echo "Enviando HTML atualizado para GoDeploy..."
-          HTML=$(cat index.html)
-          STATUS=$(python3 -c "
-          import json, urllib.request, os, sys
-          html  = open('index.html').read()
-          data  = json.dumps({'html': html}).encode()
-          req   = urllib.request.Request(
-              os.environ['GODEPLOY_URL'],
-              data=data,
-              headers={
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + os.environ['DEPLOY_KEY']
-              },
-              method='POST'
-          )
-          try:
-              resp = urllib.request.urlopen(req, timeout=30)
-              print(resp.read().decode())
-          except Exception as e:
-              print('ERRO:', e, file=sys.stderr)
-              sys.exit(1)
-          ")
-          echo "✅ Deploy GoDeploy: $STATUS"
-
-      - name: Salvar cache no git (backup)
+      - name: Commitar index.html atualizado
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
           [ -f an_cache.js ] && git add an_cache.js || true
           if git diff --staged --quiet; then
-            echo "Sem mudanças para commitar."
+            echo "Sem mudanças."
           else
-            git commit -m "chore: cache — $(date +'%d/%m/%Y %H:%M')"
+            git commit -m "chore: atualizar dados — $(date +'%d/%m/%Y %H:%M')"
             git pull --rebase origin main
             git push
+            echo "✅ Publicado no GitHub"
           fi
+
+      - name: Invalidar cache GoDeploy
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer $DEPLOY_KEY" \
+            https://requisicao-lojas.devgogroup.com/refresh
+          echo "✅ Cache GoDeploy invalidado — próximo acesso busca versão nova"
