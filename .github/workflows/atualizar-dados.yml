@@ -12,10 +12,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: '3.11'
 
@@ -52,4 +52,4 @@ jobs:
           curl -s -X POST \
             -H "Authorization: Bearer $DEPLOY_KEY" \
             https://requisicao-lojas.devgogroup.com/refresh
-          echo "✅ Cache GoDeploy invalidado — próximo acesso busca versão nova"
+          echo "✅ GoDeploy atualizado"
