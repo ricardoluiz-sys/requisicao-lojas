@@ -759,7 +759,7 @@ def main():
         (dp_raw_rows and not dp_raw_rows[0].get("dia","").startswith(ini_dp[:7]))
     ) else ini_dp
     # Operadores: últimos 2 meses para ter histórico comparável (mai+jun)
-    _dois_meses_atras = (hoje.replace(day=1) - timedelta(days=1)).replace(day=1)
+    _dois_meses_atras = (hoje.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
     ini_opr = _dois_meses_atras.isoformat()
     dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR.format(ini_dp=ini_opr, fim=fim), limit=1000)
     log(f"  ↳ {len(dp_opr_rows)} linhas")
