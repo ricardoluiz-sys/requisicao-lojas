@@ -33,12 +33,13 @@ fim   = (hoje + datetime.timedelta(days=1)).isoformat()   # exclusive upper boun
 mes_label = hoje.strftime("%b/%Y")
 # Consumo: sempre Jan→hoje (para AN.skus ter histórico completo)
 ini   = datetime.date(hoje.year, 1, 1).isoformat()
-# Desempenho: mês atual; com fallback para mês anterior se for início de mês
+# Desempenho: sempre cobrir os últimos 2 meses para histórico completo
 _primeiro_mes      = hoje.replace(day=1)
 _primeiro_anterior = (_primeiro_mes - datetime.timedelta(days=1)).replace(day=1)
-# Nos primeiros 7 dias do mês, incluir o mês anterior para ter histórico suficiente
-ini_dp = _primeiro_anterior.isoformat() if hoje.day <= 7 else _primeiro_mes.isoformat()
-ini_dp_fallback = _primeiro_anterior.isoformat()  # fallback se ini_dp retornar < 5 linhas
+_dois_meses_ini    = (_primeiro_anterior - datetime.timedelta(days=1)).replace(day=1)
+# ini_dp = início do mês anterior (cobre mês anterior + atual)
+ini_dp = _primeiro_anterior.isoformat()
+ini_dp_fallback = _dois_meses_ini.isoformat()  # fallback = 2 meses atrás
 
 MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 
