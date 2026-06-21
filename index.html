@@ -1164,7 +1164,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:13px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Atualizado</div>
-              <div style="font-size:11px;font-weight:700;color:var(--text)">20/06/2026</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text)">21/06/2026</div>
             </div>
           </div>
         </div>
@@ -1418,7 +1418,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 20/06/2026 · atualizado 20/06</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)" id="dp-last-update">01/05 – 21/06/2026 · atualizado 21/06</div>
             </div>
           </div>
 
@@ -1433,19 +1433,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Período</div>
           <div style="display:flex;align-items:center;gap:6px">
-            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-06-20"
+            <input type="date" id="dp-data-ini" value="2026-05-01" min="2026-05-01" max="2026-06-21"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
             <span style="color:var(--muted);font-size:12px">até</span>
-            <input type="date" id="dp-data-fim" value="2026-06-20" min="2026-05-01" max="2026-06-20"
+            <input type="date" id="dp-data-fim" value="2026-06-21" min="2026-05-01" max="2026-06-21"
               onchange="dpRender()"
               style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;">
           </div>
           <!-- Presets rápidos -->
           <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap">
-            <button onclick="dpSetPeriod('2026-06-01','2026-06-20')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
+            <button onclick="dpSetPeriod('2026-06-01','2026-06-21')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">1ª semana</button>
             <button onclick="dpSetPeriod('2026-06-08','2026-06-14')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">2ª semana</button>
-            <button onclick="dpSetPeriod('2026-06-01','2026-06-20')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
+            <button onclick="dpSetPeriod('2026-06-01','2026-06-21')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Todo período</button>
           </div>
         </div>
 
@@ -1465,7 +1465,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
         <!-- Resumo -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 20/06/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="dp-filter-label">01/05 – 21/06/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="dp-filter-sub">Todas as lojas</div>
         </div>
       </div>
@@ -1632,7 +1632,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">🔄</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Última atualização</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">20/06/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">21/06/2026</div>
             </div>
           </div>
           <!-- Badge cobertura -->
@@ -1640,7 +1640,7 @@ Desempenho por Operador</div>
             <span style="font-size:14px">📅</span>
             <div>
               <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cobre período</div>
-              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 20/06/2026</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">01/01/2026 – 21/06/2026</div>
             </div>
           </div>
           <!-- Lojas -->
@@ -1659,7 +1659,7 @@ Desempenho por Operador</div>
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">
             Período
-            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 20/06/2026</span>
+            <span style="margin-left:8px;font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(46,204,136,.12);color:var(--green);font-weight:600;letter-spacing:.3px" title="Data da última extração do banco Factory">📅 Atualizado em 21/06/2026</span>
           </div>
           <!-- Meses individuais -->
           <div style="display:flex;gap:4px;flex-wrap:wrap" id="an-month-btns">
@@ -1727,7 +1727,7 @@ Desempenho por Operador</div>
 
         <!-- Resumo do filtro -->
         <div style="margin-left:auto;text-align:right;align-self:flex-end">
-          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 20/06/2026</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text)" id="an-filter-summary-range">01/01/2026 – 21/06/2026</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px" id="an-filter-summary">5 meses · Todas as lojas</div>
         </div>
       </div>
@@ -2017,7 +2017,7 @@ Desempenho por Operador</div>
 </style>
 
 <script id="dados-metabase">
-/* === DADOS METABASE — atualizado 20/06/2026 === */
+/* === DADOS METABASE — atualizado 21/06/2026 === */
 let DP_RAW=[
 {dia:'2026-05-01',loja:'Anália Franco',pedidos:26,prontos:26,em_producao:0,cancelados:0,aguardando:0,d30:6,d120:7,acima120:7,f0_15:4,f15_30:2,f30_60:0,f60_120:1,f120_240:1,f240_mais:6,mediana_op:87.0,mediana_total:151.4,d30_del:6,d120_del:12,acima120_del:13,f0_15_del:4,f15_30_del:2,f30_60_del:2,f60_120_del:4,f120_240_del:2,f240_mais_del:11,mediana_del:117.4},
 {dia:'2026-05-01',loja:'Iguatemi',pedidos:3,prontos:2,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:1,acima120:1,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:1,mediana_op:null,mediana_total:7449.9,d30_del:1,d120_del:1,acima120_del:1,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:1,mediana_del:null},
@@ -2122,14 +2122,14 @@ let DP_RAW=[
 {dia:'2026-06-03',loja:'Iguatemi',pedidos:77,prontos:65,em_producao:12,cancelados:0,aguardando:0,d30:19,d120:22,acima120:12,f0_15:17,f15_30:2,f30_60:3,f60_120:0,f120_240:2,f240_mais:10,mediana_op:48.0,mediana_total:13.7,d30_del:18,d120_del:30,acima120_del:35,f0_15_del:17,f15_30_del:1,f30_60_del:5,f60_120_del:7,f120_240_del:12,f240_mais_del:23,mediana_del:124.4},
 {dia:'2026-06-03',loja:'PKS',pedidos:25,prontos:25,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:3,acima120:5,f0_15:1,f15_30:0,f30_60:0,f60_120:2,f120_240:1,f240_mais:4,mediana_op:1030.7,mediana_total:581.5,d30_del:3,d120_del:12,acima120_del:13,f0_15_del:2,f15_30_del:1,f30_60_del:3,f60_120_del:6,f120_240_del:4,f240_mais_del:9,mediana_del:110.8},
 {dia:'2026-06-04',loja:'Anália Franco',pedidos:22,prontos:16,em_producao:6,cancelados:0,aguardando:0,d30:0,d120:3,acima120:1,f0_15:0,f15_30:0,f30_60:3,f60_120:0,f120_240:0,f240_mais:1,mediana_op:33.9,mediana_total:39.5,d30_del:0,d120_del:7,acima120_del:9,f0_15_del:0,f15_30_del:0,f30_60_del:4,f60_120_del:3,f120_240_del:1,f240_mais_del:8,mediana_del:61.2},
-{dia:'2026-06-04',loja:'Iguatemi',pedidos:100,prontos:75,em_producao:24,cancelados:1,aguardando:0,d30:20,d120:27,acima120:10,f0_15:19,f15_30:1,f30_60:5,f60_120:2,f120_240:2,f240_mais:8,mediana_op:52.9,mediana_total:11.8,d30_del:20,d120_del:34,acima120_del:41,f0_15_del:17,f15_30_del:3,f30_60_del:2,f60_120_del:12,f120_240_del:17,f240_mais_del:24,mediana_del:143.1},
+{dia:'2026-06-04',loja:'Iguatemi',pedidos:100,prontos:76,em_producao:23,cancelados:1,aguardando:0,d30:20,d120:27,acima120:11,f0_15:19,f15_30:1,f30_60:5,f60_120:2,f120_240:2,f240_mais:9,mediana_op:52.9,mediana_total:19.9,d30_del:20,d120_del:34,acima120_del:42,f0_15_del:17,f15_30_del:3,f30_60_del:2,f60_120_del:12,f120_240_del:17,f240_mais_del:25,mediana_del:143.1},
 {dia:'2026-06-04',loja:'PKS',pedidos:43,prontos:43,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:2,acima120:16,f0_15:1,f15_30:0,f30_60:0,f60_120:1,f120_240:4,f240_mais:12,mediana_op:230.0,mediana_total:1260.9,d30_del:1,d120_del:4,acima120_del:39,f0_15_del:1,f15_30_del:0,f30_60_del:1,f60_120_del:2,f120_240_del:7,f240_mais_del:32,mediana_del:246.4},
 {dia:'2026-06-05',loja:'Anália Franco',pedidos:23,prontos:21,em_producao:2,cancelados:0,aguardando:0,d30:5,d120:8,acima120:2,f0_15:4,f15_30:1,f30_60:1,f60_120:2,f120_240:0,f240_mais:2,mediana_op:31.3,mediana_total:31.3,d30_del:7,d120_del:10,acima120_del:11,f0_15_del:5,f15_30_del:2,f30_60_del:0,f60_120_del:3,f120_240_del:3,f240_mais_del:8,mediana_del:153.0},
 {dia:'2026-06-05',loja:'Iguatemi',pedidos:86,prontos:64,em_producao:21,cancelados:1,aguardando:0,d30:23,d120:29,acima120:9,f0_15:19,f15_30:4,f30_60:4,f60_120:2,f120_240:1,f240_mais:8,mediana_op:48.5,mediana_total:13.1,d30_del:22,d120_del:37,acima120_del:26,f0_15_del:21,f15_30_del:1,f30_60_del:4,f60_120_del:11,f120_240_del:9,f240_mais_del:17,mediana_del:124.8},
 {dia:'2026-06-05',loja:'PKS',pedidos:37,prontos:36,em_producao:1,cancelados:0,aguardando:0,d30:1,d120:2,acima120:17,f0_15:1,f15_30:0,f30_60:0,f60_120:1,f120_240:2,f240_mais:15,mediana_op:366.3,mediana_total:1145.8,d30_del:1,d120_del:3,acima120_del:33,f0_15_del:1,f15_30_del:0,f30_60_del:1,f60_120_del:1,f120_240_del:5,f240_mais_del:28,mediana_del:405.0},
 {dia:'2026-06-06',loja:'Anália Franco',pedidos:25,prontos:23,em_producao:2,cancelados:0,aguardando:0,d30:4,d120:8,acima120:1,f0_15:2,f15_30:2,f30_60:2,f60_120:2,f120_240:0,f240_mais:1,mediana_op:27.3,mediana_total:32.6,d30_del:5,d120_del:16,acima120_del:7,f0_15_del:4,f15_30_del:1,f30_60_del:3,f60_120_del:8,f120_240_del:4,f240_mais_del:3,mediana_del:74.1},
 {dia:'2026-06-06',loja:'Iguatemi',pedidos:83,prontos:66,em_producao:17,cancelados:0,aguardando:0,d30:19,d120:30,acima120:7,f0_15:17,f15_30:2,f30_60:3,f60_120:8,f120_240:0,f240_mais:7,mediana_op:76.7,mediana_total:20.3,d30_del:20,d120_del:39,acima120_del:27,f0_15_del:19,f15_30_del:1,f30_60_del:2,f60_120_del:17,f120_240_del:8,f240_mais_del:19,mediana_del:116.3},
-{dia:'2026-06-06',loja:'PKS',pedidos:56,prontos:54,em_producao:2,cancelados:0,aguardando:0,d30:11,d120:15,acima120:18,f0_15:10,f15_30:1,f30_60:1,f60_120:3,f120_240:1,f240_mais:17,mediana_op:169.5,mediana_total:1116.1,d30_del:10,d120_del:17,acima120_del:37,f0_15_del:10,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:2,f240_mais_del:35,mediana_del:1043.5},
+{dia:'2026-06-06',loja:'PKS',pedidos:56,prontos:55,em_producao:1,cancelados:0,aguardando:0,d30:11,d120:15,acima120:18,f0_15:10,f15_30:1,f30_60:1,f60_120:3,f120_240:1,f240_mais:17,mediana_op:169.5,mediana_total:1116.1,d30_del:10,d120_del:17,acima120_del:38,f0_15_del:10,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:2,f240_mais_del:36,mediana_del:1043.5},
 {dia:'2026-06-07',loja:'Anália Franco',pedidos:22,prontos:20,em_producao:2,cancelados:0,aguardando:0,d30:1,d120:3,acima120:6,f0_15:1,f15_30:0,f30_60:2,f60_120:0,f120_240:0,f240_mais:6,mediana_op:44.8,mediana_total:3198.0,d30_del:1,d120_del:4,acima120_del:14,f0_15_del:1,f15_30_del:0,f30_60_del:2,f60_120_del:1,f120_240_del:3,f240_mais_del:11,mediana_del:70.3},
 {dia:'2026-06-07',loja:'Iguatemi',pedidos:70,prontos:46,em_producao:23,cancelados:1,aguardando:0,d30:11,d120:15,acima120:5,f0_15:9,f15_30:2,f30_60:1,f60_120:3,f120_240:0,f240_mais:5,mediana_op:63.8,mediana_total:21.3,d30_del:11,d120_del:18,acima120_del:28,f0_15_del:9,f15_30_del:2,f30_60_del:2,f60_120_del:5,f120_240_del:11,f240_mais_del:17,mediana_del:179.7},
 {dia:'2026-06-07',loja:'PKS',pedidos:15,prontos:15,em_producao:0,cancelados:0,aguardando:0,d30:2,d120:5,acima120:7,f0_15:2,f15_30:0,f30_60:1,f60_120:2,f120_240:0,f240_mais:7,mediana_op:87.0,mediana_total:831.5,d30_del:2,d120_del:5,acima120_del:10,f0_15_del:2,f15_30_del:0,f30_60_del:1,f60_120_del:2,f120_240_del:1,f240_mais_del:9,mediana_del:114.0},
@@ -2145,30 +2145,36 @@ let DP_RAW=[
 {dia:'2026-06-11',loja:'Anália Franco',pedidos:15,prontos:13,em_producao:2,cancelados:0,aguardando:0,d30:6,d120:6,acima120:1,f0_15:3,f15_30:3,f30_60:0,f60_120:0,f120_240:0,f240_mais:1,mediana_op:16.7,mediana_total:15.7,d30_del:6,d120_del:8,acima120_del:5,f0_15_del:3,f15_30_del:3,f30_60_del:2,f60_120_del:0,f120_240_del:1,f240_mais_del:4,mediana_del:24.7},
 {dia:'2026-06-11',loja:'Iguatemi',pedidos:102,prontos:79,em_producao:23,cancelados:0,aguardando:0,d30:29,d120:31,acima120:3,f0_15:27,f15_30:2,f30_60:1,f60_120:1,f120_240:0,f240_mais:3,mediana_op:27.1,mediana_total:0.3,d30_del:30,d120_del:44,acima120_del:35,f0_15_del:27,f15_30_del:3,f30_60_del:5,f60_120_del:9,f120_240_del:12,f240_mais_del:23,mediana_del:127.1},
 {dia:'2026-06-11',loja:'PKS',pedidos:49,prontos:46,em_producao:3,cancelados:0,aguardando:0,d30:6,d120:7,acima120:26,f0_15:6,f15_30:0,f30_60:1,f60_120:0,f120_240:1,f240_mais:25,mediana_op:1155.0,mediana_total:1155.0,d30_del:6,d120_del:7,acima120_del:39,f0_15_del:6,f15_30_del:0,f30_60_del:1,f60_120_del:0,f120_240_del:3,f240_mais_del:36,mediana_del:1110.7},
-{dia:'2026-06-12',loja:'Anália Franco',pedidos:26,prontos:25,em_producao:0,cancelados:0,aguardando:1,d30:5,d120:6,acima120:3,f0_15:5,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:3,mediana_op:8.3,mediana_total:14.4,d30_del:6,d120_del:14,acima120_del:11,f0_15_del:4,f15_30_del:2,f30_60_del:3,f60_120_del:5,f120_240_del:3,f240_mais_del:8,mediana_del:72.6},
+{dia:'2026-06-12',loja:'Anália Franco',pedidos:26,prontos:26,em_producao:0,cancelados:0,aguardando:0,d30:5,d120:6,acima120:4,f0_15:5,f15_30:0,f30_60:1,f60_120:0,f120_240:0,f240_mais:4,mediana_op:8.3,mediana_total:36.1,d30_del:6,d120_del:14,acima120_del:11,f0_15_del:4,f15_30_del:2,f30_60_del:3,f60_120_del:5,f120_240_del:3,f240_mais_del:8,mediana_del:72.6},
 {dia:'2026-06-12',loja:'Iguatemi',pedidos:107,prontos:77,em_producao:29,cancelados:1,aguardando:0,d30:22,d120:39,acima120:9,f0_15:16,f15_30:6,f30_60:10,f60_120:7,f120_240:2,f240_mais:7,mediana_op:48.9,mediana_total:39.5,d30_del:34,d120_del:42,acima120_del:35,f0_15_del:34,f15_30_del:0,f30_60_del:2,f60_120_del:6,f120_240_del:8,f240_mais_del:27,mediana_del:138.9},
 {dia:'2026-06-12',loja:'PKS',pedidos:50,prontos:47,em_producao:3,cancelados:0,aguardando:0,d30:5,d120:12,acima120:20,f0_15:5,f15_30:0,f30_60:3,f60_120:4,f120_240:4,f240_mais:16,mediana_op:96.9,mediana_total:257.8,d30_del:6,d120_del:14,acima120_del:33,f0_15_del:5,f15_30_del:1,f30_60_del:5,f60_120_del:3,f120_240_del:7,f240_mais_del:26,mediana_del:104.6},
 {dia:'2026-06-13',loja:'Anália Franco',pedidos:18,prontos:18,em_producao:0,cancelados:0,aguardando:0,d30:5,d120:7,acima120:0,f0_15:3,f15_30:2,f30_60:1,f60_120:1,f120_240:0,f240_mais:0,mediana_op:19.0,mediana_total:16.6,d30_del:3,d120_del:9,acima120_del:7,f0_15_del:1,f15_30_del:2,f30_60_del:2,f60_120_del:4,f120_240_del:1,f240_mais_del:6,mediana_del:75.5},
 {dia:'2026-06-13',loja:'Iguatemi',pedidos:78,prontos:58,em_producao:20,cancelados:0,aguardando:0,d30:25,d120:28,acima120:2,f0_15:21,f15_30:4,f30_60:2,f60_120:1,f120_240:0,f240_mais:2,mediana_op:24.5,mediana_total:0.4,d30_del:22,d120_del:41,acima120_del:17,f0_15_del:21,f15_30_del:1,f30_60_del:7,f60_120_del:12,f120_240_del:4,f240_mais_del:13,mediana_del:97.3},
 {dia:'2026-06-13',loja:'PKS',pedidos:29,prontos:26,em_producao:3,cancelados:0,aguardando:0,d30:2,d120:4,acima120:7,f0_15:2,f15_30:0,f30_60:0,f60_120:2,f120_240:1,f240_mais:6,mediana_op:126.6,mediana_total:1393.2,d30_del:2,d120_del:4,acima120_del:22,f0_15_del:2,f15_30_del:0,f30_60_del:0,f60_120_del:2,f120_240_del:2,f240_mais_del:20,mediana_del:1274.2},
 {dia:'2026-06-14',loja:'Anália Franco',pedidos:16,prontos:16,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:2,acima120:2,f0_15:1,f15_30:0,f30_60:0,f60_120:1,f120_240:1,f240_mais:1,mediana_op:89.6,mediana_total:104.8,d30_del:1,d120_del:8,acima120_del:8,f0_15_del:1,f15_30_del:0,f30_60_del:3,f60_120_del:4,f120_240_del:4,f240_mais_del:4,mediana_del:94.7},
-{dia:'2026-06-14',loja:'Iguatemi',pedidos:62,prontos:35,em_producao:27,cancelados:0,aguardando:0,d30:8,d120:12,acima120:3,f0_15:8,f15_30:0,f30_60:0,f60_120:4,f120_240:1,f240_mais:2,mediana_op:90.7,mediana_total:2.2,d30_del:9,d120_del:19,acima120_del:16,f0_15_del:9,f15_30_del:0,f30_60_del:1,f60_120_del:9,f120_240_del:5,f240_mais_del:11,mediana_del:145.8},
-{dia:'2026-06-14',loja:'PKS',pedidos:34,prontos:33,em_producao:1,cancelados:0,aguardando:0,d30:5,d120:6,acima120:9,f0_15:5,f15_30:0,f30_60:0,f60_120:1,f120_240:0,f240_mais:9,mediana_op:57.3,mediana_total:2804.1,d30_del:6,d120_del:6,acima120_del:27,f0_15_del:5,f15_30_del:1,f30_60_del:0,f60_120_del:0,f120_240_del:1,f240_mais_del:26,mediana_del:82.8},
+{dia:'2026-06-14',loja:'Iguatemi',pedidos:62,prontos:36,em_producao:26,cancelados:0,aguardando:0,d30:8,d120:12,acima120:3,f0_15:8,f15_30:0,f30_60:0,f60_120:4,f120_240:1,f240_mais:2,mediana_op:90.7,mediana_total:2.2,d30_del:9,d120_del:19,acima120_del:17,f0_15_del:9,f15_30_del:0,f30_60_del:1,f60_120_del:9,f120_240_del:5,f240_mais_del:12,mediana_del:145.8},
+{dia:'2026-06-14',loja:'PKS',pedidos:34,prontos:34,em_producao:0,cancelados:0,aguardando:0,d30:5,d120:6,acima120:9,f0_15:5,f15_30:0,f30_60:0,f60_120:1,f120_240:0,f240_mais:9,mediana_op:57.3,mediana_total:2804.1,d30_del:6,d120_del:6,acima120_del:28,f0_15_del:5,f15_30_del:1,f30_60_del:0,f60_120_del:0,f120_240_del:1,f240_mais_del:27,mediana_del:82.8},
 {dia:'2026-06-15',loja:'Anália Franco',pedidos:10,prontos:10,em_producao:0,cancelados:0,aguardando:0,d30:3,d120:4,acima120:1,f0_15:3,f15_30:0,f30_60:0,f60_120:1,f120_240:0,f240_mais:1,mediana_op:52.7,mediana_total:12.5,d30_del:2,d120_del:6,acima120_del:4,f0_15_del:1,f15_30_del:1,f30_60_del:3,f60_120_del:1,f120_240_del:1,f240_mais_del:3,mediana_del:50.4},
 {dia:'2026-06-15',loja:'Iguatemi',pedidos:52,prontos:35,em_producao:16,cancelados:1,aguardando:0,d30:7,d120:11,acima120:0,f0_15:6,f15_30:1,f30_60:3,f60_120:1,f120_240:0,f240_mais:0,mediana_op:43.5,mediana_total:7.3,d30_del:6,d120_del:22,acima120_del:13,f0_15_del:6,f15_30_del:0,f30_60_del:1,f60_120_del:15,f120_240_del:6,f240_mais_del:7,mediana_del:110.9},
 {dia:'2026-06-15',loja:'PKS',pedidos:69,prontos:67,em_producao:2,cancelados:0,aguardando:0,d30:45,d120:46,acima120:12,f0_15:45,f15_30:0,f30_60:0,f60_120:1,f120_240:6,f240_mais:6,mediana_op:201.5,mediana_total:0.9,d30_del:45,d120_del:48,acima120_del:19,f0_15_del:45,f15_30_del:0,f30_60_del:0,f60_120_del:3,f120_240_del:7,f240_mais_del:12,mediana_del:258.2},
 {dia:'2026-06-16',loja:'Anália Franco',pedidos:11,prontos:11,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:3,acima120:0,f0_15:0,f15_30:1,f30_60:1,f60_120:1,f120_240:0,f240_mais:0,mediana_op:34.5,mediana_total:34.5,d30_del:2,d120_del:6,acima120_del:5,f0_15_del:0,f15_30_del:2,f30_60_del:0,f60_120_del:4,f120_240_del:2,f240_mais_del:3,mediana_del:78.2},
-{dia:'2026-06-16',loja:'Iguatemi',pedidos:58,prontos:40,em_producao:18,cancelados:0,aguardando:0,d30:15,d120:19,acima120:3,f0_15:14,f15_30:1,f30_60:2,f60_120:2,f120_240:0,f240_mais:3,mediana_op:40.4,mediana_total:2.6,d30_del:16,d120_del:23,acima120_del:17,f0_15_del:16,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:6,f240_mais_del:11,mediana_del:180.9},
+{dia:'2026-06-16',loja:'Iguatemi',pedidos:58,prontos:40,em_producao:18,cancelados:0,aguardando:0,d30:15,d120:18,acima120:4,f0_15:14,f15_30:1,f30_60:1,f60_120:2,f120_240:0,f240_mais:4,mediana_op:38.8,mediana_total:2.6,d30_del:16,d120_del:22,acima120_del:18,f0_15_del:16,f15_30_del:0,f30_60_del:2,f60_120_del:4,f120_240_del:6,f240_mais_del:12,mediana_del:205.3},
 {dia:'2026-06-16',loja:'PKS',pedidos:25,prontos:22,em_producao:3,cancelados:0,aguardando:0,d30:2,d120:4,acima120:5,f0_15:2,f15_30:0,f30_60:0,f60_120:2,f120_240:1,f240_mais:4,mediana_op:122.3,mediana_total:156.6,d30_del:2,d120_del:8,acima120_del:14,f0_15_del:2,f15_30_del:0,f30_60_del:0,f60_120_del:6,f120_240_del:5,f240_mais_del:9,mediana_del:160.0},
 {dia:'2026-06-17',loja:'Anália Franco',pedidos:10,prontos:4,em_producao:6,cancelados:0,aguardando:0,d30:1,d120:1,acima120:0,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:10.5,mediana_total:10.5,d30_del:2,d120_del:2,acima120_del:2,f0_15_del:1,f15_30_del:1,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:2,mediana_del:15.6},
-{dia:'2026-06-17',loja:'Iguatemi',pedidos:66,prontos:39,em_producao:27,cancelados:0,aguardando:0,d30:10,d120:14,acima120:4,f0_15:8,f15_30:2,f30_60:3,f60_120:1,f120_240:1,f240_mais:3,mediana_op:55.2,mediana_total:23.4,d30_del:10,d120_del:19,acima120_del:20,f0_15_del:9,f15_30_del:1,f30_60_del:3,f60_120_del:6,f120_240_del:6,f240_mais_del:14,mediana_del:182.5},
+{dia:'2026-06-17',loja:'Iguatemi',pedidos:66,prontos:41,em_producao:25,cancelados:0,aguardando:0,d30:10,d120:14,acima120:4,f0_15:8,f15_30:2,f30_60:3,f60_120:1,f120_240:1,f240_mais:3,mediana_op:54.9,mediana_total:23.4,d30_del:10,d120_del:19,acima120_del:22,f0_15_del:9,f15_30_del:1,f30_60_del:3,f60_120_del:6,f120_240_del:6,f240_mais_del:16,mediana_del:172.6},
 {dia:'2026-06-17',loja:'PKS',pedidos:27,prontos:25,em_producao:2,cancelados:0,aguardando:0,d30:3,d120:5,acima120:10,f0_15:3,f15_30:0,f30_60:2,f60_120:0,f120_240:1,f240_mais:9,mediana_op:1073.7,mediana_total:1073.7,d30_del:4,d120_del:11,acima120_del:14,f0_15_del:4,f15_30_del:0,f30_60_del:2,f60_120_del:5,f120_240_del:3,f240_mais_del:11,mediana_del:165.8},
 {dia:'2026-06-18',loja:'Anália Franco',pedidos:19,prontos:10,em_producao:9,cancelados:0,aguardando:0,d30:2,d120:2,acima120:1,f0_15:1,f15_30:1,f30_60:0,f60_120:0,f120_240:0,f240_mais:1,mediana_op:689.2,mediana_total:26.9,d30_del:0,d120_del:5,acima120_del:5,f0_15_del:0,f15_30_del:0,f30_60_del:1,f60_120_del:4,f120_240_del:3,f240_mais_del:2,mediana_del:114.8},
-{dia:'2026-06-18',loja:'Iguatemi',pedidos:64,prontos:34,em_producao:30,cancelados:0,aguardando:0,d30:11,d120:14,acima120:5,f0_15:10,f15_30:1,f30_60:3,f60_120:0,f120_240:2,f240_mais:3,mediana_op:82.6,mediana_total:1.1,d30_del:10,d120_del:24,acima120_del:10,f0_15_del:10,f15_30_del:0,f30_60_del:5,f60_120_del:9,f120_240_del:4,f240_mais_del:6,mediana_del:85.2},
-{dia:'2026-06-18',loja:'PKS',pedidos:74,prontos:67,em_producao:7,cancelados:0,aguardando:0,d30:45,d120:49,acima120:13,f0_15:44,f15_30:1,f30_60:1,f60_120:3,f120_240:4,f240_mais:9,mediana_op:94.7,mediana_total:1.1,d30_del:45,d120_del:50,acima120_del:17,f0_15_del:44,f15_30_del:1,f30_60_del:2,f60_120_del:3,f120_240_del:4,f240_mais_del:13,mediana_del:169.1},
-{dia:'2026-06-19',loja:'Anália Franco',pedidos:21,prontos:12,em_producao:8,cancelados:0,aguardando:1,d30:2,d120:5,acima120:1,f0_15:1,f15_30:1,f30_60:2,f60_120:1,f120_240:1,f240_mais:0,mediana_op:58.4,mediana_total:51.9,d30_del:3,d120_del:8,acima120_del:4,f0_15_del:0,f15_30_del:3,f30_60_del:2,f60_120_del:3,f120_240_del:3,f240_mais_del:1,mediana_del:74.0},
-{dia:'2026-06-19',loja:'Iguatemi',pedidos:66,prontos:35,em_producao:31,cancelados:0,aguardando:0,d30:14,d120:18,acima120:0,f0_15:12,f15_30:2,f30_60:2,f60_120:2,f120_240:0,f240_mais:0,mediana_op:32.9,mediana_total:0.4,d30_del:15,d120_del:29,acima120_del:6,f0_15_del:13,f15_30_del:2,f30_60_del:3,f60_120_del:11,f120_240_del:6,f240_mais_del:0,mediana_del:92.1},
-{dia:'2026-06-19',loja:'PKS',pedidos:144,prontos:130,em_producao:14,cancelados:0,aguardando:0,d30:126,d120:128,acima120:0,f0_15:124,f15_30:2,f30_60:0,f60_120:2,f120_240:0,f240_mais:0,mediana_op:3.1,mediana_total:1.0,d30_del:126,d120_del:128,acima120_del:2,f0_15_del:124,f15_30_del:2,f30_60_del:1,f60_120_del:1,f120_240_del:2,f240_mais_del:0,mediana_del:3.0}
+{dia:'2026-06-18',loja:'Iguatemi',pedidos:64,prontos:37,em_producao:27,cancelados:0,aguardando:0,d30:11,d120:14,acima120:7,f0_15:10,f15_30:1,f30_60:3,f60_120:0,f120_240:2,f240_mais:5,mediana_op:82.6,mediana_total:25.2,d30_del:10,d120_del:24,acima120_del:13,f0_15_del:10,f15_30_del:0,f30_60_del:5,f60_120_del:9,f120_240_del:4,f240_mais_del:9,mediana_del:85.2},
+{dia:'2026-06-18',loja:'PKS',pedidos:74,prontos:70,em_producao:4,cancelados:0,aguardando:0,d30:43,d120:47,acima120:16,f0_15:42,f15_30:1,f30_60:1,f60_120:3,f120_240:4,f240_mais:12,mediana_op:132.0,mediana_total:1.3,d30_del:43,d120_del:48,acima120_del:22,f0_15_del:42,f15_30_del:1,f30_60_del:2,f60_120_del:3,f120_240_del:4,f240_mais_del:18,mediana_del:169.1},
+{dia:'2026-06-19',loja:'Anália Franco',pedidos:21,prontos:13,em_producao:8,cancelados:0,aguardando:0,d30:1,d120:3,acima120:4,f0_15:1,f15_30:0,f30_60:1,f60_120:1,f120_240:1,f240_mais:3,mediana_op:128.5,mediana_total:178.2,d30_del:2,d120_del:6,acima120_del:7,f0_15_del:0,f15_30_del:2,f30_60_del:1,f60_120_del:3,f120_240_del:3,f240_mais_del:4,mediana_del:117.0},
+{dia:'2026-06-19',loja:'Iguatemi',pedidos:66,prontos:39,em_producao:27,cancelados:0,aguardando:0,d30:14,d120:18,acima120:0,f0_15:12,f15_30:2,f30_60:2,f60_120:2,f120_240:0,f240_mais:0,mediana_op:32.9,mediana_total:0.4,d30_del:15,d120_del:29,acima120_del:10,f0_15_del:13,f15_30_del:2,f30_60_del:3,f60_120_del:11,f120_240_del:6,f240_mais_del:4,mediana_del:93.6},
+{dia:'2026-06-19',loja:'PKS',pedidos:144,prontos:132,em_producao:12,cancelados:0,aguardando:0,d30:124,d120:126,acima120:2,f0_15:122,f15_30:2,f30_60:0,f60_120:2,f120_240:0,f240_mais:2,mediana_op:3.0,mediana_total:1.0,d30_del:124,d120_del:126,acima120_del:6,f0_15_del:122,f15_30_del:2,f30_60_del:1,f60_120_del:1,f120_240_del:2,f240_mais_del:4,mediana_del:3.0},
+{dia:'2026-06-20',loja:'Anália Franco',pedidos:30,prontos:24,em_producao:6,cancelados:0,aguardando:0,d30:10,d120:14,acima120:3,f0_15:10,f15_30:0,f30_60:4,f60_120:0,f120_240:2,f240_mais:1,mediana_op:23.1,mediana_total:10.9,d30_del:8,d120_del:19,acima120_del:5,f0_15_del:7,f15_30_del:1,f30_60_del:4,f60_120_del:7,f120_240_del:3,f240_mais_del:2,mediana_del:79.5},
+{dia:'2026-06-20',loja:'Iguatemi',pedidos:77,prontos:56,em_producao:20,cancelados:1,aguardando:0,d30:20,d120:25,acima120:2,f0_15:16,f15_30:4,f30_60:3,f60_120:2,f120_240:0,f240_mais:2,mediana_op:26.7,mediana_total:2.0,d30_del:16,d120_del:40,acima120_del:16,f0_15_del:15,f15_30_del:1,f30_60_del:3,f60_120_del:21,f120_240_del:14,f240_mais_del:2,mediana_del:109.1},
+{dia:'2026-06-20',loja:'PKS',pedidos:50,prontos:25,em_producao:25,cancelados:0,aguardando:0,d30:14,d120:17,acima120:0,f0_15:14,f15_30:0,f30_60:1,f60_120:2,f120_240:0,f240_mais:0,mediana_op:8.2,mediana_total:5.6,d30_del:16,d120_del:22,acima120_del:3,f0_15_del:16,f15_30_del:0,f30_60_del:0,f60_120_del:6,f120_240_del:3,f240_mais_del:0,mediana_del:72.2},
+{dia:'2026-06-21',loja:'Anália Franco',pedidos:1,prontos:0,em_producao:1,cancelados:0,aguardando:0,d30:0,d120:0,acima120:0,f0_15:0,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:null,mediana_total:null,d30_del:0,d120_del:0,acima120_del:0,f0_15_del:0,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:0,mediana_del:null},
+{dia:'2026-06-21',loja:'Iguatemi',pedidos:9,prontos:5,em_producao:2,cancelados:0,aguardando:2,d30:2,d120:4,acima120:0,f0_15:1,f15_30:1,f30_60:0,f60_120:2,f120_240:0,f240_mais:0,mediana_op:49.6,mediana_total:49.6,d30_del:2,d120_del:5,acima120_del:0,f0_15_del:1,f15_30_del:1,f30_60_del:0,f60_120_del:3,f120_240_del:0,f240_mais_del:0,mediana_del:71.6},
+{dia:'2026-06-21',loja:'PKS',pedidos:1,prontos:1,em_producao:0,cancelados:0,aguardando:0,d30:1,d120:1,acima120:0,f0_15:1,f15_30:0,f30_60:0,f60_120:0,f120_240:0,f240_mais:0,mediana_op:null,mediana_total:0.2,d30_del:1,d120_del:1,acima120_del:0,f0_15_del:1,f15_30_del:0,f30_60_del:0,f60_120_del:0,f120_240_del:0,f240_mais_del:0,mediana_del:null}
 ];
 const DP_OPR_DAILY=[
 {dia:'2026-05-01',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:17,prontos:17,em_producao:0,d30:0,d120:1,acima120:4,mediana:0.0},
@@ -2458,7 +2464,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-06-04',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:8,prontos:6,em_producao:2,d30:0,d120:0,acima120:1,mediana:0.0},
 {dia:'2026-06-04',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:3,prontos:3,em_producao:0,d30:0,d120:3,acima120:0,mediana:33.9},
 {dia:'2026-06-04',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:43,prontos:33,em_producao:10,d30:2,d120:5,acima120:1,mediana:0.0},
-{dia:'2026-06-04',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:30,prontos:21,em_producao:9,d30:1,d120:4,acima120:7,mediana:0.0},
+{dia:'2026-06-04',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:30,prontos:22,em_producao:8,d30:1,d120:4,acima120:8,mediana:0.0},
 {dia:'2026-06-04',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:25,prontos:20,em_producao:4,d30:17,d120:18,acima120:2,mediana:0.2},
 {dia:'2026-06-04',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:2,prontos:1,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-06-04',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:34,prontos:34,em_producao:0,d30:0,d120:0,acima120:13,mediana:0.0},
@@ -2480,7 +2486,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-06-06',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:26,prontos:22,em_producao:4,d30:18,d120:21,acima120:1,mediana:0.3},
 {dia:'2026-06-06',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:13,prontos:11,em_producao:2,d30:0,d120:3,acima120:2,mediana:0.0},
 {dia:'2026-06-06',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:4,prontos:1,em_producao:3,d30:0,d120:0,acima120:1,mediana:0.0},
-{dia:'2026-06-06',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:37,prontos:35,em_producao:2,d30:1,d120:3,acima120:11,mediana:0.0},
+{dia:'2026-06-06',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:37,prontos:36,em_producao:1,d30:1,d120:3,acima120:11,mediana:0.0},
 {dia:'2026-06-06',loja:'PKS',uid:0,nome:'Sistema',pedidos:19,prontos:19,em_producao:0,d30:10,d120:12,acima120:7,mediana:0.2},
 {dia:'2026-06-07',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:11,prontos:9,em_producao:2,d30:0,d120:1,acima120:1,mediana:0.0},
 {dia:'2026-06-07',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:6,prontos:6,em_producao:0,d30:0,d120:0,acima120:3,mediana:1524.6},
@@ -2522,7 +2528,7 @@ const DP_OPR_DAILY=[
 {dia:'2026-06-11',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:25,prontos:22,em_producao:3,d30:0,d120:1,acima120:8,mediana:0.0},
 {dia:'2026-06-11',loja:'PKS',uid:0,nome:'Sistema',pedidos:24,prontos:24,em_producao:0,d30:6,d120:6,acima120:18,mediana:1093.2},
 {dia:'2026-06-12',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:18,prontos:18,em_producao:0,d30:1,d120:2,acima120:2,mediana:0.0},
-{dia:'2026-06-12',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:5,prontos:4,em_producao:1,d30:4,d120:4,acima120:0,mediana:4.5},
+{dia:'2026-06-12',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:5,prontos:5,em_producao:0,d30:4,d120:4,acima120:1,mediana:6.9},
 {dia:'2026-06-12',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:3,prontos:3,em_producao:0,d30:0,d120:0,acima120:1,mediana:0.0},
 {dia:'2026-06-12',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:43,prontos:35,em_producao:7,d30:22,d120:33,acima120:2,mediana:2.9},
 {dia:'2026-06-12',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:26,prontos:18,em_producao:8,d30:0,d120:1,acima120:5,mediana:0.0},
@@ -2540,10 +2546,10 @@ const DP_OPR_DAILY=[
 {dia:'2026-06-13',loja:'PKS',uid:0,nome:'Sistema',pedidos:4,prontos:4,em_producao:0,d30:2,d120:3,acima120:1,mediana:31.6},
 {dia:'2026-06-14',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:15,prontos:15,em_producao:0,d30:0,d120:1,acima120:2,mediana:0.0},
 {dia:'2026-06-14',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:1,d120:1,acima120:0,mediana:13.8},
-{dia:'2026-06-14',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:40,prontos:22,em_producao:18,d30:1,d120:2,acima120:3,mediana:0.0},
+{dia:'2026-06-14',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:40,prontos:23,em_producao:17,d30:1,d120:2,acima120:3,mediana:0.0},
 {dia:'2026-06-14',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:13,prontos:8,em_producao:5,d30:7,d120:8,acima120:0,mediana:0.1},
 {dia:'2026-06-14',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:9,prontos:5,em_producao:4,d30:0,d120:2,acima120:0,mediana:0.0},
-{dia:'2026-06-14',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:23,prontos:22,em_producao:1,d30:0,d120:1,acima120:4,mediana:0.0},
+{dia:'2026-06-14',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:23,prontos:23,em_producao:0,d30:0,d120:1,acima120:4,mediana:0.0},
 {dia:'2026-06-14',loja:'PKS',uid:0,nome:'Sistema',pedidos:10,prontos:10,em_producao:0,d30:5,d120:5,acima120:5,mediana:1394.1},
 {dia:'2026-06-14',loja:'PKS',uid:1433,nome:'Luiz Eduardo Heinz ',pedidos:1,prontos:1,em_producao:0,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-06-15',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:7,prontos:7,em_producao:0,d30:2,d120:2,acima120:0,mediana:0.0},
@@ -2559,34 +2565,46 @@ const DP_OPR_DAILY=[
 {dia:'2026-06-16',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:1,d120:2,acima120:0,mediana:55.2},
 {dia:'2026-06-16',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:24,prontos:16,em_producao:8,d30:0,d120:1,acima120:2,mediana:0.0},
 {dia:'2026-06-16',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:18,prontos:16,em_producao:2,d30:15,d120:16,acima120:0,mediana:0.3},
-{dia:'2026-06-16',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:16,prontos:8,em_producao:8,d30:0,d120:2,acima120:1,mediana:0.0},
+{dia:'2026-06-16',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:16,prontos:8,em_producao:8,d30:0,d120:1,acima120:2,mediana:0.0},
 {dia:'2026-06-16',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:19,prontos:16,em_producao:3,d30:0,d120:0,acima120:3,mediana:0.0},
 {dia:'2026-06-16',loja:'PKS',uid:0,nome:'Sistema',pedidos:6,prontos:6,em_producao:0,d30:2,d120:4,acima120:2,mediana:77.4},
 {dia:'2026-06-17',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:8,prontos:3,em_producao:5,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-06-17',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:1,prontos:0,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-06-17',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:1,d120:1,acima120:0,mediana:10.5},
-{dia:'2026-06-17',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:36,prontos:18,em_producao:18,d30:1,d120:3,acima120:2,mediana:0.0},
+{dia:'2026-06-17',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:36,prontos:19,em_producao:17,d30:1,d120:3,acima120:2,mediana:0.0},
 {dia:'2026-06-17',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:15,prontos:12,em_producao:3,d30:8,d120:10,acima120:2,mediana:0.2},
-{dia:'2026-06-17',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:13,prontos:7,em_producao:6,d30:1,d120:1,acima120:0,mediana:0.0},
+{dia:'2026-06-17',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:13,prontos:8,em_producao:5,d30:1,d120:1,acima120:0,mediana:0.0},
 {dia:'2026-06-17',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:2,prontos:2,em_producao:0,d30:0,d120:0,acima120:0,mediana:0.0},
 {dia:'2026-06-17',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:17,prontos:15,em_producao:2,d30:0,d120:0,acima120:5,mediana:0.0},
 {dia:'2026-06-17',loja:'PKS',uid:0,nome:'Sistema',pedidos:10,prontos:10,em_producao:0,d30:3,d120:5,acima120:5,mediana:107.7},
 {dia:'2026-06-18',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:15,prontos:8,em_producao:7,d30:0,d120:0,acima120:1,mediana:0.0},
 {dia:'2026-06-18',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:4,prontos:2,em_producao:2,d30:2,d120:2,acima120:0,mediana:0.2},
-{dia:'2026-06-18',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:37,prontos:18,em_producao:19,d30:1,d120:3,acima120:3,mediana:0.0},
-{dia:'2026-06-18',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:14,prontos:6,em_producao:8,d30:0,d120:1,acima120:2,mediana:0.0},
+{dia:'2026-06-18',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:37,prontos:19,em_producao:18,d30:1,d120:3,acima120:4,mediana:0.0},
+{dia:'2026-06-18',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:14,prontos:8,em_producao:6,d30:0,d120:1,acima120:3,mediana:0.0},
 {dia:'2026-06-18',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:11,prontos:10,em_producao:1,d30:10,d120:10,acima120:0,mediana:0.2},
 {dia:'2026-06-18',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:2,prontos:0,em_producao:2,d30:0,d120:0,acima120:0,mediana:0.0},
-{dia:'2026-06-18',loja:'PKS',uid:0,nome:'Sistema',pedidos:49,prontos:49,em_producao:0,d30:45,d120:46,acima120:3,mediana:0.4},
-{dia:'2026-06-18',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:25,prontos:18,em_producao:7,d30:0,d120:3,acima120:10,mediana:34.3},
+{dia:'2026-06-18',loja:'PKS',uid:0,nome:'Sistema',pedidos:49,prontos:49,em_producao:0,d30:43,d120:44,acima120:5,mediana:0.4},
+{dia:'2026-06-18',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:25,prontos:21,em_producao:4,d30:0,d120:3,acima120:11,mediana:80.2},
 {dia:'2026-06-19',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:11,prontos:6,em_producao:5,d30:0,d120:1,acima120:1,mediana:0.0},
-{dia:'2026-06-19',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:7,prontos:4,em_producao:3,d30:1,d120:2,acima120:0,mediana:0.0},
-{dia:'2026-06-19',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:3,prontos:2,em_producao:1,d30:1,d120:2,acima120:0,mediana:20.7},
-{dia:'2026-06-19',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:29,prontos:12,em_producao:17,d30:0,d120:1,acima120:0,mediana:0.0},
-{dia:'2026-06-19',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:19,prontos:8,em_producao:11,d30:0,d120:2,acima120:0,mediana:0.0},
+{dia:'2026-06-19',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:8,prontos:5,em_producao:3,d30:1,d120:2,acima120:1,mediana:0.0},
+{dia:'2026-06-19',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:2,prontos:2,em_producao:0,d30:0,d120:0,acima120:2,mediana:1541.9},
+{dia:'2026-06-19',loja:'Iguatemi',uid:1371,nome:'Junior Souza',pedidos:29,prontos:15,em_producao:14,d30:0,d120:1,acima120:0,mediana:0.0},
+{dia:'2026-06-19',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:19,prontos:9,em_producao:10,d30:0,d120:2,acima120:0,mediana:0.0},
 {dia:'2026-06-19',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:18,prontos:15,em_producao:3,d30:14,d120:15,acima120:0,mediana:0.3},
-{dia:'2026-06-19',loja:'PKS',uid:0,nome:'Sistema',pedidos:125,prontos:125,em_producao:0,d30:125,d120:125,acima120:0,mediana:0.9},
-{dia:'2026-06-19',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:19,prontos:5,em_producao:14,d30:1,d120:3,acima120:0,mediana:0.0}
+{dia:'2026-06-19',loja:'PKS',uid:0,nome:'Sistema',pedidos:125,prontos:125,em_producao:0,d30:123,d120:123,acima120:2,mediana:0.9},
+{dia:'2026-06-19',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:19,prontos:7,em_producao:12,d30:1,d120:3,acima120:0,mediana:0.0},
+{dia:'2026-06-20',loja:'Anália Franco',uid:1792,nome:'Wallace Porfiro',pedidos:12,prontos:9,em_producao:3,d30:2,d120:3,acima120:3,mediana:2.1},
+{dia:'2026-06-20',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:11,prontos:8,em_producao:3,d30:1,d120:4,acima120:0,mediana:0.0},
+{dia:'2026-06-20',loja:'Anália Franco',uid:0,nome:'Sistema',pedidos:7,prontos:7,em_producao:0,d30:7,d120:7,acima120:0,mediana:2.0},
+{dia:'2026-06-20',loja:'Iguatemi',uid:1508,nome:'Ícaro Lima e Silva ',pedidos:32,prontos:22,em_producao:10,d30:3,d120:6,acima120:1,mediana:0.0},
+{dia:'2026-06-20',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:25,prontos:18,em_producao:7,d30:1,d120:3,acima120:1,mediana:0.0},
+{dia:'2026-06-20',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:20,prontos:16,em_producao:3,d30:16,d120:16,acima120:0,mediana:0.2},
+{dia:'2026-06-20',loja:'PKS',uid:1820,nome:'- Matheus Da Silva Bonfim',pedidos:36,prontos:11,em_producao:25,d30:0,d120:3,acima120:0,mediana:0.0},
+{dia:'2026-06-20',loja:'PKS',uid:0,nome:'Sistema',pedidos:14,prontos:14,em_producao:0,d30:14,d120:14,acima120:0,mediana:5.5},
+{dia:'2026-06-21',loja:'Anália Franco',uid:1811,nome:'Jair de Oliveira Junior ',pedidos:1,prontos:0,em_producao:1,d30:0,d120:0,acima120:0,mediana:0.0},
+{dia:'2026-06-21',loja:'Iguatemi',uid:0,nome:'Sistema',pedidos:5,prontos:3,em_producao:2,d30:2,d120:3,acima120:0,mediana:7.4},
+{dia:'2026-06-21',loja:'Iguatemi',uid:597,nome:'Bruna Helem',pedidos:4,prontos:2,em_producao:2,d30:0,d120:1,acima120:0,mediana:0.0},
+{dia:'2026-06-21',loja:'PKS',uid:0,nome:'Sistema',pedidos:1,prontos:1,em_producao:0,d30:1,d120:1,acima120:0,mediana:0.2}
 ];
 const AN = {
   months: ["Jan","Fev","Mar","Abr","Mai","Jun"],
@@ -2932,7 +2950,7 @@ const AN_MONTH_DATES = [
   {start:'01/03', end:'31/03'},
   {start:'01/04', end:'30/04'},
   {start:'01/05', end:'31/05'},
-  {start:'01/06', end:'20/06'} /* ← dados até 20/06 */
+  {start:'01/06', end:'21/06'} /* ← dados até 21/06 */
 ];
 </script>
 <script>
