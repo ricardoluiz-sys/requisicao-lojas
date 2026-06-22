@@ -314,6 +314,45 @@ GROUP BY b.factory_id, mes
 ORDER BY b.factory_id, mes
 """
 
+
+SQL_MIX_PRODUTOS = """
+WITH total_geral AS (
+  SELECT COUNT(li.id) AS total
+  FROM line_items li
+  JOIN orders o ON li.order_id = o.id
+  JOIN companies c ON o.company_id = c.id
+  JOIN factories f ON c.factory_id = f.id
+  WHERE li.created_at >= '{ini_dp}'
+    AND li.created_at < '{fim}'
+    AND o.aasm_state IN ('available','delivered','complete')
+    AND li.deleted_at IS NULL
+    AND f.id IN (3,6,7)
+)
+SELECT
+  regexp_replace(m.name_with_color, '<[^>]+>', '', 'g') AS produto,
+  mc.name AS categoria,
+  CASE f.id WHEN 3 THEN 'Iguatemi' WHEN 6 THEN 'PKS' ELSE 'Anália Franco' END AS loja,
+  COUNT(li.id) AS total_vendido,
+  ROUND(100.0 * COUNT(li.id) / NULLIF((SELECT total FROM total_geral),0), 2) || '%' AS share_percent,
+  ROUND(SUM(li.price)::numeric, 2) AS receita
+FROM line_items li
+JOIN orders o ON li.order_id = o.id
+JOIN companies c ON o.company_id = c.id
+JOIN factories f ON c.factory_id = f.id
+JOIN materials m ON m.id = li.material_id
+JOIN material_categories mc ON mc.id = m.material_category_id
+WHERE li.created_at >= '{ini_dp}'
+  AND li.created_at < '{fim}'
+  AND o.aasm_state IN ('available','delivered','complete')
+  AND li.deleted_at IS NULL
+  AND f.id IN (3,6,7)
+  AND mc.name NOT ILIKE '%%ebook%%'
+  AND m.name_with_color IS NOT NULL
+  AND m.name_with_color != ''
+GROUP BY m.name_with_color, mc.name, f.id
+ORDER BY receita DESC
+"""
+
 # ── Geradores de JS ───────────────────────────────────────────────────────────
 def gerar_dp_raw(rows: list[dict]) -> str:
     """Gera o array JS let DP_RAW=[...]."""
@@ -486,6 +525,33 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict], consumo_monthly: dict 
     return an_js, dist_js
 
 
+
+def gerar_lp_todo(rows: list[dict]) -> str:
+    """Gera os arrays JS LP_TODO, LP_CATS_TODO para o Mix de Produtos."""
+    import re as _re
+    if not rows:
+        return ""
+    cats = sorted(set(r["categoria"] for r in rows if r.get("categoria")))
+    def _esc(v):
+        return v.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+    linhas = []
+    for r in rows:
+        p = _esc(str(r.get("produto", "") or ""))
+        c = _esc(str(r.get("categoria", "") or ""))
+        l = _esc(str(r.get("loja", "") or ""))
+        q = int(r.get("total_vendido") or 0)
+        sh = str(r.get("share_percent") or "0%").strip()
+        rv = float(r.get("receita") or 0)
+        linhas.append(f"{{l:\"{l}\",c:\"{c}\",p:\"{p}\",q:{q},s:\"{sh}\",r:{rv}}}")
+    js_arr = "[\n" + ",\n".join(linhas) + "\n]"
+    cats_js = repr(cats).replace("'", '"')
+    return (
+        f"var LP_TODO = {js_arr};\n"
+        f"var LP_CATS_TODO = {cats_js};\n"
+        f"var LP_MAI = LP_TODO; var LP_JUN = LP_TODO;\n"
+        f"var LP_CATS_MAI = LP_CATS_TODO; var LP_CATS_JUN = LP_CATS_TODO;\n"
+    )
+
 def gerar_an_month_dates(hoje: datetime.date) -> str:
     """Gera AN_MONTH_DATES com todos os meses até o atual."""
     import calendar
@@ -535,7 +601,7 @@ def gerar_vol_mes(rows: list[dict], hoje) -> str:
     parts = ', '.join(f'{fid}:{data[fid]}' for fid in [3, 6, 7])
     return f'const AN_VOL_MES = {{mes:{mes}, {parts}}};'
 
-def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str,
+def substituir_bloco_dados(html: str, dp_raw: str, dp_opr: str, an: str, an_dist: str, lp_todo: str = None,
                            an_month_dates: str = "") -> str:
     """Substitui o bloco <script id='dados-metabase'> por completo.
     Se an/an_dist são None, preserva os dados de AN existentes no HTML."""
@@ -648,7 +714,7 @@ def injetar_no_html(html: str,
                     hoje: datetime.date) -> str:
     # 1. Substituir bloco de dados
     an_month_dates_js = gerar_an_month_dates(hoje)
-    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js)
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js, lp_todo=lp_js)
     log("  ↳ Bloco de dados substituído")
 
     # 2. Atualizar datas nos badges
@@ -840,6 +906,15 @@ def main():
     except Exception as e:
         log(f"  ⚠ Volume mensal falhou: {e}")
 
+    # ── Mix de Produtos ──────────────────────────────────────────────────────
+    # Período: mesmo que DP_RAW (mês anterior + atual)
+    lp_rows = []
+    try:
+        lp_rows = mb_query(token, SQL_MIX_PRODUTOS.format(ini_dp=ini_dp, fim=fim), limit=500, retries=2)
+        log(f"  ↳ Mix de Produtos: {len(lp_rows)} linhas")
+    except Exception as exc:
+        log(f"  ↳ Mix de Produtos falhou: {exc} — preservando")
+
     # ── Gerar JS ─────────────────────────────────────────────────────────────
     if dp_raw_rows:
         dp_raw_js       = gerar_dp_raw(dp_raw_rows)
@@ -849,6 +924,10 @@ def main():
         dp_raw_js       = None   # preservar existente
         dp_opr_daily_js = None
         log("  ↳ DP_RAW vazio — preservando dados existentes no HTML")
+
+    lp_js      = gerar_lp_todo(lp_rows) if lp_rows else None
+    if lp_js:
+        log(f"  ↳ LP_TODO gerado: {len(lp_rows)} produtos")
 
     an_js      = None
     an_dist_js = None
