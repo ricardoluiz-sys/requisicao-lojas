@@ -876,7 +876,7 @@ def main():
         mes_fim_iso = min(mes_fim, hoje + datetime.timedelta(days=1)).isoformat()
         try:
             rows_mes = mb_query(token, SQL_CONSUMO_MES.format(
-                ini=mes_ini_iso, fim=mes_fim_iso), limit=5000, retries=2)
+                ini=mes_ini_iso, fim=mes_fim_iso), limit=2000, retries=1)
             for r in rows_mes:
                 fid = r.get('factory_id')
                 mid = r.get('material_id')
@@ -896,7 +896,7 @@ def main():
     log(f"  ↳ {len(consumo_acc)} entradas de consumo ({meses_ok} meses OK, {meses_err} erros)")
 
     try:
-        rows_vol = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=2)
+        rows_vol = mb_query(token, SQL_VOL_MENSAL.format(fim=fim), limit=100, retries=1)
         for r in rows_vol:
             fid = r.get('factory_id')
             mes = r.get('mes')
