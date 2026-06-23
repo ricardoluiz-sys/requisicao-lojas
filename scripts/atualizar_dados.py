@@ -247,11 +247,14 @@ SELECT b.dia::text, b.loja,
   COALESCE(fp.uid::text, '0') uid,
   COALESCE(u.name, 'Sistema') nome,
   COUNT(*) pedidos,
-  COUNT(*) FILTER(WHERE b.aasm_state='delivered' OR rp.t1 IS NOT NULL) prontos,
+  -- prontos = tem log de fechamento (closing/picking/packing)
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL) prontos,
   COUNT(*) FILTER(WHERE rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered')) em_producao,
+  -- buckets exclusivos: d30 + d120 + acima120 = prontos
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=30) d30,
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
+    GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)>30 AND
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=120) d120,
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)>120) acima120,
@@ -826,8 +829,10 @@ def main():
     _ini_dp_usado = ini_dp_fallback if (not dp_raw_rows or
         (dp_raw_rows and not dp_raw_rows[0].get("dia","").startswith(ini_dp[:7]))
     ) else ini_dp
-    # Operadores: mesmo período que Desempenho por loja
-    dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR.format(ini_dp=ini_dp, fim=fim), limit=1000)
+    # Operadores: últimos 2 meses para ter histórico comparável (mai+jun)
+    _dois_meses_atras = (hoje.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+    ini_opr = _dois_meses_atras.isoformat()
+    dp_opr_rows = mb_query(token, SQL_DESEMPENHO_OPR.format(ini_dp=ini_opr, fim=fim), limit=1000)
     log(f"  ↳ {len(dp_opr_rows)} linhas")
 
 
