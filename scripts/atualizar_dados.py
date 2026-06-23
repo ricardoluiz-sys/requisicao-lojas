@@ -408,7 +408,7 @@ def gerar_an(skus_rows: list[dict], vol_rows: list[dict], consumo_monthly: dict 
     # Incluir todos os meses de Jan até o mês atual (não só os com dados)
     mes_atual = hoje.month
     # Usar apenas meses que realmente têm dados em consumo_acc
-    meses_com_dados = sorted(set(mes for (fid, mid, mes) in consumo_acc.keys()))
+    meses_com_dados = sorted(set(mes for (fid, mid, mes) in (consumo_monthly or {}).keys()))
     if not meses_com_dados:
         meses_com_dados = list(range(1, mes_atual))  # fallback: jan até mês anterior
     meses_disponiveis = meses_com_dados
@@ -715,7 +715,7 @@ def injetar_no_html(html: str,
                     lp_todo: str = None) -> str:
     # 1. Substituir bloco de dados
     an_month_dates_js = gerar_an_month_dates(hoje)
-    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates_js, lp_todo=lp_todo)
+    html = substituir_bloco_dados(html, dp_raw_js, dp_opr_daily_js, an_js, an_dist_js, an_month_dates=an_month_dates_js, lp_todo=lp_todo)
     log("  ↳ Bloco de dados substituído")
 
     # 2. Atualizar datas nos badges
