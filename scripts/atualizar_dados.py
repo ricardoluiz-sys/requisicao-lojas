@@ -247,8 +247,9 @@ SELECT b.dia::text, b.loja,
   COALESCE(fp.uid::text, '0') uid,
   COALESCE(u.name, 'Sistema') nome,
   COUNT(*) pedidos,
-  -- prontos = tem log de fechamento (closing/picking/packing)
-  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL) prontos,
+  -- prontos = entregue (qualquer forma) OU tem log de fechamento
+  -- garante: pedidos = prontos + em_producao + cancelados
+  COUNT(*) FILTER(WHERE b.aasm_state='delivered' OR rp.t1 IS NOT NULL) prontos,
   COUNT(*) FILTER(WHERE rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered')) em_producao,
   -- buckets exclusivos: d30 + d120 + acima120 = prontos
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
