@@ -246,12 +246,14 @@ rp AS (
 SELECT b.dia::text, b.loja,
   COALESCE(fp.uid::text, '0') uid,
   COALESCE(u.name, 'Sistema') nome,
-  COUNT(*) pedidos,
-  -- prontos = entregue (qualquer forma) OU tem log de fechamento
-  -- garante: pedidos = prontos + em_producao + cancelados
-  COUNT(*) FILTER(WHERE b.aasm_state='delivered' OR rp.t1 IS NOT NULL) prontos,
+  -- Excluir entregues automáticos (batch/sistema sem log de fechamento)
+  -- Medir apenas pedidos com interação real do operador
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL
+    OR (rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered'))) pedidos,
+  -- prontos = tem log de fechamento: d30+d120+acima120 = prontos ✓
+  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL) prontos,
   COUNT(*) FILTER(WHERE rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered')) em_producao,
-  -- buckets exclusivos: d30 + d120 + acima120 = prontos
+  -- buckets exclusivos: d30 + d120 + acima120 = prontos ✓
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=30) d30,
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
