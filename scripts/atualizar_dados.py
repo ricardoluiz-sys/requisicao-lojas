@@ -152,14 +152,17 @@ fp AS (
   ORDER BY li.order_id, lipl.created_at
 ),
 rp AS (
-  -- Primeiro closing real: exclui lotes automáticos (user_id=1)
+  -- Primeiro closing dentro de 8h da produção (exclui lotes retroativos de qualquer usuário)
   SELECT li.order_id,
-    MIN(lipl.created_at) FILTER(WHERE lipl.user_id != 1) t1
+    MIN(lipl.created_at) FILTER(
+      WHERE lipl.created_at >= fp.t0
+        AND lipl.created_at - fp.t0 <= interval '8 hours'
+    ) t1
   FROM line_items li
+  JOIN fp ON fp.order_id = li.order_id
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
   WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE
     AND li.deleted_at IS NULL
-    AND li.order_id IN (SELECT oid FROM base)
   GROUP BY li.order_id
 ),
 calc AS (
@@ -239,10 +242,14 @@ fp AS (
   ORDER BY li.order_id, lipl.created_at
 ),
 rp AS (
-  -- Primeiro closing real: exclui lotes automáticos (user_id=1)
+  -- Primeiro closing dentro de 8h da produção (exclui lotes retroativos de qualquer usuário)
   SELECT li.order_id,
-    MIN(lipl.created_at) FILTER(WHERE lipl.user_id != 1) t1
+    MIN(lipl.created_at) FILTER(
+      WHERE lipl.created_at >= fp.t0
+        AND lipl.created_at - fp.t0 <= interval '8 hours'
+    ) t1
   FROM line_items li JOIN base b ON b.oid=li.order_id
+  JOIN fp ON fp.order_id = li.order_id
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
   WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
   GROUP BY li.order_id
