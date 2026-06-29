@@ -152,7 +152,9 @@ fp AS (
   ORDER BY li.order_id, lipl.created_at
 ),
 rp AS (
-  SELECT li.order_id, MAX(lipl.created_at) t1
+  -- Primeiro closing real: exclui lotes automáticos (user_id=1)
+  SELECT li.order_id,
+    MIN(lipl.created_at) FILTER(WHERE lipl.user_id != 1) t1
   FROM line_items li
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
   WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE
@@ -237,7 +239,23 @@ fp AS (
   ORDER BY li.order_id, lipl.created_at
 ),
 rp AS (
-  SELECT li.order_id, MAX(lipl.created_at) t1
+  -- t1 = PRIMEIRO closing real do operador após início da produção
+  -- Exclui closings em lote (user_id=1 com 3+ pedidos no mesmo minuto)
+  SELECT li.order_id,
+    MIN(lipl.created_at) FILTER(WHERE lipl.user_id IS DISTINCT FROM 1
+      OR NOT EXISTS (
+        SELECT 1 FROM line_item_production_logs lipl2
+        JOIN line_items li2 ON li2.id = lipl2.line_item_id
+        JOIN base b2 ON b2.oid = li2.order_id
+        WHERE lipl2.operation IN('closing','picking','packing')
+          AND lipl2.success = TRUE
+          AND li2.deleted_at IS NULL
+          AND lipl2.user_id = 1
+          AND DATE_TRUNC('minute', lipl2.created_at) = DATE_TRUNC('minute', lipl.created_at)
+          AND lipl2.id <> lipl.id
+        HAVING COUNT(*) >= 3
+      )
+    ) t1
   FROM line_items li JOIN base b ON b.oid=li.order_id
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
   WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
@@ -246,14 +264,12 @@ rp AS (
 SELECT b.dia::text, b.loja,
   COALESCE(fp.uid::text, '0') uid,
   COALESCE(u.name, 'Sistema') nome,
-  -- Excluir entregues automáticos (batch/sistema sem log de fechamento)
-  -- Medir apenas pedidos com interação real do operador
-  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL
-    OR (rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered'))) pedidos,
-  -- prontos = tem log de fechamento: d30+d120+acima120 = prontos ✓
-  COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL) prontos,
+  COUNT(*) pedidos,
+  -- prontos = entregue (qualquer forma) OU tem log de fechamento
+  -- garante: pedidos = prontos + em_producao + cancelados
+  COUNT(*) FILTER(WHERE b.aasm_state='delivered' OR rp.t1 IS NOT NULL) prontos,
   COUNT(*) FILTER(WHERE rp.t1 IS NULL AND b.aasm_state NOT IN('canceled','delivered')) em_producao,
-  -- buckets exclusivos: d30 + d120 + acima120 = prontos ✓
+  -- buckets exclusivos: d30 + d120 + acima120 = prontos
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)<=30) d30,
   COUNT(*) FILTER(WHERE rp.t1 IS NOT NULL AND
