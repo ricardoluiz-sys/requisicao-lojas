@@ -198,6 +198,9 @@ SELECT dia::text, loja,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>60 AND pm<=120) f60_120,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120 AND pm<=240) f120_240,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>240) f240_mais,
+  -- Pedidos "prontos" (delivered) sem closing válido dentro da janela de 8h:
+  -- sem isso, soma das faixas (f0_15..f240_mais) fica menor que "prontos".
+  COUNT(*) FILTER(WHERE status='pronto' AND pm IS NULL) f_sem_log,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)
     FILTER(WHERE pm IS NOT NULL AND pm>=2 AND pm<1440)::numeric, 1) mediana_op,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric, 1) mediana_total,
@@ -373,7 +376,7 @@ def gerar_dp_raw(rows: list[dict]) -> str:
     """Gera o array JS let DP_RAW=[...]."""
     campos = ["dia","loja","pedidos","prontos","em_producao","cancelados","aguardando",
               "d30","d120","acima120","f0_15","f15_30","f30_60",
-              "f60_120","f120_240","f240_mais","mediana_op","mediana_total",
+              "f60_120","f120_240","f240_mais","f_sem_log","mediana_op","mediana_total",
               "d30_del","d120_del","acima120_del",
               "f0_15_del","f15_30_del","f30_60_del","f60_120_del","f120_240_del","f240_mais_del",
               "mediana_del"]
