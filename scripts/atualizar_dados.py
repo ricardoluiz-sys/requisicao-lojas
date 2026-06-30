@@ -165,16 +165,6 @@ rp AS (
     AND li.deleted_at IS NULL
   GROUP BY li.order_id
 ),
-vf AS (
-  -- TRUE somente se TODOS os itens do pedido são vanilla (clear, sem personalização).
-  -- Pedidos 100% vanilla legitimamente não passam pelo operador/produção.
-  SELECT li.order_id, bool_and(p.vanilla) all_vanilla
-  FROM line_items li
-  JOIN products p ON p.id = li.product_id
-  WHERE li.deleted_at IS NULL
-    AND li.order_id IN (SELECT oid FROM base)
-  GROUP BY li.order_id
-),
 calc AS (
   SELECT b.dia, b.loja, b.created_at,
     CASE WHEN b.aasm_state='canceled' THEN 'cancelado'
@@ -189,11 +179,21 @@ calc AS (
     CASE WHEN b.delivered_at IS NOT NULL THEN
       GREATEST(0, EXTRACT(EPOCH FROM(b.delivered_at - b.created_at))/60.0)
     END pm_del,
-    COALESCE(vf.all_vanilla, FALSE) all_vanilla
+    -- TRUE se o pedido tem pelo menos 1 item E nenhum deles precisa de
+    -- personalização (todo vanilla). Subconsulta correlacionada (usa índice
+    -- de order_id) em vez de agregar a tabela inteira de uma vez — mais rápido.
+    (
+      EXISTS(SELECT 1 FROM line_items li1 WHERE li1.order_id=b.oid AND li1.deleted_at IS NULL)
+      AND NOT EXISTS(
+        SELECT 1 FROM line_items li2
+        JOIN products p2 ON p2.id = li2.product_id
+        WHERE li2.order_id = b.oid AND li2.deleted_at IS NULL
+          AND p2.vanilla IS NOT TRUE
+      )
+    ) all_vanilla
   FROM base b
   LEFT JOIN fp ON fp.order_id=b.oid
   LEFT JOIN rp ON rp.order_id=b.oid
-  LEFT JOIN vf ON vf.order_id=b.oid
 )
 SELECT dia::text, loja,
   COUNT(*) pedidos,
@@ -270,15 +270,6 @@ rp AS (
   JOIN line_item_production_logs lipl ON lipl.line_item_id=li.id
   WHERE lipl.operation IN('closing','picking','packing') AND lipl.success=TRUE AND li.deleted_at IS NULL
   GROUP BY li.order_id
-),
-vf AS (
-  -- TRUE somente se TODOS os itens do pedido são vanilla (clear, sem personalização)
-  SELECT li.order_id, bool_and(p.vanilla) all_vanilla
-  FROM line_items li
-  JOIN base b ON b.oid = li.order_id
-  JOIN products p ON p.id = li.product_id
-  WHERE li.deleted_at IS NULL
-  GROUP BY li.order_id
 )
 SELECT b.dia::text, b.loja,
   COALESCE(fp.uid::text, '0') uid,
@@ -298,17 +289,28 @@ SELECT b.dia::text, b.loja,
     GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)>120) acima120,
   -- Pedidos "prontos" sem rp.t1 (não entram em d30/d120/acima120):
   -- separados em vanilla (legítimo, sem necessidade de operador) vs. gap real.
+  -- all_vanilla via subconsulta correlacionada (índice de order_id), não
+  -- agregação da tabela inteira — evita o timeout que isso causava.
   COUNT(*) FILTER(WHERE (b.aasm_state='delivered' OR rp.t1 IS NOT NULL) AND rp.t1 IS NULL
-    AND COALESCE(vf.all_vanilla, FALSE)) f_sem_log_vanilla,
+    AND EXISTS(SELECT 1 FROM line_items li1 WHERE li1.order_id=b.oid AND li1.deleted_at IS NULL)
+    AND NOT EXISTS(
+      SELECT 1 FROM line_items li2 JOIN products p2 ON p2.id=li2.product_id
+      WHERE li2.order_id=b.oid AND li2.deleted_at IS NULL AND p2.vanilla IS NOT TRUE
+    )) f_sem_log_vanilla,
   COUNT(*) FILTER(WHERE (b.aasm_state='delivered' OR rp.t1 IS NOT NULL) AND rp.t1 IS NULL
-    AND NOT COALESCE(vf.all_vanilla, FALSE)) f_sem_log_gap,
+    AND NOT (
+      EXISTS(SELECT 1 FROM line_items li1 WHERE li1.order_id=b.oid AND li1.deleted_at IS NULL)
+      AND NOT EXISTS(
+        SELECT 1 FROM line_items li2 JOIN products p2 ON p2.id=li2.product_id
+        WHERE li2.order_id=b.oid AND li2.deleted_at IS NULL AND p2.vanilla IS NOT TRUE
+      )
+    )) f_sem_log_gap,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(
     ORDER BY GREATEST(0,EXTRACT(EPOCH FROM(rp.t1-COALESCE(fp.t0,b.created_at)))/60.0)
   )::numeric, 1) mediana
 FROM base b
 LEFT JOIN fp ON fp.order_id=b.oid
 LEFT JOIN rp ON rp.order_id=b.oid
-LEFT JOIN vf ON vf.order_id=b.oid
 LEFT JOIN users u ON u.id=fp.uid
 GROUP BY b.dia, b.loja, fp.uid, u.name
 ORDER BY b.dia, b.loja, pedidos DESC
