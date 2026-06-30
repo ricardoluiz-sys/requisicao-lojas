@@ -165,6 +165,16 @@ rp AS (
     AND li.deleted_at IS NULL
   GROUP BY li.order_id
 ),
+vf AS (
+  -- TRUE somente se TODOS os itens do pedido são vanilla (clear, sem personalização).
+  -- Pedidos 100% vanilla legitimamente não passam pelo operador/produção.
+  SELECT li.order_id, bool_and(p.vanilla) all_vanilla
+  FROM line_items li
+  JOIN products p ON p.id = li.product_id
+  WHERE li.deleted_at IS NULL
+    AND li.order_id IN (SELECT oid FROM base)
+  GROUP BY li.order_id
+),
 calc AS (
   SELECT b.dia, b.loja, b.created_at,
     CASE WHEN b.aasm_state='canceled' THEN 'cancelado'
@@ -178,10 +188,12 @@ calc AS (
     -- Via delivered_at (experiência do cliente)
     CASE WHEN b.delivered_at IS NOT NULL THEN
       GREATEST(0, EXTRACT(EPOCH FROM(b.delivered_at - b.created_at))/60.0)
-    END pm_del
+    END pm_del,
+    COALESCE(vf.all_vanilla, FALSE) all_vanilla
   FROM base b
   LEFT JOIN fp ON fp.order_id=b.oid
   LEFT JOIN rp ON rp.order_id=b.oid
+  LEFT JOIN vf ON vf.order_id=b.oid
 )
 SELECT dia::text, loja,
   COUNT(*) pedidos,
@@ -198,9 +210,11 @@ SELECT dia::text, loja,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>60 AND pm<=120) f60_120,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>120 AND pm<=240) f120_240,
   COUNT(*) FILTER(WHERE pm IS NOT NULL AND pm>240) f240_mais,
-  -- Pedidos "prontos" (delivered) sem closing válido dentro da janela de 8h:
-  -- sem isso, soma das faixas (f0_15..f240_mais) fica menor que "prontos".
-  COUNT(*) FILTER(WHERE status='pronto' AND pm IS NULL) f_sem_log,
+  -- Pedidos "prontos" sem pm (closing fora da janela de 8h ou nunca logado),
+  -- separados em: vanilla (sem necessidade de operador, legítimo) vs.
+  -- gap real (tinha item personalizado e deveria ter log de produção).
+  COUNT(*) FILTER(WHERE status='pronto' AND pm IS NULL AND all_vanilla) f_sem_log_vanilla,
+  COUNT(*) FILTER(WHERE status='pronto' AND pm IS NULL AND NOT all_vanilla) f_sem_log_gap,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)
     FILTER(WHERE pm IS NOT NULL AND pm>=2 AND pm<1440)::numeric, 1) mediana_op,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY pm)::numeric, 1) mediana_total,
@@ -376,7 +390,7 @@ def gerar_dp_raw(rows: list[dict]) -> str:
     """Gera o array JS let DP_RAW=[...]."""
     campos = ["dia","loja","pedidos","prontos","em_producao","cancelados","aguardando",
               "d30","d120","acima120","f0_15","f15_30","f30_60",
-              "f60_120","f120_240","f240_mais","f_sem_log","mediana_op","mediana_total",
+              "f60_120","f120_240","f240_mais","f_sem_log_vanilla","f_sem_log_gap","mediana_op","mediana_total",
               "d30_del","d120_del","acima120_del",
               "f0_15_del","f15_30_del","f30_60_del","f60_120_del","f120_240_del","f240_mais_del",
               "mediana_del"]
